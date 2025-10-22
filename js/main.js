@@ -1,36 +1,21 @@
-let SatelliteExplosion, GovVsCom, LaunchDominance, CongestionRisk;
+loadLaunchDominance();
 
-loadData();
+function loadLaunchDominance() {
+  d3.json("data/launch_dominance.json").then(jsonObj => {
+    // convert {"Falcon 9":4731,...} -> [{name:"Falcon 9", satellites:4731}, ...]
+    const dataArr = Object.entries(jsonObj).map(([name, satellites]) => ({
+      name,
+      satellites: +satellites
+    }));
 
-function loadData() {
-
-    d3.json("data/consumer_internal_external.json").then(jsonData => {
-        const externalData = jsonData.external;
-        const internalData = jsonData.internal;
-
-        satelliteExplosion = new SatelliteExplosion("satellite-explosion", externalData);
-        govVsCom = new GovVsCom("gov-vs-com", internalData, externalData);
-        // window.countryPanel = countryPanel;
-        lauchDominance = new LaunchDominance("launch-dominance");
-        congestionRisk = new CongestionRisk("congestion-risk", externalData);
-
-
-        satelliteExplosion.initVis();
-        govVsCom.initVis();
-        lauchDominance.initVis();
-        congestionRisk.initVis();
-
+    const viz = new LaunchDominance("launch-dominance", dataArr, {
+        
+      radius: 550,
+      bandDeg: 90,
+      capReveal: 180,
+      gapPx: 28
     });
-}
 
-// function yearUpdate(year) {
-//     d3.select('#main-title').text("World Gold Consumer Demand in " + year);
-    
-//     if (worldMap) {
-//         worldMap.updateYear(year);
-//     }
-    
-//     if (countryPanel && countryPanel.selectedCountry) {
-//         countryPanel.updateCountry(countryPanel.selectedCountry, year);
-//     }
-// }
+    viz.setTransform(500, -100, 1.0);
+  });
+}

@@ -1,0 +1,69 @@
+.launch-widget {
+    position: relative;
+    width: 1500px;
+    height: 800px;
+    transform-origin: top left;
+}
+
+.earth-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.rockets-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events:auto;
+}
+
+/* rocket styles */
+.rocket-body {
+    fill: #E8E8E8;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.rocket-nose {
+    fill: #FF6B6B;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.rocket-fin {
+    fill: #4ECDC4;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.rocket-window {
+    fill: #87CEEB;
+    stroke: #333;
+    stroke-width: 1.5;
+}
+
+.rocket-name {
+    fill: #222;
+    font-size: 12px;
+    text-anchor: middle;
+    user-select: none;
+}
+
+.rocket-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    pointer-events: none;
+    visibility: hidden;
+    z-index: 99999;
+}
