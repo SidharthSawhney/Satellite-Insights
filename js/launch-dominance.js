@@ -45,9 +45,18 @@ class LaunchDominance {
     this.lifted = false;
     this._setupObserver();
     // Handle responsive resize
+// React to container size changes (width or height)
+if (window.ResizeObserver) {
+  this._ro = new ResizeObserver(() => this.resize());
+  this._ro.observe(this.host.node());
+}
+
+// Also handle window resize
 window.addEventListener('resize', () => this.resize());
-// Initial normalization
+
+// Normalize once
 this.resize();
+
 
   }
 
@@ -282,25 +291,20 @@ this.resize();
 resize() {
   const bbox = this.host.node().getBoundingClientRect();
   this.w = Math.max(320, Math.floor(bbox.width));
-  this.h = Math.max(240, Math.floor(bbox.height));
-
+  this.h = Math.max(240, Math.floor(bbox.height)); // <- uses actual height (Y)
   if (this.camera && this.renderer) {
     this.camera.aspect = this.w / this.h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.w, this.h);
   }
-
   if (this.svg) {
     this.svg.attr('width', this.w).attr('height', this.h);
   }
-
   this._computeLayout();
 
   const nx = (this.center.x - this.w / 2);
   const ny = -(this.center.y - this.h / 2);
-  if (this.earthGroup) {
-    this.earthGroup.position.set(nx, ny, 0);
-  }
+  if (this.earthGroup) this.earthGroup.position.set(nx, ny, 0);
 
   if (this.rocketSel) {
     this.rocketSel.attr('transform', (_, i) => {

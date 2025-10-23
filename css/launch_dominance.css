@@ -1,74 +1,118 @@
+/* Title: responsive sizing and spacing */
+#hero {
+  padding: clamp(12px, 2vw, 28px) clamp(12px, 3vw, 40px);
+}
+
+.hero-title {
+  font-size: clamp(20px, 4.5vw, 50px);
+  line-height: 1.1;
+  margin: 0 0 clamp(6px, 1.2vw, 14px) 0;
+  text-align: left;
+  color: #ffffff;
+}
+
+.hero-sub {
+  font-size: clamp(14px, 2vw, 22px);
+  line-height: 1.4;
+  margin: 0;
+  opacity: 0.8;
+  color: #ffffff;
+}
+
+/* Prevent sideways scrolling and let sections fill the screen nicely */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* The viz gets the remaining height below the hero (value set by JS var) */
+:root {
+  --hero-h: 0px;
+}
+
+.viz-section {
+  min-height: 0;
+}
+
+/* Responsive container for the visualization */
 .launch-widget {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-width: 1200px;
+  width: min(100%, 1200px);
+  height: calc(100vh - var(--hero-h) - clamp(12px, 2vw, 28px)); /* Full page minus title */
   margin: 0 auto;
+  position: relative;
   transform-origin: center center;
 }
 
+.launch-widget svg,
+.launch-widget canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
+/* Earth + Rocket Layers */
 .earth-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .rockets-layer {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events:auto;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: auto;
 }
 
-/* rocket styles */
+/* Rocket visuals */
 .rocket-body {
-    fill: #E8E8E8;
-    stroke: #333;
-    stroke-width: 2;
+  fill: #E8E8E8;
+  stroke: #333;
+  stroke-width: 2;
 }
 
 .rocket-nose {
-    fill: #FF6B6B;
-    stroke: #333;
-    stroke-width: 2;
+  fill: #FF6B6B;
+  stroke: #333;
+  stroke-width: 2;
 }
 
 .rocket-fin {
-    fill: #4ECDC4;
-    stroke: #333;
-    stroke-width: 2;
+  fill: #4ECDC4;
+  stroke: #333;
+  stroke-width: 2;
 }
 
 .rocket-window {
-    fill: #87CEEB;
-    stroke: #333;
-    stroke-width: 1.5;
+  fill: #87CEEB;
+  stroke: #333;
+  stroke-width: 1.5;
 }
 
 .rocket-name {
-    fill: #222;
-    font-size: 12px;
-    text-anchor: middle;
-    user-select: none;
+  fill: #ffffff; 
+  font-size: 12px;
+  text-anchor: middle;
+  user-select: none;
 }
 
+
 .rocket-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.9);
-    color: #fff;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    white-space: nowrap;
-    pointer-events: none;
-    visibility: hidden;
-    z-index: 99999;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+  visibility: hidden;
+  z-index: 99999;
 }
 
 /* --- Responsive tweaks --- */
@@ -76,10 +120,26 @@
   .rocket-name {
     font-size: 10px;
   }
+
+  .hero-title {
+    font-size: clamp(18px, 5vw, 42px);
+  }
+
+  .hero-sub {
+    font-size: clamp(13px, 3vw, 20px);
+  }
 }
 
 @media (max-width: 480px) {
   .rocket-name {
     font-size: 9px;
+  }
+
+  .hero-title {
+    font-size: clamp(16px, 6vw, 38px);
+  }
+
+  .hero-sub {
+    font-size: clamp(12px, 4vw, 18px);
   }
 }

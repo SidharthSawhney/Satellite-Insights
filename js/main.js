@@ -8,13 +8,17 @@ function loadLaunchDominance() {
       satellites: +satellites
     }));
 
-    const viz = new LaunchDominance("launch-dominance", dataArr, {
-        
-      radius: 530,
-      bandDeg: 85,
-      capReveal: 180,
-      gapPx: 28
-    });
+const viz = new LaunchDominance("launch-dominance", dataArr, {
+  radius: 530,
+  bandDeg: 85,
+  capReveal: 180,
+  gapPx: 28
+});
+
+// ensure layout fits under the title on first render
+if (typeof setHeroHeightVar === "function") setHeroHeightVar();
+if (viz && typeof viz.resize === "function") viz.resize();
+
 
    
   });

@@ -26,19 +26,18 @@ call to action: sketch 6 -->
 
     <div class="container-fluid" style="height: 100vh; display: flex; flex-direction: column; padding: 0; margin: 0;">
         <!-- header with horizontal color scale -->
-        <div
-            style="height: 10vh; display: flex; align-items: center; justify-content: space-between; padding: 20px 40px;">
-            <div style="text-align: left;">
-                <h1 id="main-title">Satellite Insights - by Around the World</h1>
-                <h2 style="font-style: italic; color: #666;">From a a handful of satellites in year X to over 9000 today
-                    - space has never been more crowded...</h2>
-            </div>
-        </div>
+        <div id="hero" style="display:flex; align-items:center; justify-content:space-between; padding:20px 40px;">
+  <div style="text-align:left;">
+    <h1 class="hero-title" style="font-style:italic; color:#ffffff;">Satellite Insights - by Around the World</h1>
+    <h2 class="hero-sub"   style="font-style:italic; color:#ffffff;">From a a handful of satellites in year X to over 9000 today – space has never been more crowded...</h2>
+  </div>
+</div>
+
 
         <!-- Intro: sketch 2 - Explosion of satellites graph -->
         <div id="satellite-explosion"></div>
 
-        <div>Curious to know more the reason behind the satellite boom?</div>
+        <p style="color: #ffffff;">Curious to know more the reason behind the satellite boom?</p>
 
         <!-- vis 1: sketch 12 - Government vs Commerical  -->
         <div id="gov-vs-com"></div>
@@ -54,7 +53,7 @@ call to action: sketch 6 -->
         <!-- Explain english here based on doc -->
 
         <!-- Main Message -->
-        <p>
+        <p style=" color: #ffffff;" >
             The explosion in the number of satellites is the direct result of two interconnected forces: an ownership
             shift from government to commercial entities focused on mass-manufactured, short-lifespan Low Earth Orbit
             (LEO) satellites, and the radical reduction in launch costs enabled by reusable rockets, exemplified by the
@@ -62,9 +61,9 @@ call to action: sketch 6 -->
         </p>
 
         <!-- Call to Action: Sketch 6 -->
-        <h2>But too many satellites is making the lower orbits more congested...</h2>
+        <h2 style="color: #ffffff;">But too many satellites is making the lower orbits more congested...</h2>
         <div id="congestion-risk"></div>
-        <p>
+        <p style="color: #ffffff;" >
             English text explaining congestion risk here and sustainbility and etc based on doc
         </p>
     </div>
@@ -82,8 +81,17 @@ call to action: sketch 6 -->
     <script src="js/launch-dominance.js"></script>
     <script src="js/congestion-risk.js"></script>
 
-    <!-- Entry -->
-    <script src="js/main.js"></script>
+    <script>
+  function setHeroHeightVar() {
+    const hero = document.querySelector('#hero');
+    const h = hero ? hero.getBoundingClientRect().height : 0;
+    document.documentElement.style.setProperty('--hero-h', Math.ceil(h) + 'px');
+  }
+  window.addEventListener('load', setHeroHeightVar);
+  window.addEventListener('resize', setHeroHeightVar);
+</script>
+<script src="js/main.js"></script>
+
 
 </body>
 
