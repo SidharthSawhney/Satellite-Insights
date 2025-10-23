@@ -44,6 +44,11 @@ class LaunchDominance {
     // Scroll-triggered animation
     this.lifted = false;
     this._setupObserver();
+    // Handle responsive resize
+window.addEventListener('resize', () => this.resize());
+// Initial normalization
+this.resize();
+
   }
 
   /**
@@ -271,6 +276,40 @@ class LaunchDominance {
         return tweenTo(r1(d) - 8, r1(d), a, rot);
       });
   }
+  /**
+ * Recompute layout & redraw on resize
+ */
+resize() {
+  const bbox = this.host.node().getBoundingClientRect();
+  this.w = Math.max(320, Math.floor(bbox.width));
+  this.h = Math.max(240, Math.floor(bbox.height));
+
+  if (this.camera && this.renderer) {
+    this.camera.aspect = this.w / this.h;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(this.w, this.h);
+  }
+
+  if (this.svg) {
+    this.svg.attr('width', this.w).attr('height', this.h);
+  }
+
+  this._computeLayout();
+
+  const nx = (this.center.x - this.w / 2);
+  const ny = -(this.center.y - this.h / 2);
+  if (this.earthGroup) {
+    this.earthGroup.position.set(nx, ny, 0);
+  }
+
+  if (this.rocketSel) {
+    this.rocketSel.attr('transform', (_, i) => {
+      const a = this.angles[i], [x, y] = this.polar(a, this.radius);
+      return `translate(${x},${y}) rotate(${this.rotFor(a)})`;
+    });
+  }
+}
+
 
   /**
    * Applies translation and scaling to reposition the entire widget.

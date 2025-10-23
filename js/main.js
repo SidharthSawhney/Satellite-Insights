@@ -10,12 +10,12 @@ function loadLaunchDominance() {
 
     const viz = new LaunchDominance("launch-dominance", dataArr, {
         
-      radius: 550,
-      bandDeg: 90,
+      radius: 530,
+      bandDeg: 85,
       capReveal: 180,
       gapPx: 28
     });
 
-    viz.setTransform(500, -100, 1.0);
+   
   });
 }

@@ -1,9 +1,12 @@
 .launch-widget {
-    position: relative;
-    width: 1500px;
-    height: 800px;
-    transform-origin: top left;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-width: 1200px;
+  margin: 0 auto;
+  transform-origin: center center;
 }
+
 
 .earth-canvas {
     position: absolute;
@@ -66,4 +69,17 @@
     pointer-events: none;
     visibility: hidden;
     z-index: 99999;
+}
+
+/* --- Responsive tweaks --- */
+@media (max-width: 768px) {
+  .rocket-name {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rocket-name {
+    font-size: 9px;
+  }
 }
