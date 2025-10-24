@@ -114,13 +114,13 @@ class Congestion {
             .attr('cx', vis.width / 2)
             .attr('cy', vis.height / 2)
             .attr('rx', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 1) + 5;
-                const pe = vis.scale(+d['perigee_(km)'] || 1) + 5;
+                const ap = vis.scale(+d['apogee_(km)'] || 0) + 5;
+                const pe = vis.scale(+d['perigee_(km)'] || 0) + 5;
                 return (ap + pe) / 2 + vis.projection.scale(); // semi-major axis
             })
             .attr('ry', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 1) + 5;
-                const pe = vis.scale(+d['perigee_(km)'] || 1) + 5;
+                const ap = vis.scale(+d['apogee_(km)'] || 0) + 5;
+                const pe = vis.scale(+d['perigee_(km)'] || 0) + 5;
                 const a = (ap + pe) / 2;
                 const c = (ap - pe) / 2;
                 return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
