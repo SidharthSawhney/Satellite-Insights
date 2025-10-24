@@ -1,150 +1,140 @@
-/*
- * @param  parentElement 	-- the HTML element in which to draw the visualization
- * @param  data             -- the data that's provided initially
- */
+// ---- congestion-risk.js ----
+// Minimal orbit visualizer that draws satellite orbits as ellipses
+// using perigee/apogee (km) and rotates by inclination (degrees).
 
 class Congestion {
+    /**
+     * @param {string} hostId            Container element id
+     * @param {Array<Object>} data       Rows with keys: 'perigee_(km)', 'apogee_(km)', 'inclination_(degrees)', 'class_of_orbit'
+     */
+    constructor(hostId, data) {
+        this.host = d3.select('#' + hostId);
+        this.node = this.host.node();
+        this.data = data || [];
 
-    constructor(parentElement, data) {
-        this.parentElement = parentElement;
-        this.data = data;
-        console.log("reached")
+        // dimensions
+        const box = this.node.getBoundingClientRect();
+        this.width = Math.max(320, Math.floor(box.width || 900));
+        this.height = Math.max(320, Math.floor(box.height || 600));
 
+        // color scale for orbit classes
+        this.colorScale = d3.scaleOrdinal()
+            .domain(["LEO", "MEO", "GEO", "Elliptical"])
+            .range(['#a6cee3', '#cab2d6', '#f6ff00', '#e31a1c']);
+
+        // responsive
+        if (window.ResizeObserver) {
+            this._ro = new ResizeObserver(() => this.resize());
+            this._ro.observe(this.node);
+        }
+        window.addEventListener('resize', () => this.resize());
     }
 
     initVis() {
-        let vis = this;
+        const vis = this;
 
-        // Margins and dimensions
-        vis.margin = { top: 40, right: 40, bottom: 60, left: 40 };
+        // scaffold
+        vis.svg = vis.host.append('svg')
+            .attr('class', 'congestion-svg')
+            .attr('width', vis.width)
+            .attr('height', vis.height);
 
-        vis.width =
-            document.getElementById(vis.parentElement).getBoundingClientRect().width -
-            vis.margin.left - vis.margin.right;
-        vis.height =
-            document.getElementById(vis.parentElement).getBoundingClientRect().height -
-            vis.margin.top - vis.margin.bottom;
+        // background (space)
+        vis.svg.append('rect')
+            .attr('x', 0).attr('y', 0)
+            .attr('width', vis.width).attr('height', vis.height)
+            .attr('fill', '#0b0c10');
 
-        console.log(vis.height);
+        // simple Earth gradient
+        const defs = vis.svg.append('defs');
+        const grad = defs.append('radialGradient')
+            .attr('id', 'earth-grad')
+            .attr('cx', '50%').attr('cy', '50%')
+            .attr('r', '60%');
+        grad.append('stop').attr('offset', '0%').attr('stop-color', '#5b8cff');
+        grad.append('stop').attr('offset', '100%').attr('stop-color', '#1e3a8a');
 
-        // SVG drawing area
-        vis.svg = d3.select("#" + vis.parentElement)
-            .append("svg")
-            .attr("width", vis.width + vis.margin.left + vis.margin.right)
-            .attr("height", vis.height + vis.margin.top + vis.margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + vis.margin.left + "," + vis.margin.top + ")");
+        // Earth (center)
+        vis.earth = vis.svg.append('circle')
+            .attr('cx', vis.width / 2)
+            .attr('cy', vis.height / 2)
+            .attr('fill', 'url(#earth-grad)');
 
-        // --- Globe Setup ---
-        const projection = d3.geoOrthographic()
-            .scale(vis.height / 2.5)
-            .translate([vis.width / 2, vis.height / 2])
-            .clipAngle(90);
-
-        const path = d3.geoPath(projection);
-
-        // Add a background sphere (ocean)
-        vis.svg.append("circle")
-            .attr("cx", vis.width / 2)
-            .attr("cy", vis.height / 2)
-            .attr("r", projection.scale())
-            .attr("fill", "#003366");
-
-        // Load world map data
-        d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(worldData => {
-            const countries = topojson.feature(worldData, worldData.objects.countries);
-
-            const globe = vis.svg.append("g");
-
-            // Draw countries
-            const land = globe.selectAll("path")
-                .data(countries.features)
-                .enter()
-                .append("path")
-                .attr("fill", "#1e8fffb2")
-                .attr("stroke", "#000")
-                .attr("stroke-width", 0.3);
-
-            // Rotation speed
-            const velocity = 0.15; // degrees per frame
-            let rotation = [0, -10]; // [longitude, latitude]
-
-            d3.timer(function () {
-                rotation[0] += velocity;
-                projection.rotate(rotation);
-                land.attr("d", path);
-            });
-        });
-
-        //Scales
-        // Get the max apogee since it's the furthest point from Earth
-        let maxApogee = d3.max(vis.data, d=> d.apogee_(km))
-        vis.scale = d3.scaleLinear()
-                        .domain([0, maxApogee])
-                        .range([0, Math.min(vis.width, vis.height)/2]) // Range is due to rotation
-        
-        //Color Scale
-        let colors = ['#a6cee3','#e31a1c','#f6ff00ff','#cab2d6'];
-            // Set ordinal color scale
-        vis.colorScale = d3.scaleOrdinal()
-        .domain(["LEO", "GEO", "MEO", "Elliptical"])
-        .range(colorArray);
-
+        vis.orbitLayer = vis.svg.append('g').attr('class', 'orbits');
 
         vis.updateVis();
     }
 
-    updateVis(){
-        vis = this;
+    updateVis() {
+        const vis = this;
 
-        let orbits = vis.svg.selectAll("orbit")
-                        .data(vis.data);
-        
-        orbits.enter().append("ellipse")
-            .attr("class", "orbit")
-            .merge(orbits)
-            .attr("cx", d=>{
-                // Convert to pixel values
-                const apogee_px = vis.scale(d.apogee_(km));
-                const perigee_px = vis.scale(d.perigee(km));
+        // scale distances to pixels based on max apogee
+        const maxApogee = d3.max(vis.data, d => +d['apogee_(km)'] || 0) || 1;
+        const maxRadius = Math.min(vis.width, vis.height) / 2 * 0.95;
 
-                //Find the focal point (i.e. center of the orbit)
-                const c = (apogee_px - perigee_px) / 2;
+        vis.scale = d3.scaleLinear()
+            .domain([0, maxApogee])
+            .range([0, maxRadius]);
 
-                // Find the difference between the center of the orbit and center of Earth
-                return Math.abs(vis.width/2 - c)
+        // Earth radius (optional aesthetic, ~6371 km if your values are altitude-above-Earth,
+        // but here we simply set a fixed nice radius relative to the scene)
+        const earthR = maxRadius * 0.45;
+        vis.earth.attr('r', earthR);
 
+        // DATA JOIN
+        const orbits = vis.orbitLayer.selectAll('.orbit')
+            .data(vis.data, d => d.norad_number || d['current_official_name_of_satellite'] || Math.random());
+
+        // ENTER
+        const orbitsEnter = orbits.enter().append('ellipse')
+            .attr('class', 'orbit')
+            .attr('fill', 'none')
+            .attr('stroke-width', 1.5)
+            .attr('stroke-opacity', 0.9);
+
+        // ENTER + UPDATE
+        orbitsEnter.merge(orbits)
+            .attr('cx', d => {
+                const ap = vis.scale(+d['apogee_(km)'] || 0);
+                const pe = vis.scale(+d['perigee_(km)'] || 0);
+                const c = (ap - pe) / 2;                // focus distance
+                return vis.width / 2 - c;                 // shift so Earth stays centered
             })
-            .attr("cy", vis.height/2)
-            .attr("rx",d=>{
-                // Need the semi major axis
-                const apogee_px = vis.scale(d.apogee_(km));
-                const perigee_px = vis.scale(d.perigee(km));
-                return (apogee_px + perigee_px) / 2;
-
+            .attr('cy', vis.height / 2)
+            .attr('rx', d => {
+                const ap = vis.scale(+d['apogee_(km)'] || 0);
+                const pe = vis.scale(+d['perigee_(km)'] || 0);
+                return (ap + pe) / 2;                     // semi-major
             })
-            .attr("ry", d=>{
-                // Need semi minor axis
-                const apogee_px = vis.scale(d.apogee_(km));
-                const perigee_px = vis.scale(d.perigee(km));
-                const a_px = (apogee_px + perigee_px) / 2;
-                const c_px = (apogee_px - perigee_px) / 2;
-
-                const b_px_squared = Math.pow(a_px, 2) - Math.pow(c_px, 2);
-                return Math.sqrt(Math.max(0, b_px_squared));
-
+            .attr('ry', d => {
+                const ap = vis.scale(+d['apogee_(km)'] || 0);
+                const pe = vis.scale(+d['perigee_(km)'] || 0);
+                const a = (ap + pe) / 2;
+                const c = (ap - pe) / 2;
+                const b2 = Math.max(0, a * a - c * c);    // semi-minor
+                return Math.sqrt(b2);
             })
-            .attr("fill", "none")
-            .attr("stroke-width", 2)
-            .attr("transform", d =>{
-                return `rotate(${d.inclination_(degrees)}, ${vis.width/2}, ${vis.height/2})`;
-            })
-            .attr("stroke", d=>{
-                return vis.colorScale(d.class_of_orbit)
-            });
+            .attr('transform', d => `rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
+            .attr('stroke', d => vis.colorScale(d.class_of_orbit));
 
-            orbits.exit().remove();
+        // EXIT
+        orbits.exit().remove();
+    }
 
+    resize() {
+        const vis = this;
+        const box = vis.node.getBoundingClientRect();
+        vis.width = Math.max(320, Math.floor(box.width));
+        vis.height = Math.max(320, Math.floor(box.height));
 
+        if (vis.svg) {
+            vis.svg.attr('width', vis.width).attr('height', vis.height);
+        }
+
+        if (vis.earth) {
+            vis.earth.attr('cx', vis.width / 2).attr('cy', vis.height / 2);
+        }
+
+        vis.updateVis();
     }
 }
