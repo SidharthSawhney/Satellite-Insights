@@ -34,16 +34,16 @@
 
 /* Basemap */
 .land {
-    fill: #11151b;
-    stroke: #2a2f36;
+    fill: #1c2530;
+    stroke: #415067;
     stroke-width: 0.5px;
 }
 
 .graticule {
     fill: none;
-    stroke: #20252c;
+    stroke: #2c333f;
     stroke-width: 0.5px;
-    opacity: 0.4;
+    opacity: 0.45;
 }
 
 /* Launch sites - simple circles */
@@ -251,4 +251,5 @@
     .year-slider {
         width: 100px;
     }
+
 }
