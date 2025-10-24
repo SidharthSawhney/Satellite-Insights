@@ -1,0 +1,373 @@
+/* ===================================
+   Main Stylesheet - Satellite Insights
+   =================================== */
+
+/* ============ ROOT & RESET ============ */
+:root {
+    /* Colors */
+    --bg-dark: #0b0c10;
+    --bg-darker: #050608;
+    --text-primary: #ffffff;
+    --text-secondary: #c5c6c7;
+    --accent-blue: #66fcf1;
+    --accent-teal: #45a29e;
+    --accent-warning: #f4a261;
+    --accent-danger: #e63946;
+    
+    /* Spacing */
+    --section-padding: 80px 0;
+    --container-max-width: 1400px;
+    
+    /* Typography */
+    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    --font-heading: 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ============ TYPOGRAPHY ============ */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+h3 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+p {
+    margin-bottom: 1rem;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+}
+
+/* ============ CONTAINER ============ */
+.container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* ============ HERO SECTION ============ */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 2rem;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(ellipse at 20% 30%, rgba(102, 252, 241, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(69, 162, 158, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    font-size: clamp(3rem, 8vw, 5rem);
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.hero-description {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    color: var(--text-primary);
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    background-color: var(--bg-dark);
+}
+
+/* ============ SECTIONS ============ */
+.viz-section {
+    padding: var(--section-padding);
+    position: relative;
+}
+
+.viz-section:nth-child(even) {
+    background-color: var(--bg-darker);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-title {
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent-teal), transparent);
+}
+
+.section-description {
+    color: var(--text-secondary);
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    line-height: 1.8;
+}
+
+/* ============ VISUALIZATION CONTAINERS ============ */
+.viz-container {
+    width: 100%;
+    min-height: 500px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(102, 252, 241, 0.1);
+}
+
+.launch-widget {
+    width: 100%;
+    min-height: 450px;
+}
+
+.congestion-viz {
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#congestion-risk {
+    width: 100%;
+    height: 600px;
+}
+
+/* ============ NARRATIVE SECTIONS ============ */
+.narrative-section {
+    padding: 4rem 0;
+    text-align: center;
+    background: linear-gradient(180deg, transparent 0%, rgba(102, 252, 241, 0.03) 50%, transparent 100%);
+}
+
+.narrative-section.warning {
+    background: linear-gradient(180deg, transparent 0%, rgba(244, 162, 97, 0.05) 50%, transparent 100%);
+}
+
+.narrative-text {
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    color: var(--text-secondary);
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.8;
+    font-weight: 300;
+}
+
+.narrative-text.emphasis {
+    color: var(--accent-warning);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+}
+
+/* ============ INSIGHT SECTION ============ */
+.insight-section {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, rgba(102, 252, 241, 0.05) 0%, rgba(69, 162, 158, 0.05) 100%);
+}
+
+.insight-box {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-left: 4px solid var(--accent-blue);
+    padding: 3rem;
+    border-radius: 8px;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.insight-title {
+    color: var(--accent-blue);
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+.insight-text {
+    color: var(--text-primary);
+    font-size: clamp(1.125rem, 1.75vw, 1.375rem);
+    line-height: 1.8;
+}
+
+/* ============ CONCLUSION SECTION ============ */
+.conclusion-section {
+    padding: 6rem 0;
+    background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+    text-align: center;
+}
+
+.conclusion-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.conclusion-title {
+    color: var(--accent-teal);
+    margin-bottom: 2rem;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.conclusion-text {
+    color: var(--text-secondary);
+    font-size: clamp(1.125rem, 1.75vw, 1.375rem);
+    line-height: 1.9;
+}
+
+/* ============ FOOTER ============ */
+.footer {
+    background-color: var(--bg-darker);
+    padding: 2rem 0;
+    text-align: center;
+    border-top: 1px solid rgba(102, 252, 241, 0.1);
+}
+
+.footer p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.viz-section,
+.narrative-section,
+.insight-section {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .viz-container {
+        padding: 1rem;
+    }
+    
+    .insight-box {
+        padding: 2rem 1.5rem;
+    }
+    
+    .viz-section {
+        padding: 3rem 0;
+    }
+    
+    .hero-section {
+        min-height: 80vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title::after {
+        width: 80%;
+    }
+    
+    .viz-container {
+        min-height: 400px;
+    }
+}
+
+/* ============ UTILITY CLASSES ============ */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mt-3 { margin-top: 3rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.mb-3 { margin-bottom: 3rem; }
+
+/* ============ SCROLL ANIMATIONS ============ */
+@media (prefers-reduced-motion: no-preference) {
+    .viz-section {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+    
+    .viz-section:nth-child(1) { animation-delay: 0.1s; }
+    .viz-section:nth-child(2) { animation-delay: 0.2s; }
+    .viz-section:nth-child(3) { animation-delay: 0.3s; }
+}
