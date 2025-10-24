@@ -24,11 +24,13 @@
     <div class="container-fluid" style="height: 100vh; display: flex; flex-direction: column; padding: 0; margin: 0;">
         <!-- header with horizontal color scale -->
         <div id="hero" style="display:flex; align-items:center; justify-content:space-between; padding:20px 40px;">
-  <div style="text-align:left;">
-    <h1 class="hero-title" style="font-style:italic; color:#ffffff;">Satellite Insights - by Around the World</h1>
-    <h2 class="hero-sub"   style="font-style:italic; color:#ffffff;">From a a handful of satellites in year X to over 9000 today – space has never been more crowded...</h2>
-  </div>
-</div>
+            <div style="text-align:left;">
+                <h1 class="hero-title" style="font-style:italic; color:#ffffff;">Satellite Insights - by Around the
+                    World</h1>
+                <h2 class="hero-sub" style="font-style:italic; color:#ffffff;">From a a handful of satellites in year X
+                    to over 9000 today – space has never been more crowded...</h2>
+            </div>
+        </div>
 
 
         <!-- Intro: sketch 2 - Explosion of satellites graph -->
@@ -47,7 +49,7 @@
         <!-- vis 2: Sketch 1 - Launch Dominance -->
 
         <div id="liftOffSection">
-            <h2>Launch Vehicle Dominance per Year</h2>
+            <h2 style="color: #ffffff;">Launch Vehicle Dominance per Year</h2>
             <div id="launch-dominance" class="launch-widget"></div>
         </div>
 
@@ -56,7 +58,7 @@
         <!-- Explain english here based on doc -->
 
         <!-- Main Message -->
-        <p style=" color: #ffffff;" >
+        <p style=" color: #ffffff;">
             The explosion in the number of satellites is the direct result of two interconnected forces: an ownership
             shift from government to commercial entities focused on mass-manufactured, short-lifespan Low Earth Orbit
             (LEO) satellites, and the radical reduction in launch costs enabled by reusable rockets, exemplified by the
@@ -66,7 +68,7 @@
         <!-- Call to Action: Sketch 6 -->
         <h2 style="color: #ffffff;">But too many satellites is making the lower orbits more congested...</h2>
         <div id="congestion-risk"></div>
-        <p style="color: #ffffff;" >
+        <p style="color: #ffffff;">
             English text explaining congestion risk here and sustainbility and etc based on doc
         </p>
     </div>
@@ -89,15 +91,15 @@
     <script src="js/gov-vs-com.js"></script>
 
     <script>
-  function setHeroHeightVar() {
-    const hero = document.querySelector('#hero');
-    const h = hero ? hero.getBoundingClientRect().height : 0;
-    document.documentElement.style.setProperty('--hero-h', Math.ceil(h) + 'px');
-  }
-  window.addEventListener('load', setHeroHeightVar);
-  window.addEventListener('resize', setHeroHeightVar);
-</script>
-<script src="js/main.js"></script>
+        function setHeroHeightVar() {
+            const hero = document.querySelector('#hero');
+            const h = hero ? hero.getBoundingClientRect().height : 0;
+            document.documentElement.style.setProperty('--hero-h', Math.ceil(h) + 'px');
+        }
+        window.addEventListener('load', setHeroHeightVar);
+        window.addEventListener('resize', setHeroHeightVar);
+    </script>
+    <script src="js/main.js"></script>
 
 
 </body>
