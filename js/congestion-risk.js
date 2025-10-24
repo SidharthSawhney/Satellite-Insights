@@ -20,7 +20,7 @@ class Congestion {
         // color scale for orbit classes
         this.colorScale = d3.scaleOrdinal()
             .domain(["LEO", "MEO", "GEO", "Elliptical"])
-            .range(['#a6cee3', '#cab2d6', '#f6ff00', '#e31a1c']);
+            .range(['#d2b0f6ff', '#9ee7f6ff', '#c2e98cff', '#f2d396ff']);
 
         // responsive
         if (window.ResizeObserver) {
@@ -49,20 +49,13 @@ class Congestion {
 
         vis.path = d3.geoPath(vis.projection);
 
-        vis.svg.append('defs')
-            .append('clipPath')
-            .attr('id', 'globe-clip')
-            .append('circle')
-            .attr('cx', vis.width / 2)
-            .attr('cy', vis.height / 2)
-            .attr('r', vis.projection.scale());
 
         // === Background Sphere ===
         vis.svg.append("circle")
             .attr("cx", vis.width / 2)
             .attr("cy", vis.height / 2)
             .attr("r", vis.projection.scale())
-            .attr("fill", "#003366");
+            .attr("fill", "#1a69b9ff");
 
         // === Load World Map ===
         d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(worldData => {
@@ -71,8 +64,8 @@ class Congestion {
             vis.land = vis.svg.append("g").selectAll("path")
                 .data(countries.features)
                 .enter().append("path")
-                .attr("fill", "#1E90FF")
-                .attr("stroke", "#000")
+                .attr("fill", "#38ad30ff")
+                .attr("stroke", "#38ad30ff")
                 .attr("stroke-width", 0.3);
 
             // === Rotation Animation ===
@@ -87,8 +80,7 @@ class Congestion {
         });
         // === Orbit Layer (empty for now) ===
         vis.orbitLayer = vis.svg.append('g')
-            .attr('class', 'orbits')
-            .attr('clip-path', 'url(#globe-clip)');
+            .attr('class', 'orbits');
 
 
         // === Call updateVis to draw orbits ===
@@ -114,7 +106,7 @@ class Congestion {
         const orbitsEnter = orbits.enter().append('ellipse')
             .attr('class', 'orbit')
             .attr('fill', 'none')
-            .attr('stroke-width', 1.5)
+            .attr('stroke-width', 0.5)
             .attr('stroke-opacity', 0.9);
 
         // ENTER + UPDATE
@@ -122,16 +114,16 @@ class Congestion {
             .attr('cx', vis.width / 2)
             .attr('cy', vis.height / 2)
             .attr('rx', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0);
-                const pe = vis.scale(+d['perigee_(km)'] || 0);
-                return (ap + pe) / 2; // semi-major axis
+                const ap = vis.scale(+d['apogee_(km)'] || 1) + 5;
+                const pe = vis.scale(+d['perigee_(km)'] || 1) + 5;
+                return (ap + pe) / 2 + vis.projection.scale(); // semi-major axis
             })
             .attr('ry', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0);
-                const pe = vis.scale(+d['perigee_(km)'] || 0);
+                const ap = vis.scale(+d['apogee_(km)'] || 1) + 5;
+                const pe = vis.scale(+d['perigee_(km)'] || 1) + 5;
                 const a = (ap + pe) / 2;
                 const c = (ap - pe) / 2;
-                return Math.sqrt(Math.max(0, a * a - c * c)); // semi-minor axis
+                return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
             })
             .attr('transform', d => `rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
             .attr('stroke', d => vis.colorScale(d.class_of_orbit));
@@ -156,14 +148,7 @@ class Congestion {
 
         vis.updateVis();
 
-        // update globe clip radius and position
-        const clipCircle = vis.svg.select('#globe-clip circle');
-        if (clipCircle.node()) {
-            clipCircle
-                .attr('cx', vis.width / 2)
-                .attr('cy', vis.height / 2)
-                .attr('r', vis.projection.scale());
-        }
+
 
         
         vis.updateVis();
