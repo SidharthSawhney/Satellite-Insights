@@ -52,4 +52,15 @@ function loadCongestion() {
 
 }
 
+// Government vs Commercial loader
+loadGovernmentVsCommercial();
 
+function loadGovernmentVsCommercial() {
+  d3.json("data/satellite_clean.json").then(data => {
+    const viz = new governmentVsCommercial("gov-vs-com", data);
+
+  }
+  ).catch(err => {
+    console.error("Government vs Commercial load error:", err);
+  });
+}
