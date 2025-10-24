@@ -49,13 +49,6 @@ class Congestion {
 
         vis.path = d3.geoPath(vis.projection);
 
-        vis.svg.append('defs')
-            .append('clipPath')
-            .attr('id', 'globe-clip')
-            .append('circle')
-            .attr('cx', vis.width / 2)
-            .attr('cy', vis.height / 2)
-            .attr('r', vis.projection.scale());
 
         // === Background Sphere ===
         vis.svg.append("circle")
@@ -87,8 +80,7 @@ class Congestion {
         });
         // === Orbit Layer (empty for now) ===
         vis.orbitLayer = vis.svg.append('g')
-            .attr('class', 'orbits')
-            .attr('clip-path', 'url(#globe-clip)');
+            .attr('class', 'orbits');
 
 
         // === Call updateVis to draw orbits ===
@@ -156,14 +148,7 @@ class Congestion {
 
         vis.updateVis();
 
-        // update globe clip radius and position
-        const clipCircle = vis.svg.select('#globe-clip circle');
-        if (clipCircle.node()) {
-            clipCircle
-                .attr('cx', vis.width / 2)
-                .attr('cy', vis.height / 2)
-                .attr('r', vis.projection.scale());
-        }
+
 
         
         vis.updateVis();
