@@ -1,8 +1,8 @@
 /**
  * Launch Sites Map Visualization
- * - Each launch site is a donut whose radius grows with cumulative launches.
- * - Donut segments show % mix of Government / Military / Commercial / Civilian.
- * - Center label shows a 2-letter site acronym that scales with the donut..
+ * - Each launch site is a circle whose radius grows with cumulative launches.
+ * - YouTube-style controls: play/pause, backward, forward, year slider
+ * - Tooltip shows satellite count per site
  */
 
 class LaunchSitesMap {
@@ -21,16 +21,10 @@ class LaunchSitesMap {
         this.world = worldGeo;
         this.launchesRaw = launches;
 
-        this.categories = ['Government', 'Military', 'Commercial', 'Civilian'];
-
-        // Colors by category
-        this.colorFor = d3.scaleOrdinal()
-            .domain(this.categories)
-            .range(['#4e79a7', '#e15759', '#59a14f', '#f28e2b']);
-
-        // Playback
-        this.intervalMs = opts.intervalMs ?? 100; // one event per tick
-        this.loop = opts.loop ?? false;
+        // Playback state
+        this.isPlaying = false;
+        this.currentYearIndex = 0;
+        this.playSpeed = opts.playSpeed ?? 500; // ms per year
 
         // Build DOM, projection, map
         this._build();
@@ -39,11 +33,16 @@ class LaunchSitesMap {
 
         this._installSiteDictionary();
 
-        // Prepare events (also sets title years)
+        // Prepare events by year
         this._prepLaunchEvents();
 
-        // Start autoplay and handle resize
-        this._play();
+        // Build controls
+        this._buildControls();
+
+        // Initial render
+        this._updateVisualization();
+
+        // Handle resize
         this._attachResize();
     }
 
@@ -58,25 +57,17 @@ class LaunchSitesMap {
 
         this.g = this.svg.append('g');
         this.gLand = this.g.append('g');
-        this.gSites = this.g.append('g'); // donut groups
+        this.gSites = this.g.append('g'); // circles
 
         // Title
         this.title = d3.select(this.node).append('div')
             .attr('class', 'map-title')
-            .text('Satellite launches'); // actual years set after data parse
+            .text('Satellite Launches by Location');
 
-        // Legend (rectangle swatches)
-        this.legend = d3.select(this.node).append('div').attr('class', 'map-legend');
-        this.categories.forEach(k => {
-            const row = this.legend.append('div').attr('class', 'row');
-            row.append('span').attr('class', 'swatch').style('background', this.colorFor(k));
-            row.append('span').text(k);
-        });
-
-        // Caption / timeline label
-        this.caption = d3.select(this.node).append('div')
-            .attr('class', 'map-caption')
-            .text('Playing…');
+        // Year display
+        this.yearDisplay = d3.select(this.node).append('div')
+            .attr('class', 'map-year-display')
+            .text('');
 
         // Tooltip
         this.tooltip = d3.select(this.node).append('div').attr('class', 'map-tooltip');
@@ -141,17 +132,6 @@ class LaunchSitesMap {
         return undefined;
     }
 
-    _normalizeCategory(raw) {
-        if (!raw) return 'Civilian';
-        const v = String(raw).toLowerCase();
-        if (v.includes('milit')) return 'Military';
-        if (v.includes('gov'))   return 'Government';
-        if (v.includes('com'))   return 'Commercial';
-        if (v.includes('civil')) return 'Civilian';
-        if (v.includes('research') || v.includes('university')) return 'Civilian';
-        return 'Civilian';
-    }
-
     _parseDate(raw) {
         if (!raw) return null;
         const d = new Date(raw);
@@ -182,7 +162,6 @@ class LaunchSitesMap {
 
         for (const r of rows) {
             const siteName = this._pick(r, ['launch_site','Launch Site','Launch_Site','Site']) || '';
-            const users    = this._pick(r, ['users','Users','User','Owner Type','Category']);
             const dateRaw  = this._pick(r, ['date_of_launch','Date of Launch','Launch_Date','Launch Date','Date']);
             const dt = this._parseDate(dateRaw);
             if (!dt) continue;
@@ -200,191 +179,235 @@ class LaunchSitesMap {
                 lat = guess.lat; lon = guess.lon;
             }
 
-            const category = this._normalizeCategory(users);
             const key = `${lon.toFixed(4)},${lat.toFixed(4)}`;
-            events.push({ key, lon, lat, dt, category, siteName: siteName || 'Unknown site' });
+            const year = dt.getFullYear();
+            events.push({ key, lon, lat, year, siteName: siteName || 'Unknown site' });
         }
 
-        // Sort by time (and store years for title)
-        events.sort((a,b) => a.dt - b.dt);
-        this.events = events;
-        this.i = 0;
+        // Sort by year
+        events.sort((a,b) => a.year - b.year);
+        
+        // Get unique years
+        const yearsSet = new Set(events.map(e => e.year));
+        this.years = Array.from(yearsSet).sort((a,b) => a - b);
+        
+        // Group events by year
+        this.eventsByYear = {};
+        this.years.forEach(year => {
+            this.eventsByYear[year] = events.filter(e => e.year === year);
+        });
 
-        if (events.length) {
-            const y1 = events[0].dt.getFullYear();
-            const yN = events[events.length - 1].dt.getFullYear();
-            this.title.text(`Satellite launches from ${y1} to ${yN}`);
+        // Cumulative data by year
+        this.cumulativeByYear = {};
+        const cumulative = new Map();
+        
+        this.years.forEach(year => {
+            this.eventsByYear[year].forEach(ev => {
+                if (!cumulative.has(ev.key)) {
+                    cumulative.set(ev.key, {
+                        key: ev.key,
+                        lon: ev.lon,
+                        lat: ev.lat,
+                        siteName: ev.siteName,
+                        count: 0
+                    });
+                }
+                cumulative.get(ev.key).count += 1;
+            });
+            
+            // Store snapshot for this year
+            this.cumulativeByYear[year] = new Map(
+                Array.from(cumulative.entries()).map(([k, v]) => [k, {...v}])
+            );
+        });
+
+        // Radius scale
+        const maxCount = Math.max(...Array.from(cumulative.values()).map(s => s.count), 1);
+        this.radiusScale = d3.scaleSqrt()
+            .domain([0, maxCount])
+            .range([0, 35]);
+    }
+
+    /* ---------- Controls ---------- */
+
+    _buildControls() {
+        // Controls container
+        this.controls = d3.select(this.node).append('div')
+            .attr('class', 'map-controls');
+
+        // Play/Pause button
+        this.playButton = this.controls.append('button')
+            .attr('class', 'control-btn play-btn')
+            .html('▶')
+            .on('click', () => this._togglePlay());
+
+        // Backward button
+        this.controls.append('button')
+            .attr('class', 'control-btn')
+            .html('⏮')
+            .on('click', () => this._stepBackward());
+
+        // Forward button
+        this.controls.append('button')
+            .attr('class', 'control-btn')
+            .html('⏭')
+            .on('click', () => this._stepForward());
+
+        // Year slider
+        this.yearSlider = this.controls.append('input')
+            .attr('type', 'range')
+            .attr('class', 'year-slider')
+            .attr('min', 0)
+            .attr('max', this.years.length - 1)
+            .attr('value', 0)
+            .on('input', (event) => {
+                this.currentYearIndex = +event.target.value;
+                this._updateVisualization();
+            });
+
+        // Year label
+        this.yearLabel = this.controls.append('span')
+            .attr('class', 'year-label')
+            .text(this.years[0] || '');
+    }
+
+    _togglePlay() {
+        if (this.isPlaying) {
+            this._pause();
+        } else {
+            this._play();
         }
-
-        // Per-site state
-        this.sites = new Map();
-        this.R = c => 4 + Math.sqrt(c) * 3.0; // outer radius of donut
-        this.arcInner = R => R * 0.55;        // inner radius
-        this.pie = d3.pie().sort(null).value(d => d.value);
-
-        // initial render (empty)
-        this._renderSites();
     }
 
-    /* ---------- Rendering donuts ---------- */
-
-    _siteDataForPie(site) {
-        return this.categories.map(cat => ({
-            category: cat,
-            value: site.byCat[cat] || 0,
-            site
-        }));
+    _play() {
+        this.isPlaying = true;
+        this.playButton.html('⏸');
+        this._startPlayback();
     }
 
-    _renderSites() {
-        const arr = Array.from(this.sites.values());
+    _pause() {
+        this.isPlaying = false;
+        this.playButton.html('▶');
+        if (this.playbackTimer) {
+            clearInterval(this.playbackTimer);
+        }
+    }
 
-        // One <g> per site
-        const siteG = this.gSites.selectAll('g.site')
-            .data(arr, d => d.key);
+    _startPlayback() {
+        if (this.playbackTimer) clearInterval(this.playbackTimer);
+        
+        this.playbackTimer = setInterval(() => {
+            if (this.currentYearIndex < this.years.length - 1) {
+                this.currentYearIndex++;
+                this.yearSlider.property('value', this.currentYearIndex);
+                this._updateVisualization();
+            } else {
+                this._pause();
+            }
+        }, this.playSpeed);
+    }
 
-        const siteGEnter = siteG.enter()
+    _stepForward() {
+        if (this.currentYearIndex < this.years.length - 1) {
+            this.currentYearIndex++;
+            this.yearSlider.property('value', this.currentYearIndex);
+            this._updateVisualization();
+        }
+    }
+
+    _stepBackward() {
+        if (this.currentYearIndex > 0) {
+            this.currentYearIndex--;
+            this.yearSlider.property('value', this.currentYearIndex);
+            this._updateVisualization();
+        }
+    }
+
+    /* ---------- Rendering ---------- */
+
+    _updateVisualization() {
+        const currentYear = this.years[this.currentYearIndex];
+        this.yearLabel.text(currentYear);
+        this.yearDisplay.text(`Year: ${currentYear}`);
+
+        // Get cumulative data up to current year
+        const sites = this.cumulativeByYear[currentYear];
+        if (!sites) return;
+
+        const sitesArray = Array.from(sites.values());
+
+        // Bind data
+        const circles = this.gSites.selectAll('g.site')
+            .data(sitesArray, d => d.key);
+
+        // Enter
+        const circlesEnter = circles.enter()
             .append('g')
             .attr('class', 'site')
             .attr('transform', d => {
-                const [x,y] = this.projection([d.lon, d.lat]);
-                // enter at a slightly smaller scale, then pop to 1.0
-                return `translate(${x},${y}) scale(0.75)`;
-            })
-            .style('opacity', 0);
+                const [x, y] = this.projection([d.lon, d.lat]);
+                return `translate(${x},${y})`;
+            });
 
-        // center label (acronym)
-        siteGEnter.append('text')
+        circlesEnter.append('circle')
+            .attr('class', 'site-circle')
+            .attr('r', 0)
+            .attr('fill', '#4a90e2')
+            .attr('fill-opacity', 0.7)
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 1.5)
+            .on('mouseover', (e, d) => this._showTip(e, d))
+            .on('mousemove', (e, d) => this._moveTip(e, d))
+            .on('mouseout', () => this._hideTip());
+
+        circlesEnter.append('text')
             .attr('class', 'site-label')
             .attr('text-anchor', 'middle')
             .attr('dy', '0.35em')
             .style('fill', '#ffffff')
             .style('pointer-events', 'none')
             .style('font-weight', 700)
-            .text(d => d.acronym || this._acronym(d.siteName));
+            .style('font-size', '10px')
+            .text(d => this._acronym(d.siteName));
 
-        // donut paths group
-        siteGEnter.append('g').attr('class', 'donut');
+        // Update
+        const circlesAll = circlesEnter.merge(circles);
 
-        // gentle scale-in for the whole site group (no slice sweep)
-        siteGEnter.transition().duration(220)
-            .style('opacity', 1)
-            .attr('transform', d => {
-                const [x,y] = this.projection([d.lon, d.lat]);
-                return `translate(${x},${y}) scale(1)`;
-            });
+        circlesAll.select('circle')
+            .transition()
+            .duration(300)
+            .attr('r', d => this.radiusScale(d.count));
 
-        // Merge for update
-        const siteGAll = siteGEnter.merge(siteG);
+        circlesAll.select('text')
+            .text(d => this._acronym(d.siteName))
+            .style('font-size', d => Math.max(8, this.radiusScale(d.count) * 0.4) + 'px');
 
-        // Keep groups positioned (and scaled at 1) on resize/updates
-        siteGAll.attr('transform', d => {
-            const [x,y] = this.projection([d.lon, d.lat]);
-            return `translate(${x},${y}) scale(1)`;
-        });
-
-        siteGAll.each((site, i, nodes) => {
-            const R = this.R(site.count);
-            const inner = this.arcInner(R);
-            const arc = d3.arc().innerRadius(inner).outerRadius(R);
-
-            // keep a stable category order so the ring always “looks whole”
-            const pieces = this.pie(this._siteDataForPie(site));
-
-            // update donut segments
-            const g = d3.select(nodes[i]).select('g.donut');
-            const seg = g.selectAll('path.seg')
-                .data(pieces, d => d.data.category);
-
-            seg.enter().append('path')
-                .attr('class', 'seg')
-                .attr('fill', d => this.colorFor(d.data.category))
-                .attr('stroke', '#0b0c10')
-                .attr('stroke-width', 0.6)
-                .attr('d', arc)                         // draw at final angles immediately
-                .on('mouseover', (e, d) => this._showTip(e, d))
-                .on('mousemove', (e, d) => this._moveTip(e, d))
-                .on('mouseout', () => this._hideTip());
-
-            seg
-                .attr('fill', d => this.colorFor(d.data.category))
-                .attr('d', arc);                         // update without animation
-
-            seg.exit().remove();
-
-            // center label size tracks donut radius
-            d3.select(nodes[i]).select('text.site-label')
-                .text(site.acronym || (site.acronym = this._acronym(site.siteName)))
-                .style('font-size', Math.max(8, R * 0.55) + 'px');
-        });
-
-        siteG.exit().remove();
+        // Exit
+        circles.exit()
+            .transition()
+            .duration(200)
+            .style('opacity', 0)
+            .remove();
     }
 
     _showTip(e, d) {
-        const site = d.data.site;
-        const total = Math.max(1, site.count);
-        const count = d.data.value;
-        const pct = (count / total) * 100;
         this.tooltip
             .style('visibility', 'visible')
             .html(
-                `<strong>${site.siteName}</strong><br/>` +
-                `${d.data.category}: ${count} (${pct.toFixed(1)}%)<br/>` +
-                `Total: ${total}`
+                `<strong>${d.siteName}</strong><br/>` +
+                `Satellites: ${d.count}`
             );
         this._moveTip(e);
     }
+
     _moveTip(e) {
         this.tooltip
-            .style('left', (e.offsetX + 12) + 'px')
-            .style('top',  (e.offsetY - 12) + 'px');
-    }
-    _hideTip() { this.tooltip.style('visibility', 'hidden'); }
-
-    /* ---------- Playback ---------- */
-
-    _tick() {
-        if (this.i >= this.events.length) {
-            if (this.loop) this._restart();
-            return;
-        }
-
-        const ev = this.events[this.i++];
-        const key = ev.key;
-
-        if (!this.sites.has(key)) {
-            this.sites.set(key, {
-                key, lon: ev.lon, lat: ev.lat, siteName: ev.siteName,
-                count: 0,
-                byCat: { Government:0, Military:0, Commercial:0, Civilian:0 },
-                acronym: this._acronym(ev.siteName)
-            });
-        }
-        const s = this.sites.get(key);
-        s.count += 1;
-        s.byCat[ev.category] = (s.byCat[ev.category] || 0) + 1;
-
-        // update caption
-        const d = ev.dt;
-        this.caption.text(
-            `Launching…  ${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-        );
-
-        this._renderSites();
+            .style('left', (e.pageX + 12) + 'px')
+            .style('top',  (e.pageY - 12) + 'px');
     }
 
-    _play() {
-        this._stop();
-        this.timer = setInterval(() => this._tick(), this.intervalMs);
-    }
-    _stop() { if (this.timer) clearInterval(this.timer); }
-    _restart() {
-        this._stop();
-        this.i = 0;
-        this.sites.clear();
-        this._renderSites();
-        this._play();
+    _hideTip() { 
+        this.tooltip.style('visibility', 'hidden'); 
     }
 
     /* ---------- Resize ---------- */
@@ -399,8 +422,12 @@ class LaunchSitesMap {
             this._layout();
             this.gLand.selectAll('path').attr('d', this.geoPath);
 
-            // Reposition site groups and recompute arcs to the same counts
-            this._renderSites();
+            // Reposition circles
+            this.gSites.selectAll('g.site')
+                .attr('transform', d => {
+                    const [x, y] = this.projection([d.lon, d.lat]);
+                    return `translate(${x},${y})`;
+                });
         };
 
         if (window.ResizeObserver) {

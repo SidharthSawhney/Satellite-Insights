@@ -8,6 +8,7 @@
     background: rgba(0,0,0,0.45);
     padding: 6px 8px;
     border-radius: 6px;
+    z-index: 10;
 }
 
 .map-widget {
@@ -45,50 +46,142 @@
     opacity: 0.4;
 }
 
-/* Launch sites */
-.site-dot {
-    stroke: #0b0c10;
-    stroke-width: 1px;
-    opacity: 0.92;
+/* Launch sites - simple circles */
+.site-circle {
+    fill: #4a90e2;
+    fill-opacity: 0.7;
+    stroke: #fff;
+    stroke-width: 1.5px;
+    cursor: pointer;
+    transition: fill-opacity 0.2s;
 }
 
-/* Legend */
-.map-legend {
+.site-circle:hover {
+    fill-opacity: 0.9;
+    stroke-width: 2px;
+}
+
+.site-label {
+    fill: #ffffff;
+    pointer-events: none;
+    font-weight: 700;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+
+/* Year display */
+.map-year-display {
     position: absolute;
     right: 16px;
     top: 16px;
-    padding: 10px 12px;
+    padding: 8px 16px;
     border-radius: 8px;
-    background: rgba(0,0,0,0.55);
+    background: rgba(0,0,0,0.7);
     color: #fff;
-    font-size: 12px;
-    line-height: 1.2;
+    font-size: 20px;
+    font-weight: 700;
+    z-index: 10;
 }
 
-.map-legend .row {
+/* YouTube-style controls */
+.map-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    backdrop-filter: blur(10px);
 }
 
-.map-legend .swatch {
-    width: 14px;
-    height: 10px;
+.control-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+.play-btn {
+    background: #4a90e2;
+    font-size: 18px;
+}
+
+.play-btn:hover {
+    background: #5fa3f0;
+}
+
+/* Year slider */
+.year-slider {
+    width: 300px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 3px;
-    display: inline-block;
+    outline: none;
+    cursor: pointer;
 }
 
-/* Timeline caption */
-.map-caption {
-    position: absolute;
-    left: 16px;
-    bottom: 12px;
-    color: #cbd5e1;
-    font-size: 12px;
-    background: rgba(0,0,0,0.45);
-    padding: 6px 8px;
-    border-radius: 6px;
+.year-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #4a90e2;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.year-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: #5fa3f0;
+}
+
+.year-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #4a90e2;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.year-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    background: #5fa3f0;
+}
+
+.year-label {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: center;
 }
 
 /* Tooltip */
@@ -97,15 +190,65 @@
     pointer-events: none;
     background: rgba(0,0,0,0.9);
     color: white;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    z-index: 9;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    z-index: 100;
     visibility: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Small screen tweaks */
+.map-tooltip strong {
+    color: #4a90e2;
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .map-caption { font-size: 11px; }
-    .map-legend { font-size: 11px; }
+    .map-year-display { 
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+    
+    .map-controls {
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 20px;
+    }
+    
+    .control-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .year-slider {
+        width: 150px;
+    }
+    
+    .year-label {
+        font-size: 12px;
+        min-width: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .map-controls {
+        bottom: 10px;
+        gap: 6px;
+        padding: 6px 10px;
+    }
+    
+    .control-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        padding: 6px;
+    }
+    
+    .year-slider {
+        width: 100px;
+    }
 }

@@ -1,145 +1,333 @@
-/* Title: responsive sizing and spacing */
-#hero {
-  padding: clamp(12px, 2vw, 28px) clamp(12px, 3vw, 40px);
-}
-
-.hero-title {
-  font-size: clamp(20px, 4.5vw, 50px);
-  line-height: 1.1;
-  margin: 0 0 clamp(6px, 1.2vw, 14px) 0;
-  text-align: left;
-  color: #ffffff;
-}
-
-.hero-sub {
-  font-size: clamp(14px, 2vw, 22px);
-  line-height: 1.4;
-  margin: 0;
-  opacity: 0.8;
-  color: #ffffff;
-}
-
-/* Prevent sideways scrolling and let sections fill the screen nicely */
-html, body {
-  height: 100%;
-  overflow-x: hidden;
-}
-
-/* The viz gets the remaining height below the hero (value set by JS var) */
-:root {
-  --hero-h: 0px;
-}
-
-.viz-section {
-  min-height: 0;
-}
-
-/* Responsive container for the visualization */
-.launch-widget {
-  width: min(100%, 1200px);
-  height: calc(100vh - var(--hero-h) - clamp(12px, 2vw, 28px)); /* Full page minus title */
-  margin: 0 auto;
+.launch-dom-container {
   position: relative;
-  transform-origin: center center;
-}
-
-.launch-widget svg,
-.launch-widget canvas {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+}
+
+.launch-dom-svg {
+  background: transparent;
   display: block;
+  border: none;
+  outline: none;
 }
 
-/* Earth + Rocket Layers */
-.earth-canvas {
+/* Tooltip */
+.launch-dom-tooltip {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.rockets-layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: auto;
-}
-
-/* Rocket visuals */
-.rocket-body {
-  fill: #E8E8E8;
-  stroke: #333;
-  stroke-width: 2;
-}
-
-.rocket-nose {
-  fill: #FF6B6B;
-  stroke: #333;
-  stroke-width: 2;
-}
-
-.rocket-fin {
-  fill: #4ECDC4;
-  stroke: #333;
-  stroke-width: 2;
-}
-
-.rocket-window {
-  fill: #87CEEB;
-  stroke: #333;
-  stroke-width: 1.5;
-}
-
-.rocket-name {
-  fill: #ffffff; 
-  font-size: 12px;
-  text-anchor: middle;
-  user-select: none;
-}
-
-
-.rocket-tooltip {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.9);
-  color: #fff;
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  white-space: nowrap;
-  pointer-events: none;
   visibility: hidden;
-  z-index: 99999;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* --- Responsive tweaks --- */
+/* Lollipop elements */
+.lollipop-stem {
+  stroke: #4a90e2;
+  stroke-width: 3px;
+}
+
+.lollipop-rocket {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lollipop-rocket:hover {
+  filter: brightness(1.2);
+}
+
+/* Axes */
+.x-axis text,
+.y-axis text {
+  fill: white;
+  font-size: 12px;
+}
+
+.x-axis line,
+.x-axis path,
+.y-axis line,
+.y-axis path {
+  stroke: white;
+  stroke-width: 2px;
+}
+
+.y-axis-label {
+  fill: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Year Slider */
+.year-slider-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  z-index: 10;
+}
+
+.year-slider-container label {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.year-label-display {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  min-width: 100px;
+  text-align: center;
+}
+
+/* Range slider styling */
+.year-slider-range {
+  width: 200px;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.year-slider-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #4a90e2;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.year-slider-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #5fa3f0;
+}
+
+.year-slider-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #4a90e2;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.year-slider-range::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #5fa3f0;
+}
+
+/* Remove old dropdown styles */
+.year-select {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 2px solid #4a90e2;
+  background: #1a1a1a;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.year-select:hover {
+  background: #2a2a2a;
+  border-color: #5fa3f0;
+}
+
+.year-select:focus {
+  border-color: #5fa3f0;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+/* Sidebar */
+.launch-dom-sidebar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  padding: 0;
+  border-left: 2px solid #4a90e2;
+  z-index: 100;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+.sidebar-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+}
+
+.sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-content {
+  padding: 50px 20px 20px 20px;
+  color: white;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: #4a90e2;
+  border-radius: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: #5fa3f0;
+}
+
+.sidebar-content h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #4a90e2;
+  border-bottom: 2px solid #4a90e2;
+  padding-bottom: 10px;
+}
+
+.sidebar-content img {
+  width: 100%;
+  max-width: 150px;
+  display: block;
+  margin: 0 auto 20px auto;
+}
+
+/* Stats display in sidebar */
+.sidebar-content .stat-item {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #333;
+}
+
+.sidebar-content .stat-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.sidebar-content .stat-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.sidebar-content .company-info {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  border-left: 3px solid #4a90e2;
+}
+
+.sidebar-content .company-info strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #4a90e2;
+}
+
+/* Section styling */
+#liftOffSection2 {
+  min-height: 800px;
+  position: relative;
+  margin-top: 50px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+#liftOffSection2 h2 {
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+#launch-dominance1 {
+  height: 700px;
+  overflow: hidden;
+  border: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .year-slider-container {
+    top: 10px;
+    left: 10px;
+    padding: 8px 15px;
+  }
+  
+  .launch-dom-sidebar {
+    width: 0 !important;
+  }
+  
+  .launch-dom-sidebar.open {
+    width: 250px !important;
+  }
+}
+
 @media (max-width: 768px) {
-  .rocket-name {
+  #liftOffSection2 h2 {
+    font-size: 20px;
+  }
+  
+  .year-slider-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .x-axis text {
     font-size: 10px;
   }
-
-  .hero-title {
-    font-size: clamp(18px, 5vw, 42px);
-  }
-
-  .hero-sub {
-    font-size: clamp(13px, 3vw, 20px);
-  }
-}
-
-@media (max-width: 480px) {
-  .rocket-name {
-    font-size: 9px;
-  }
-
-  .hero-title {
-    font-size: clamp(16px, 6vw, 38px);
-  }
-
-  .hero-sub {
-    font-size: clamp(12px, 4vw, 18px);
+  
+  .y-axis text {
+    font-size: 10px;
   }
 }
