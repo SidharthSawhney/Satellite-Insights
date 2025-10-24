@@ -19,6 +19,7 @@ call to action: sketch 6 -->
     <link rel="stylesheet" href="css/fontawesome.min.css">
 
     <!-- Custom CSS code -->
+    <link rel="stylesheet" href="css/launch_sites_map.css">
     <link rel="stylesheet" href="css/launch_dominance.css">
 </head>
 
@@ -35,7 +36,9 @@ call to action: sketch 6 -->
 
 
         <!-- Intro: sketch 2 - Explosion of satellites graph -->
-        <div id="satellite-explosion"></div>
+        <div id="satellite-explosion">
+            <div id="launch-sites" class="launch-widget"></div>
+        </div>
 
         <p style="color: #ffffff;">Curious to know more the reason behind the satellite boom?</p>
 
@@ -76,6 +79,8 @@ call to action: sketch 6 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- Visualization objects (order matters) -->
+    <script src="https://unpkg.com/topojson-client@3"></script>
+    <script src="js/launch-sites-map.js"></script>
     <script src="js/satellite-explosion.js"></script>
     <script src="js/gov-vs-com.js"></script>
     <script src="js/launch-dominance.js"></script>
