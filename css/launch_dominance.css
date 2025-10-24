@@ -28,7 +28,7 @@
 
 /* Lollipop elements */
 .lollipop-stem {
-  stroke: #4a90e2;
+  stroke: #00a659;
   stroke-width: 3px;
 }
 
@@ -109,7 +109,7 @@
   appearance: none;
   width: 16px;
   height: 16px;
-  background: #4a90e2;
+  background: #00a659;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s;
@@ -117,13 +117,13 @@
 
 .year-slider-range::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  background: #5fa3f0;
+  background: #28be0e;
 }
 
 .year-slider-range::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: #4a90e2;
+  background: #00a659;
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -132,31 +132,9 @@
 
 .year-slider-range::-moz-range-thumb:hover {
   transform: scale(1.2);
-  background: #5fa3f0;
+  background: #28be0e;
 }
 
-/* Remove old dropdown styles */
-.year-select {
-  padding: 8px 15px;
-  border-radius: 5px;
-  border: 2px solid #4a90e2;
-  background: #1a1a1a;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.year-select:hover {
-  background: #2a2a2a;
-  border-color: #5fa3f0;
-}
-
-.year-select:focus {
-  border-color: #5fa3f0;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-}
 
 /* Sidebar */
 .launch-dom-sidebar {
@@ -170,7 +148,7 @@
   overflow-x: hidden;
   transition: width 0.3s ease;
   padding: 0;
-  border-left: 2px solid #4a90e2;
+  border-left: 2px solid #00a659;
   z-index: 100;
   box-shadow: -4px 0 10px rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
@@ -216,19 +194,19 @@
 }
 
 .sidebar-content::-webkit-scrollbar-thumb {
-  background: #4a90e2;
+  background: #00a659;
   border-radius: 4px;
 }
 
 .sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: #5fa3f0;
+  background: #28be0e;
 }
 
 .sidebar-content h2 {
   font-size: 20px;
   margin-bottom: 20px;
-  color: #4a90e2;
-  border-bottom: 2px solid #4a90e2;
+  color: #00a659;
+  border-bottom: 2px solid #00a659;
   padding-bottom: 10px;
 }
 
@@ -264,13 +242,13 @@
   border-radius: 8px;
   font-size: 12px;
   line-height: 1.6;
-  border-left: 3px solid #4a90e2;
+  border-left: 3px solid #00a659;
 }
 
 .sidebar-content .company-info strong {
   display: block;
   margin-bottom: 8px;
-  color: #4a90e2;
+  color: #00a659;
 }
 
 /* Section styling */

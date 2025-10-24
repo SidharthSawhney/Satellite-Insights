@@ -125,12 +125,12 @@
 }
 
 .play-btn {
-    background: #4a90e2;
+    background: #00a659;
     font-size: 18px;
 }
 
 .play-btn:hover {
-    background: #5fa3f0;
+    background: #28be0e;
 }
 
 /* Year slider */
@@ -150,7 +150,7 @@
     appearance: none;
     width: 16px;
     height: 16px;
-    background: #4a90e2;
+    background: #28be0e;
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s;
@@ -158,7 +158,7 @@
 
 .year-slider::-webkit-slider-thumb:hover {
     transform: scale(1.2);
-    background: #5fa3f0;
+    background: #00a659;
 }
 
 .year-slider::-moz-range-thumb {
