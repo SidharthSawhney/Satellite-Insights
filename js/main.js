@@ -1,7 +1,9 @@
 loadLaunchDominance();
 
+
 function loadLaunchDominance() {
   d3.json("data/launch_dominance.json").then(jsonObj => {
+    
     // convert {"Falcon 9":4731,...} -> [{name:"Falcon 9", satellites:4731}, ...]
     const dataArr = Object.entries(jsonObj).map(([name, satellites]) => ({
       name,
@@ -17,5 +19,9 @@ function loadLaunchDominance() {
     });
 
     viz.setTransform(500, -100, 1.0);
+
+
+
   });
 }
+
