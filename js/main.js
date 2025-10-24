@@ -23,3 +23,20 @@ if (viz && typeof viz.resize === "function") viz.resize();
    
   });
 }
+
+// Launch Sites Map loader
+loadLaunchSitesMap();
+
+function loadLaunchSitesMap() {
+    Promise.all([
+        d3.json("data/world_lowres.json"),   // basemap (GeoJSON or TopoJSON)
+        d3.csv("data/satellite_clean.csv")   // launch events
+    ]).then(([world, launches]) => {
+        new LaunchSitesMap("launch-sites", world, launches, {
+            intervalMs: 120,
+            loop: false
+        });
+    }).catch(err => {
+        console.error("Launch Sites Map load error:", err);
+    });
+}
