@@ -33,35 +33,65 @@ class Congestion {
     initVis() {
         const vis = this;
 
-        // scaffold
+        // === Create the main SVG ===
         vis.svg = vis.host.append('svg')
             .attr('class', 'congestion-svg')
             .attr('width', vis.width)
             .attr('height', vis.height);
 
-        // background (space)
-        vis.svg.append('rect')
-            .attr('x', 0).attr('y', 0)
-            .attr('width', vis.width).attr('height', vis.height)
-            .attr('fill', '#0b0c10');
 
-        // simple Earth gradient
-        const defs = vis.svg.append('defs');
-        const grad = defs.append('radialGradient')
-            .attr('id', 'earth-grad')
-            .attr('cx', '50%').attr('cy', '50%')
-            .attr('r', '60%');
-        grad.append('stop').attr('offset', '0%').attr('stop-color', '#5b8cff');
-        grad.append('stop').attr('offset', '100%').attr('stop-color', '#1e3a8a');
 
-        // Earth (center)
-        vis.earth = vis.svg.append('circle')
+        // === Globe Projection ===
+        vis.projection = d3.geoOrthographic()
+            .scale(vis.height / 7)
+            .translate([vis.width / 2, vis.height / 2])
+            .clipAngle(90);
+
+        vis.path = d3.geoPath(vis.projection);
+
+        vis.svg.append('defs')
+            .append('clipPath')
+            .attr('id', 'globe-clip')
+            .append('circle')
             .attr('cx', vis.width / 2)
             .attr('cy', vis.height / 2)
-            .attr('fill', 'url(#earth-grad)');
+            .attr('r', vis.projection.scale());
 
-        vis.orbitLayer = vis.svg.append('g').attr('class', 'orbits');
+        // === Background Sphere ===
+        vis.svg.append("circle")
+            .attr("cx", vis.width / 2)
+            .attr("cy", vis.height / 2)
+            .attr("r", vis.projection.scale())
+            .attr("fill", "#003366");
 
+        // === Load World Map ===
+        d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(worldData => {
+            const countries = topojson.feature(worldData, worldData.objects.countries);
+
+            vis.land = vis.svg.append("g").selectAll("path")
+                .data(countries.features)
+                .enter().append("path")
+                .attr("fill", "#1E90FF")
+                .attr("stroke", "#000")
+                .attr("stroke-width", 0.3);
+
+            // === Rotation Animation ===
+            vis.rotation = [0, -10]; // initial [lambda, phi]
+            vis.velocity = 0.35; // degrees per frame
+
+            d3.timer(function() {
+                vis.rotation[0] += vis.velocity;
+                vis.projection.rotate(vis.rotation);
+                vis.land.attr("d", vis.path);
+            });
+        });
+        // === Orbit Layer (empty for now) ===
+        vis.orbitLayer = vis.svg.append('g')
+            .attr('class', 'orbits')
+            .attr('clip-path', 'url(#globe-clip)');
+
+
+        // === Call updateVis to draw orbits ===
         vis.updateVis();
     }
 
@@ -76,11 +106,6 @@ class Congestion {
             .domain([0, maxApogee])
             .range([0, maxRadius]);
 
-        // Earth radius (optional aesthetic, ~6371 km if your values are altitude-above-Earth,
-        // but here we simply set a fixed nice radius relative to the scene)
-        const earthR = maxRadius * 0.45;
-        vis.earth.attr('r', earthR);
-
         // DATA JOIN
         const orbits = vis.orbitLayer.selectAll('.orbit')
             .data(vis.data, d => d.norad_number || d['current_official_name_of_satellite'] || Math.random());
@@ -94,25 +119,19 @@ class Congestion {
 
         // ENTER + UPDATE
         orbitsEnter.merge(orbits)
-            .attr('cx', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0);
-                const pe = vis.scale(+d['perigee_(km)'] || 0);
-                const c = (ap - pe) / 2;                // focus distance
-                return vis.width / 2 - c;                 // shift so Earth stays centered
-            })
+            .attr('cx', vis.width / 2)
             .attr('cy', vis.height / 2)
             .attr('rx', d => {
                 const ap = vis.scale(+d['apogee_(km)'] || 0);
                 const pe = vis.scale(+d['perigee_(km)'] || 0);
-                return (ap + pe) / 2;                     // semi-major
+                return (ap + pe) / 2; // semi-major axis
             })
             .attr('ry', d => {
                 const ap = vis.scale(+d['apogee_(km)'] || 0);
                 const pe = vis.scale(+d['perigee_(km)'] || 0);
                 const a = (ap + pe) / 2;
                 const c = (ap - pe) / 2;
-                const b2 = Math.max(0, a * a - c * c);    // semi-minor
-                return Math.sqrt(b2);
+                return Math.sqrt(Math.max(0, a * a - c * c)); // semi-minor axis
             })
             .attr('transform', d => `rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
             .attr('stroke', d => vis.colorScale(d.class_of_orbit));
@@ -136,5 +155,18 @@ class Congestion {
         }
 
         vis.updateVis();
+
+        // update globe clip radius and position
+        const clipCircle = vis.svg.select('#globe-clip circle');
+        if (clipCircle.node()) {
+            clipCircle
+                .attr('cx', vis.width / 2)
+                .attr('cy', vis.height / 2)
+                .attr('r', vis.projection.scale());
+        }
+
+        
+        vis.updateVis();
+
     }
 }
