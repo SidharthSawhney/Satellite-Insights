@@ -75,5 +75,76 @@ class Congestion {
                 land.attr("d", path);
             });
         });
+
+        //Scales
+        // Get the max apogee since it's the furthest point from Earth
+        let maxApogee = d3.max(vis.data, d=> d.apogee_(km))
+        vis.scale = d3.scaleLinear()
+                        .domain([0, maxApogee])
+                        .range([0, Math.min(vis.width, vis.height)/2]) // Range is due to rotation
+        
+        //Color Scale
+        let colors = ['#a6cee3','#e31a1c','#f6ff00ff','#cab2d6'];
+            // Set ordinal color scale
+        vis.colorScale = d3.scaleOrdinal()
+        .domain(["LEO", "GEO", "MEO", "Elliptical"])
+        .range(colorArray);
+
+
+        vis.updateVis();
+    }
+
+    updateVis(){
+        vis = this;
+
+        let orbits = vis.svg.selectAll("orbit")
+                        .data(vis.data);
+        
+        orbits.enter().append("ellipse")
+            .attr("class", "orbit")
+            .merge(orbits)
+            .attr("cx", d=>{
+                // Convert to pixel values
+                const apogee_px = vis.scale(d.apogee_(km));
+                const perigee_px = vis.scale(d.perigee(km));
+
+                //Find the focal point (i.e. center of the orbit)
+                const c = (apogee_px - perigee_px) / 2;
+
+                // Find the difference between the center of the orbit and center of Earth
+                return Math.abs(vis.width/2 - c)
+
+            })
+            .attr("cy", vis.height/2)
+            .attr("rx",d=>{
+                // Need the semi major axis
+                const apogee_px = vis.scale(d.apogee_(km));
+                const perigee_px = vis.scale(d.perigee(km));
+                return (apogee_px + perigee_px) / 2;
+
+            })
+            .attr("ry", d=>{
+                // Need semi minor axis
+                const apogee_px = vis.scale(d.apogee_(km));
+                const perigee_px = vis.scale(d.perigee(km));
+                const a_px = (apogee_px + perigee_px) / 2;
+                const c_px = (apogee_px - perigee_px) / 2;
+
+                const b_px_squared = Math.pow(a_px, 2) - Math.pow(c_px, 2);
+                return Math.sqrt(Math.max(0, b_px_squared));
+
+            })
+            .attr("fill", "none")
+            .attr("stroke-width", 2)
+            .attr("transform", d =>{
+                return `rotate(${d.inclination_(degrees)}, ${vis.width/2}, ${vis.height/2})`;
+            })
+            .attr("stroke", d=>{
+                return vis.colorScale(d.class_of_orbit)
+            });
+
+            orbits.exit().remove();
+
+
     }
 }

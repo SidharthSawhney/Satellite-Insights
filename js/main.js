@@ -35,12 +35,14 @@ function loadLaunchSitesMap() {
         d3.csv("data/satellite_clean.csv")   // launch events
     ]).then(([world, launches]) => {
         data = launches
-        loadCongestion();
 
         new LaunchSitesMap("launch-sites", world, launches, {
             intervalMs: 120,
             loop: false
         });
+
+        loadCongestion();
+
     }).catch(err => {
         console.error("Launch Sites Map load error:", err);
     });
@@ -48,6 +50,13 @@ function loadLaunchSitesMap() {
 
 
 function loadCongestion() {
+  // Convert CSV values to numbers 
+  data.forEach(d => {
+      d.perigee_(km) = +d.perigee_(km); 
+      d.apogee_(km) = +d.apogee_(km);
+      d.eccentricity = +d.eccentricity;
+      d.inclination_(degrees) = +d.inclination_(degrees);
+  });
   congestion = new Congestion("congestion-risk", data)
 	congestion.initVis();
 
