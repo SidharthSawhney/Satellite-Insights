@@ -1,11 +1,11 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <meta name="description" content="">
+    <meta name="description" content="Visualizing the explosive growth of satellites and the congestion crisis in Earth's orbit">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Satellite Insights</title>
+    <title>Satellite Insights - Around the World</title>
 
     <!-- CSS libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -13,66 +13,159 @@
     <link rel="stylesheet" href="css/fontawesome.min.css">
 
     <!-- Custom CSS code -->
+    <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/launch_sites_map.css">
     <link rel="stylesheet" href="css/launch_dominance.css">
     <link rel="stylesheet" href="css/congestion.css">
     <link rel="stylesheet" href="css/gov-vs-com.css">
 </head>
 
-<body style="background-color: #0b0c10;">
+<body>
+    <!-- Hero Section -->
+    <section id="hero" class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">Satellite Insights</h1>
+            <p class="hero-subtitle">by Around the World</p>
+            <p class="hero-description">From a handful of satellites in 1957 to over 9,000 today — space has never been more crowded</p>
+        </div>
+    </section>
 
-    <div class="container-fluid" style="height: 100vh; display: flex; flex-direction: column; padding: 0; margin: 0;">
-        <!-- header with horizontal color scale -->
-        <div id="hero" style="display:flex; align-items:center; justify-content:space-between; padding:20px 40px;">
-            <div style="text-align:left;">
-                <h1 class="hero-title" style="font-style:italic; color:#ffffff;">Satellite Insights - by Around the
-                    World</h1>
-                <h2 class="hero-sub" style="font-style:italic; color:#ffffff;">From a a handful of satellites in year X
-                    to over 9000 today – space has never been more crowded...</h2>
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Section 1: Launch Sites Visualization -->
+        <section class="viz-section" id="satellite-explosion-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">The Satellite Boom</h2>
+                    <p class="section-description">
+                        Watch how satellites have transformed from rare scientific instruments to ubiquitous technology, 
+                        launching from sites across the globe.
+                    </p>
+                </div>
+                <div class="viz-container">
+                    <div id="launch-sites" class="launch-widget"></div>
+                </div>
             </div>
+        </section>
+
+        <!-- Transition Text -->
+        <section class="narrative-section">
+            <div class="container">
+                <p class="narrative-text">
+                    Curious about what's driving this explosive growth? The answer lies in a fundamental shift 
+                    in who owns these satellites and why they're being launched.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Government vs Commercial -->
+        <section class="viz-section" id="gov-vs-com-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Government vs Commercial Ownership</h2>
+                    <p class="section-description">
+                        The space race began with governments, but today's satellite boom is driven by private companies 
+                        launching massive constellations for global internet coverage and commercial applications.
+                    </p>
+                </div>
+                <div class="viz-container">
+                    <div id="gov-vs-com" class="launch-widget"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transition Text -->
+        <section class="narrative-section">
+            <div class="container">
+                <p class="narrative-text">
+                    But how did launching satellites become so accessible to private companies? 
+                    The answer is revolutionary rocket technology.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 3: Launch Vehicle Dominance -->
+        <section class="viz-section" id="launch-dominance-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Launch Vehicle Dominance Over Time</h2>
+                    <p class="section-description">
+                        The emergence of reusable rockets, led by SpaceX's Falcon 9, has dramatically reduced launch costs, 
+                        enabling the commercial satellite revolution and making space more accessible than ever before.
+                    </p>
+                </div>
+                <div class="viz-container">
+                    <div id="launch-dominance" class="launch-widget"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Insight -->
+        <section class="insight-section">
+            <div class="container">
+                <div class="insight-box">
+                    <h3 class="insight-title">The Perfect Storm</h3>
+                    <p class="insight-text">
+                        The explosion in satellite numbers is the direct result of two interconnected forces: 
+                        an ownership shift from government to commercial entities focused on mass-manufactured, 
+                        short-lifespan Low Earth Orbit (LEO) satellites, and the radical reduction in launch costs 
+                        enabled by reusable rockets, exemplified by the market dominance of SpaceX's Falcon 9.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transition to Problem -->
+        <section class="narrative-section warning">
+            <div class="container">
+                <p class="narrative-text emphasis">
+                    But this rapid growth comes with a hidden cost...
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 4: Congestion Risk -->
+        <section class="viz-section" id="congestion-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Orbital Congestion Crisis</h2>
+                    <p class="section-description">
+                        With thousands of satellites crowding Low Earth Orbit, the risk of collisions increases exponentially. 
+                        Each collision creates debris that threatens other satellites, potentially triggering a cascade effect 
+                        known as Kessler Syndrome — making entire orbital regions unusable for generations.
+                    </p>
+                </div>
+                <div class="viz-container congestion-viz">
+                    <div id="congestion-risk"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="conclusion-section">
+            <div class="container">
+                <div class="conclusion-content">
+                    <h3 class="conclusion-title">The Path Forward</h3>
+                    <p class="conclusion-text">
+                        As we enter this new era of space utilization, sustainable practices are no longer optional. 
+                        International cooperation on satellite deorbiting, active debris removal, and responsible 
+                        constellation management are essential to ensure that the orbital environment remains accessible 
+                        for future generations. The choices we make today will determine whether space remains a frontier 
+                        of opportunity or becomes an unusable junkyard.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Around the World | Data Visualization Project</p>
         </div>
-
-
-        <!-- Intro: sketch 2 - Explosion of satellites graph -->
-        <div id="satellite-explosion">
-            <div id="launch-sites" class="launch-widget"></div>
-        </div>
-
-        <p style="color: #ffffff;">Curious to know more the reason behind the satellite boom?</p>
-
-        <!-- vis 1: sketch 12 - Government vs Commerical  -->
-        <div id="butterflySection">
-            <h2>Government vs Commercial Satellite Ownership Over Time</h2>
-            <div id="gov-vs-com" class="launch-widget"></div>
-        </div>
-
-        <!-- vis 2: Sketch 1 - Launch Dominance -->
-
-        <div id="liftOffSection">
-            <h2 style="color: #ffffff;">Launch Vehicle Dominance per Year</h2>
-            <div id="launch-dominance" class="launch-widget"></div>
-        </div>
-
-
-
-        <!-- Explain english here based on doc -->
-
-        <!-- Main Message -->
-        <p style=" color: #ffffff;">
-            The explosion in the number of satellites is the direct result of two interconnected forces: an ownership
-            shift from government to commercial entities focused on mass-manufactured, short-lifespan Low Earth Orbit
-            (LEO) satellites, and the radical reduction in launch costs enabled by reusable rockets, exemplified by the
-            market dominance of SpaceX's Falcon 9.
-        </p>
-
-        <!-- Call to Action: Sketch 6 -->
-        <h2 style="color: #ffffff;">But too many satellites is making the lower orbits more congested...</h2>
-        <div id="congestion-risk"></div>
-        <p style="color: #ffffff;">
-            English text explaining congestion risk here and sustainbility and etc based on doc
-        </p>
-    </div>
-
+    </footer>
 
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -81,15 +174,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
 
-    <!-- Visualization objects (order matters) -->
-    <script src="https://unpkg.com/topojson-client@3"></script>
+    <!-- Visualization objects -->
     <script src="js/launch-sites-map.js"></script>
     <script src="js/satellite-explosion.js"></script>
     <script src="js/gov-vs-com.js"></script>
     <script src="js/launch-dominance.js"></script>
     <script src="js/congestion-risk.js"></script>
-    <script src="js/gov-vs-com.js"></script>
 
+    <!-- Main application logic -->
     <script>
         function setHeroHeightVar() {
             const hero = document.querySelector('#hero');
@@ -100,7 +192,6 @@
         window.addEventListener('resize', setHeroHeightVar);
     </script>
     <script src="js/main.js"></script>
-
 
 </body>
 
