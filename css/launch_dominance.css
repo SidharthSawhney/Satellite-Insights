@@ -1,7 +1,20 @@
+/* ===================================
+   Launch Dominance - Line Graph CSS
+   =================================== */
+
 .launch-dom-container {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  display: flex;
+  background: transparent;
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+  transition: flex 0.3s ease;
   overflow: hidden;
 }
 
@@ -12,300 +25,396 @@
   outline: none;
 }
 
-/* Tooltip */
-.launch-dom-tooltip {
-  position: absolute;
-  visibility: hidden;
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  pointer-events: none;
-  z-index: 1000;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+.chart-background {
+  cursor: default;
 }
 
-/* Lollipop elements */
-.lollipop-stem {
-  stroke: #00a659;
-  stroke-width: 3px;
+/* Lines and dots */
+.vehicle-line {
+  transition: opacity 0.3s ease;
 }
 
-.lollipop-rocket {
+.line-path {
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.lollipop-rocket:hover {
-  filter: brightness(1.2);
+.data-point {
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Axes */
+/* Axes styling */
 .x-axis text,
 .y-axis text {
-  fill: white;
-  font-size: 12px;
+  fill: #8fb98f;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
 }
 
 .x-axis line,
 .x-axis path,
 .y-axis line,
 .y-axis path {
-  stroke: white;
-  stroke-width: 2px;
+  stroke: #00ff88;
+  stroke-opacity: 0.2;
 }
 
 .y-axis-label {
-  fill: white;
-  font-size: 14px;
-  font-weight: bold;
+  fill: #00ff88;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  text-transform: uppercase;
 }
 
-/* Year Slider */
-.year-slider-container {
+/* Title styling */
+.chart-title {
+  font-size: 24px;
+  font-weight: bold;
+  fill: #00ff88;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
+}
+
+.chart-subtitle {
+  font-size: 14px;
+  fill: #8fb98f;
+  font-family: 'Courier New', monospace;
+}
+
+/* Legend styling */
+.legend {
+  cursor: default;
+}
+
+.legend-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.legend-item:hover line {
+  filter: drop-shadow(0 0 4px #00ff88);
+}
+
+.legend-item text {
+  transition: fill 0.2s ease;
+}
+
+/* Tooltip */
+.launch-dom-tooltip {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 10px 20px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(74, 144, 226, 0.3);
-  z-index: 10;
+  visibility: hidden;
+  background: rgba(0, 0, 0, 0.95);
+  color: #00ff88;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #00ff88;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 2000;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  line-height: 1.5;
 }
-
-.year-slider-container label {
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.year-label-display {
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-  min-width: 100px;
-  text-align: center;
-}
-
-/* Range slider styling */
-.year-slider-range {
-  width: 200px;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-}
-
-.year-slider-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #00a659;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.year-slider-range::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  background: #28be0e;
-}
-
-.year-slider-range::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #00a659;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.year-slider-range::-moz-range-thumb:hover {
-  transform: scale(1.2);
-  background: #28be0e;
-}
-
 
 /* Sidebar */
 .launch-dom-sidebar {
-  position: absolute;
-  right: 0;
-  top: 0;
   width: 0;
-  height: 100%;
   background: rgba(0, 0, 0, 0.95);
+  border-left: 2px solid #00ff88;
   overflow-y: auto;
   overflow-x: hidden;
   transition: width 0.3s ease;
-  padding: 0;
-  border-left: 2px solid #00a659;
-  z-index: 100;
-  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.5);
-  box-sizing: border-box;
+  box-shadow: -4px 0 20px rgba(0, 255, 136, 0.2);
 }
 
-.sidebar-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 1000;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.3s ease;
-}
-
-.sidebar-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-content {
-  padding: 50px 20px 20px 20px;
-  color: white;
-  overflow-y: auto;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.sidebar-content::-webkit-scrollbar {
+.launch-dom-sidebar::-webkit-scrollbar {
   width: 8px;
 }
 
-.sidebar-content::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+.launch-dom-sidebar::-webkit-scrollbar-track {
+  background: rgba(0, 255, 136, 0.05);
 }
 
-.sidebar-content::-webkit-scrollbar-thumb {
-  background: #00a659;
+.launch-dom-sidebar::-webkit-scrollbar-thumb {
+  background: #00ff88;
   border-radius: 4px;
 }
 
-.sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: #28be0e;
+.launch-dom-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #39ff14;
+}
+
+.sidebar-content {
+  padding: 20px;
+  color: #e0ffe0;
+  font-family: 'Courier New', monospace;
 }
 
 .sidebar-content h2 {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 20px;
-  color: #00a659;
-  border-bottom: 2px solid #00a659;
+  color: #00ff88;
+  border-bottom: 2px solid #00ff88;
   padding-bottom: 10px;
+  text-transform: uppercase;
+  font-family: 'Courier New', monospace;
 }
 
-.sidebar-content img {
-  width: 100%;
-  max-width: 150px;
-  display: block;
-  margin: 0 auto 20px auto;
+.sidebar-content button {
+  background: transparent;
+  border: 1px solid #00ff88;
+  color: #00ff88;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  border-radius: 3px;
+  transition: all 0.2s ease;
 }
 
-/* Stats display in sidebar */
+.sidebar-content button:hover {
+  background: #00ff88;
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+/* Stat items in sidebar */
 .sidebar-content .stat-item {
   margin-bottom: 15px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #2a3a2a;
 }
 
 .sidebar-content .stat-label {
-  font-size: 12px;
-  color: #999;
+  font-size: 11px;
+  color: #8fb98f;
   margin-bottom: 5px;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
 }
 
 .sidebar-content .stat-value {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
 }
 
-.sidebar-content .company-info {
+/* Rating display */
+.sidebar-content .rating-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(0, 255, 136, 0.1);
+  border-left: 3px solid #00ff88;
+  border-radius: 4px;
+}
+
+.sidebar-content .rating-stars {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+/* Info box */
+.sidebar-content .info-box {
   margin-top: 20px;
   padding: 15px;
-  background: rgba(74, 144, 226, 0.1);
-  border-radius: 8px;
+  background: rgba(0, 255, 136, 0.05);
+  border-radius: 4px;
   font-size: 12px;
   line-height: 1.6;
-  border-left: 3px solid #00a659;
+  font-family: 'Courier New', monospace;
+  color: #8fb98f;
 }
 
-.sidebar-content .company-info strong {
+.sidebar-content .info-box strong {
+  color: #00ff88;
   display: block;
   margin-bottom: 8px;
-  color: #00a659;
 }
 
-/* Section styling */
-#liftOffSection2 {
-  min-height: 800px;
+/* Section styling for main page */
+#launch-dominance-section {
+  min-height: 700px;
   position: relative;
-  margin-top: 50px;
   padding: 20px;
-  overflow: hidden;
+  overflow: visible;
 }
 
-#liftOffSection2 h2 {
-  color: #ffffff;
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-#launch-dominance1 {
+#launch-dominance {
   height: 700px;
-  overflow: hidden;
+  overflow: visible;
   border: none;
+}
+
+/* Animations */
+@keyframes lineGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+}
+
+.line-path.falcon-9 {
+  animation: lineGlow 3s ease-in-out infinite;
+}
+
+/* Hover effects */
+.line-path:hover {
+  filter: drop-shadow(0 0 8px currentColor) !important;
+}
+
+.data-point:hover {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Selected state */
+.vehicle-line.selected .line-path {
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 10px currentColor);
 }
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
-  .year-slider-container {
-    top: 10px;
-    left: 10px;
-    padding: 8px 15px;
+  .chart-title {
+    font-size: 20px;
   }
   
-  .launch-dom-sidebar {
-    width: 0 !important;
+  .chart-subtitle {
+    font-size: 12px;
   }
   
-  .launch-dom-sidebar.open {
-    width: 250px !important;
+  .legend-item text {
+    font-size: 10px;
   }
 }
 
 @media (max-width: 768px) {
-  #liftOffSection2 h2 {
+  .launch-dom-container {
+    flex-direction: column;
+  }
+  
+  .chart-container {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  
+  .launch-dom-sidebar {
+    width: 100% !important;
+    max-height: 300px;
+    border-left: none;
+    border-top: 2px solid #00ff88;
+  }
+  
+  .chart-title {
+    font-size: 16px;
+  }
+  
+  .chart-subtitle {
+    font-size: 11px;
+  }
+  
+  .x-axis text,
+  .y-axis text {
+    font-size: 9px;
+  }
+  
+  .legend text {
+    font-size: 9px;
+  }
+  
+  #launch-dominance {
+    height: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-content {
+    padding: 15px;
+  }
+  
+  .sidebar-content h2 {
+    font-size: 16px;
+  }
+  
+  .sidebar-content .stat-value {
     font-size: 20px;
   }
   
-  .year-slider-container {
-    flex-direction: column;
-    gap: 8px;
+  #launch-dominance {
+    height: 500px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .launch-dom-sidebar {
+    display: none;
   }
   
-  .x-axis text {
-    font-size: 10px;
+  .chart-container {
+    flex: 1 !important;
   }
-  
-  .y-axis text {
-    font-size: 10px;
-  }
+}
+
+/* Accessibility */
+.line-path:focus,
+.data-point:focus,
+.legend-item:focus {
+  outline: 2px solid #00ff88;
+  outline-offset: 2px;
+}
+
+/* Loading state */
+.launch-dom-container.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.launch-dom-container.loading::after {
+  content: 'LOADING...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  font-weight: bold;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Transition states */
+.line-path {
+  transition: stroke-width 0.3s ease, filter 0.3s ease;
+}
+
+.vehicle-line {
+  transition: opacity 0.5s ease;
+}
+
+/* Grid lines styling (if using) */
+.x-axis .tick line,
+.y-axis .tick line {
+  stroke: #00ff88;
+  stroke-opacity: 0.1;
+  stroke-dasharray: 2, 2;
+}
+
+/* Highlight effect for Falcon 9 */
+.vehicle-line[data-vehicle="Falcon 9"] .line-path {
+  stroke: #00ffff !important;
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 4px #00ffff);
+}
+
+.vehicle-line[data-vehicle="Falcon 9"] .data-point {
+  fill: #00ffff !important;
+  filter: drop-shadow(0 0 3px #00ffff);
 }
