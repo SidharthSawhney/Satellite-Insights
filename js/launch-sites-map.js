@@ -352,7 +352,7 @@ class LaunchSitesMap {
         circlesEnter.append('circle')
             .attr('class', 'site-circle')
             .attr('r', 0)
-            .attr('fill', '#4a90e2')
+            .attr('fill', '#9bcac2ff')
             .attr('fill-opacity', 0.7)
             .attr('stroke', '#fff')
             .attr('stroke-width', 1.5)

@@ -223,7 +223,7 @@ p {
 /* ============ VISUALIZATION CONTAINERS ============ */
 .viz-container {
     width: 100%;
-    min-height: 500px;
+    min-height: 600px;
     background-color: var(--bg-card);
     border-radius: 4px;
     padding: 2rem;
@@ -250,7 +250,7 @@ p {
 
 .launch-widget {
     width: 100%;
-    min-height: 450px;
+    min-height: 600px;
 }
 
 .congestion-viz {
@@ -491,7 +491,7 @@ body::after {
 
 @media (max-width: 480px) {
     .viz-container {
-        min-height: 400px;
+        min-height: 600px;
     }
     
     .section-title::before {
