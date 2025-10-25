@@ -1,0 +1,18 @@
+.legend_text{
+    fill: var(--text-primary);
+    font-family: var(--font-primary);
+}
+
+.buttonBox{
+    fill: none; /* Keep inside transparent */
+    stroke: var(--accent-green-bright); /* Neon outline */
+    stroke-width: 1px;
+    filter: drop-shadow(0 0 2px var(--accent-green))
+            drop-shadow(0 0 2px var(--accent-green))
+            drop-shadow(0 0 2px var(--glow-green));
+}
+
+.buttonText{
+    font-family: var(--font-primary);
+    fill: white;
+}
