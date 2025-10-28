@@ -1,4 +1,4 @@
-.legend_text{
+.legend_text, .legend_text{
     fill: var(--text-primary);
     font-family: var(--font-primary);
 }
@@ -15,4 +15,26 @@
 .buttonText{
     font-family: var(--font-primary);
     fill: white;
+}
+
+.label_box{
+    rx: 10;
+    ry: 10;
+
+    fill: #1c2530; /* Keep inside transparent */
+    
+}
+
+.tooltip {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #aaa;
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 1000;
+    font-size: 13px;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
 }

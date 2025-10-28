@@ -75,7 +75,7 @@ class Congestion {
                 .attr("stroke", "#38ad30ff")
                 .attr("stroke-width", 0.3);
 
-            // === Rotation Animation ===
+            //  Rotation Animation 
             vis.rotation = [0, -10]; // initial [lambda, phi]
             vis.velocity = 0.35; // degrees per frame
 
@@ -118,29 +118,64 @@ class Congestion {
         // Show the color legend
         vis.legend = vis.svg.append("g")
                         .attr("class", "legend");
+
+        vis.legend.append("text")
+                    .attr("x", 0)
+                    .attr("y", 10)
+                    .attr("class", "legend_title")
+                    .text("Orbit Class")
+                    .style("fill", "white");
+        
         vis.legend.selectAll("rect")
                     .data(vis.colorScale.domain())
                     .enter()
                     .append("rect")
                     .attr("x",0)
-                    .attr("y", (d,i)=> i*25)
+                    .attr("y", (d,i)=> i*25 + 30)
                     .attr("width", 20)
                     .attr("height", 20)
                     .style("fill", d=> this.colorScale(d));
 
-        vis.legend.selectAll("text")
+        vis.legend.selectAll("legend_text")
                     .data(vis.colorScale.domain())
                     .enter()
                     .append("text")
                     .attr("class", "legend_text")
                     .attr("x", 30)
-                    .attr("y", (d,i) => i*25 + 15)
+                    .attr("y", (d,i) => i*25 + 45)
                     .text(d=>d);
+
+        // Add tooltips
+        vis.tooltip = d3.select("body").append("div")
+                            .style("opacity", 0)
+                            .attr("class", "tooltip");        
+        // Add annotation
+        vis.annotation = vis.svg.append("g")
+                                .attr("class", "annotation")
+                                .attr("transform", `translate(${150}, 0)`);
+        
+        vis.annotation.append("rect")
+                        .attr("class", "label_box")
+                        .attr("x",0)
+                        .attr("y",0)
+                        .attr("width", 950) 
+                        .attr("height",40);
+        
+        vis.annotation.append("text")
+                        .attr("class", "annotation")
+                        .text("Each orbital layer's thickness indicates the density of satellites within that orbital region.")
+                        .style("fill", "white")
+                        .attr("x", 30)
+                        .attr("y", 25);
+        
+        vis.annotation.style("opacity", 0);
+        
+
         
         // Add a button to change states
         vis.button = vis.svg.append("g")
                             .attr("class", "svg-button")
-                            .attr("transform", `translate(${vis.width/2-80}, 0)`)
+                            .attr("transform", `translate(${vis.width-200}, ${vis.height/2-80})`)
                             .style("cursor", "pointer")
                              .on("click",function(){
                                 // Get the text of the button
@@ -150,9 +185,18 @@ class Congestion {
                                 if (txt === "Full View"){
                                     d3.select(this).select(".buttonText").text("Simplify");
                                     vis.state = 0;
+                                    vis.annotation.transition()
+                                                .duration(500) 
+                                                .delay(500)
+                                                .style("opacity", 0);
                                 }
                                 else{
                                      d3.select(this).select(".buttonText").text("Full View");
+                                    vis.annotation.transition()
+                                                .duration(500) 
+                                                .delay(500)
+                                                .style("opacity", 1);
+
                                      vis.state = 1;
                                 }
 
@@ -222,7 +266,19 @@ class Congestion {
                             .attr('stroke', d => vis.colorScale(d.orbit_class))
                             .attr('stroke-width', d=>{
                                 return vis.cScale(d.count);
-                            });
+                            })
+                            .on("mouseover", (event, d) =>{
+                                    vis.tooltip
+                                                .style("opacity", 1)
+                                                .text(`Satellites in Orbit Layer ${d.orbit_class}: ${d.count}`)
+                                                .style("left", (event.pageX ) + "px")
+                                                .style("top", (event.pageY) + "px");
+                            })
+                            .on("mouseleave", ()=>{
+                                vis.tooltip.style("opacity",0)
+                                    .text("")
+                            }) 
+                            ;
 
              //Remove unused orbits   
              orbits.exit().remove();
@@ -259,13 +315,22 @@ class Congestion {
                 return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
             })
             .attr('transform', d => `rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
-            .attr('stroke', d => vis.colorScale(d.class_of_orbit));
+            .attr('stroke', d => vis.colorScale(d.class_of_orbit))
+            .on("mouseover", (event, d) =>{
+                vis.tooltip
+                            .style("opacity", 1)
+                            .text(`${d.current_official_name_of_satellite}`)
+                            .style("left", (event.pageX ) + "px")
+                            .style("top", (event.pageY) + "px");
+            })
+            .on("mouseleave", ()=>{
+                vis.tooltip.style("opacity",0)
+                    .text("")
+            }) 
+            ;
 
         // EXIT
         orbits.exit().remove();
-
-        }
-        else{
 
         }
 
@@ -285,6 +350,45 @@ class Congestion {
             vis.earth.attr('cx', vis.width / 2).attr('cy', vis.height / 2);
         }
 
+        // Reposition the globe
+        vis.projection
+            .translate([vis.width / 2, vis.height / 2])
+            .scale(vis.height / 7);
+        
+        // Reposition the background Earth
+        vis.svg.selectAll("circle")
+            .attr("cx", vis.width / 2)
+            .attr("cy", vis.height / 2)
+            .attr("r", vis.projection.scale());
+        
+        // Make annotation box responsive
+        vis.annotation.attr("transform", `translate(${vis.width * 0.15}, ${vis.height * 0.05})`);
+        vis.annotation.select("rect")
+            .attr("width", vis.width * 0.8)
+            .attr("height", 40);
+
+        vis.annotation.select("text")
+            .attr("x", 30)
+            .attr("y", 25)
+            .style("font-size", `${Math.max(7, vis.width / 80)}px`);
+
+        // Move and resize the button dynamically
+        const buttonWidth = vis.width * 0.15;   // 15% of width
+        const buttonHeight = Math.max(30, vis.height * 0.06); // scale with height
+        const buttonX = vis.width - buttonWidth - 40; // 40px padding from right
+        const buttonY = vis.height / 2 - buttonHeight / 2;
+
+        vis.button.select("rect.buttonBox")
+                    .attr("width", buttonWidth)
+                    .attr("height", buttonHeight);
+
+        vis.button.select("text.buttonText")
+                    .attr("x", buttonWidth / 2)
+                    .attr("y", buttonHeight / 2 + 5)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", `${Math.max(7, vis.width / 55)}px`)
+
+        vis.button.attr("transform", `translate(${buttonX}, ${buttonY})`);
         vis.updateVis();
 
 
