@@ -157,7 +157,7 @@ class governmentVsCommercial {
         .attr('transform', `translate(${this.chartW / 2}, ${this.chartH})`)
         .call(xAxisRight)
         .selectAll('text')
-        .style('fill', '#8fffcc');
+        .style('fill', '#fdff8fff');
 
       this.chart.append('line')
         .attr('class', 'divider-line')
@@ -222,7 +222,7 @@ class governmentVsCommercial {
         .attr("text-anchor", "middle")
         .attr("fill", "#ccc")
         .attr("font-size", "13px")
-        .text("Commercial − Government Launches");
+        .text("Net Difference in Launches (Commercial – Government)");
     }
   }
 
@@ -255,7 +255,7 @@ class governmentVsCommercial {
         .attr('y', d => vis.yScale(d.year))
         .attr('width', d => vis.xScale(d.commercial))
         .attr('height', vis.yScale.bandwidth())
-        .attr('fill', '#00ff88')
+        .attr('fill', '#f9b233')
         .on('mouseover', (event, d) => vis._showTip(event, d, 'Commercial'))
         .on('mouseout', () => vis._hideTip());
 
@@ -270,7 +270,7 @@ class governmentVsCommercial {
         .datum(this.data)
         .attr("class", "trend-line")
         .attr("fill", "none")
-        .attr("stroke", "#00ff88")
+        .attr("stroke", "#f9b233")
         .attr("stroke-width", 2)
         .attr("d", line);
 
@@ -282,7 +282,7 @@ class governmentVsCommercial {
         .attr("cx", d => vis.xLine(d.year))
         .attr("cy", d => vis.yLine(d.difference))
         .attr("r", 4)
-        .attr("fill", d => d.difference >= 0 ? "#00ff88" : "#3da5f4")
+        .attr("fill", d => d.difference >= 0 ? "#f9b233" : "#3da5f4")
         .on("mouseover", (event, d) => vis._showTip(event, d, "Difference"))
         .on("mouseout", () => vis._hideTip());
     }
@@ -312,7 +312,7 @@ class governmentVsCommercial {
     const legend = this.chart.append("g").attr("class", "legend");
     const categories = [
       { name: "Government", color: "#3da5f4" },
-      { name: "Commercial", color: "#00ff88" }
+      { name: "Commercial", color: "#f9b233" }
     ];
 
     legend.selectAll("rect")
@@ -386,7 +386,7 @@ class governmentVsCommercial {
     const titleText =
       this.mode === "split"
         ? "Government vs Commercial Satellite Launches by Year"
-        : "Commercial − Government Launch Difference Over Time";
+        : "Net Advantage of Commercial Satellite Launches Over Time";
 
     this.chart
       .append("text")
