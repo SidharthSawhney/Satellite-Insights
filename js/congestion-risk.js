@@ -50,7 +50,7 @@ class Congestion {
 
         // Globe Projection
         vis.projection = d3.geoOrthographic()
-            .scale(vis.height / 7)
+            .scale(vis.height/5)
             .translate([vis.width / 2, vis.height / 2])
             .clipAngle(90);
 
@@ -303,13 +303,13 @@ class Congestion {
             .attr('cx', vis.width / 2)
             .attr('cy', vis.height / 2)
             .attr('rx', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0) + 5;
-                const pe = vis.scale(+d['perigee_(km)'] || 0) + 5;
+                const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
+                const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
                 return (ap + pe) / 2 + vis.projection.scale(); // semi-major axis
             })
             .attr('ry', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0) + 5;
-                const pe = vis.scale(+d['perigee_(km)'] || 0) + 5;
+                const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
+                const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
                 const a = (ap + pe) / 2;
                 const c = (ap - pe) / 2;
                 return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
@@ -353,7 +353,7 @@ class Congestion {
         // Reposition the globe
         vis.projection
             .translate([vis.width / 2, vis.height / 2])
-            .scale(vis.height / 7);
+            .scale(vis.height/5);
         
         // Reposition the background Earth
         vis.svg.selectAll("circle")
