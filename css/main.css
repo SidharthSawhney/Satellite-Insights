@@ -553,3 +553,13 @@ body::after {
             0 0 30px var(--glow-green);
     }
 }
+
+.Congestion_Description {
+    font-family: var(--font-primary);
+    font-size: clamp(0.75rem, 1.25vw, 0.9rem); 
+    line-height: 1.4;
+    max-width: 100%; 
+    text-align: left; 
+    margin: 0.5rem 0; 
+    word-wrap: break-word; 
+}

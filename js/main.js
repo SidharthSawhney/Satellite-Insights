@@ -78,10 +78,33 @@ function loadCongestion() {
     d.eccentricity             = +d.eccentricity || 0;
   });
 
-  congestion = new Congestion("congestion-risk", data);
+  condensed = congestionCondensedData(data)
+  console.log(condensed);
+  congestion = new Congestion("congestion-risk", data, condensed);
   if (congestion && typeof congestion.initVis === "function") {
     congestion.initVis();
   }
+}
+
+// Find the number of satellites per orbit
+function congestionCondensedData(data){
+  let c = {}
+  data.forEach(function(d){
+    let orbit = d.class_of_orbit
+    if (!c[orbit]){
+      c[orbit] = 1
+    }
+    else{
+      c[orbit] += 1
+    }
+
+  })
+  
+  return Object.keys(c).map(d=>({
+    orbit_class: d,
+    count: c[d]
+  }));
+
 }
 
 // Government vs Commercial loader
