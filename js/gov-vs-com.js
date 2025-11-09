@@ -150,14 +150,14 @@ class governmentVsCommercial {
         .attr('transform', `translate(0, ${this.chartH})`)
         .call(xAxisLeft)
         .selectAll('text')
-        .style('fill', '#9fc9ff');
+        .style('fill', '#778da9');
 
       this.chart.append('g')
         .attr('class', 'x-axis-right')
         .attr('transform', `translate(${this.chartW / 2}, ${this.chartH})`)
         .call(xAxisRight)
         .selectAll('text')
-        .style('fill', '#fdff8fff');
+        .style('fill', '#778da9');
 
       this.chart.append('line')
         .attr('class', 'divider-line')
@@ -242,7 +242,7 @@ class governmentVsCommercial {
         .attr('y', d => vis.yScale(d.year))
         .attr('width', d => vis.xScale(d.government))
         .attr('height', vis.yScale.bandwidth())
-        .attr('fill', '#3da5f4')
+        .attr('fill', '#5fa8d3')
         .on('mouseover', (event, d) => vis._showTip(event, d, 'Government'))
         .on('mouseout', () => vis._hideTip());
 
@@ -255,7 +255,7 @@ class governmentVsCommercial {
         .attr('y', d => vis.yScale(d.year))
         .attr('width', d => vis.xScale(d.commercial))
         .attr('height', vis.yScale.bandwidth())
-        .attr('fill', '#f9b233')
+        .attr('fill', '#00d4ff')
         .on('mouseover', (event, d) => vis._showTip(event, d, 'Commercial'))
         .on('mouseout', () => vis._hideTip());
 
@@ -270,7 +270,7 @@ class governmentVsCommercial {
         .datum(this.data)
         .attr("class", "trend-line")
         .attr("fill", "none")
-        .attr("stroke", "#f9b233")
+        .attr("stroke", "#00d4ff")
         .attr("stroke-width", 2)
         .attr("d", line);
 
@@ -282,7 +282,7 @@ class governmentVsCommercial {
         .attr("cx", d => vis.xLine(d.year))
         .attr("cy", d => vis.yLine(d.difference))
         .attr("r", 4)
-        .attr("fill", d => d.difference >= 0 ? "#f9b233" : "#3da5f4")
+        .attr("fill", d => d.difference >= 0 ? "#00d4ff" : "#5fa8d3")
         .on("mouseover", (event, d) => vis._showTip(event, d, "Difference"))
         .on("mouseout", () => vis._hideTip());
     }
@@ -311,8 +311,8 @@ class governmentVsCommercial {
 
     const legend = this.chart.append("g").attr("class", "legend");
     const categories = [
-      { name: "Government", color: "#3da5f4" },
-      { name: "Commercial", color: "#f9b233" }
+      { name: "Government", color: "#5fa8d3" },
+      { name: "Commercial", color: "#00d4ff" }
     ];
 
     legend.selectAll("rect")
@@ -367,14 +367,14 @@ class governmentVsCommercial {
       .attr("height", 25)
       .attr("rx", 6)
       .attr("fill", "#222")
-      .attr("stroke", "#00ff88")
+      .attr("stroke", "#5fa8d3")
       .attr("stroke-width", 1.5);
 
     button.append("text")
       .attr("x", 75)
       .attr("y", 17)
       .attr("text-anchor", "middle")
-      .attr("fill", "#00ff88")
+      .attr("fill", "#5fa8d3")
       .attr("font-size", "13px")
       .attr("font-family", "monospace")
       .text("Switch View");

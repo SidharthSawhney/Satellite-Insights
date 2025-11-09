@@ -24,7 +24,7 @@ class Congestion {
         // color scale for orbit classes
         this.colorScale = d3.scaleOrdinal()
             .domain(["LEO", "MEO", "GEO", "Elliptical"])
-            .range(['#22ff00ff', '#05d4fdff', '#f80cccff', '#fbff2cff']);
+            .range(['#00d4ff', '#5fa8d3', '#7b2cbf', '#ff006e']);
 
         //sets current state to 0
         this.state = 0;
@@ -62,7 +62,7 @@ class Congestion {
             .attr("cx", vis.width / 2)
             .attr("cy", vis.height / 2)
             .attr("r", vis.projection.scale())
-            .attr("fill", "#1a69b9ff");
+            .attr("fill", "#1b4965");
 
         // Load World Map 
         d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(worldData => {
@@ -71,8 +71,8 @@ class Congestion {
             vis.land = vis.svg.append("g").selectAll("path")
                 .data(countries.features)
                 .enter().append("path")
-                .attr("fill", "#38ad30ff")
-                .attr("stroke", "#38ad30ff")
+                .attr("fill", "#2a9d8f")
+                .attr("stroke", "#264653")
                 .attr("stroke-width", 0.3);
 
             //  Rotation Animation 
@@ -88,6 +88,28 @@ class Congestion {
         // Orbit Layer (empty for now) 
         vis.orbitLayer = vis.svg.append('g')
             .attr('class', 'orbits');
+
+        // Satellite Layer (for moving satellites)
+        vis.satelliteLayer = vis.svg.append('g')
+            .attr('class', 'satellites');
+
+        // Add defs for satellite image
+        vis.defs = vis.svg.append("defs");
+        
+        vis.defs.append("pattern")
+            .attr("id", "satellite-icon")
+            .attr("width", 1)
+            .attr("height", 1)
+            .attr("patternContentUnits", "objectBoundingBox")
+            .append("image")
+            .attr("xlink:href", "images/satellite.png")
+            .attr("width", 1)
+            .attr("height", 1)
+            .attr("preserveAspectRatio", "xMidYMid slice");
+
+        // Initialize satellite animation data
+        vis.satelliteData = [];
+        vis.satelliteAnimationTimer = null;
 
         // scale distances to pixels based on max apogee
         const maxApogee = d3.max(vis.data, d => +d['apogee_(km)'] || 0) || 1;
@@ -334,6 +356,145 @@ class Congestion {
 
         }
 
+        // Start satellite animation if in full view mode
+        if (vis.state === 0) {
+            vis.animateSatellites();
+        } else {
+            vis.stopSatelliteAnimation();
+        }
+
+    }
+
+    animateSatellites() {
+        const vis = this;
+        
+        // Stop existing animation if any
+        if (vis.satelliteAnimationTimer) {
+            vis.satelliteAnimationTimer.stop();
+        }
+
+        // Sample satellites from the data (limit to ~100 for performance, prioritize elliptical)
+        const sampleSize = Math.min(60, vis.data.length);
+        const sampledData = [];
+        
+        // First, get all elliptical orbit satellites
+        const ellipticalSats = vis.data.filter(d => d.class_of_orbit === "Elliptical");
+        const otherSats = vis.data.filter(d => d.class_of_orbit !== "Elliptical");
+        
+        // Take more elliptical satellites to make them visible
+        const ellipticalSampleSize = Math.min(ellipticalSats.length);
+        const otherSampleSize = sampleSize - ellipticalSampleSize;
+        
+        const ellipticalStep = Math.max(1, Math.floor(ellipticalSats.length / ellipticalSampleSize));
+        const otherStep = Math.max(1, Math.floor(otherSats.length / otherSampleSize));
+        
+        // Add elliptical satellites
+        for (let i = 0; i < ellipticalSats.length && sampledData.length < ellipticalSampleSize; i += ellipticalStep) {
+                const sat = ellipticalSats[i];
+                // Calculate ellipse parameters
+                const ap = vis.scale(+sat['apogee_(km)'] || 0) + 15;
+                const pe = vis.scale(+sat['perigee_(km)'] || 0) + 15;
+                const a = (ap + pe) / 2; // semi-major axis
+                const c = (ap - pe) / 2; // distance from center to focus
+                const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
+                
+                // Speed based on power - normalize to reasonable rotation speed
+                const power = +sat['power_(watts)'] || 100;
+                const speed = (power / 1000) * 0.01; // Adjust multiplier for visible movement
+                
+                sampledData.push({
+                    ...sat,
+                    rx: a + vis.projection.scale(), // semi-major axis with earth radius
+                    ry: b + vis.projection.scale(), // semi-minor axis with earth radius
+                    angle: Math.random() * Math.PI * 2, // Random starting position
+                    speed: speed,
+                    inclination: +sat['inclination_(degrees)'] || 0
+                });
+        }
+        
+        // Add other satellites
+        for (let i = 0; i < otherSats.length && sampledData.length < sampleSize; i += otherStep) {
+                const sat = otherSats[i];
+                // Calculate ellipse parameters
+                const ap = vis.scale(+sat['apogee_(km)'] || 0) + 15;
+                const pe = vis.scale(+sat['perigee_(km)'] || 0) + 15;
+                const a = (ap + pe) / 2; // semi-major axis
+                const c = (ap - pe) / 2; // distance from center to focus
+                const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
+                
+                // Speed based on power - normalize to reasonable rotation speed
+                const power = +sat['power_(watts)'] || 100;
+                const speed = (power / 1000) * 0.01; // Adjust multiplier for visible movement
+                
+                sampledData.push({
+                    ...sat,
+                    rx: a + vis.projection.scale(), // semi-major axis with earth radius
+                    ry: b + vis.projection.scale(), // semi-minor axis with earth radius
+                    angle: Math.random() * Math.PI * 2, // Random starting position
+                    speed: speed,
+                    inclination: +sat['inclination_(degrees)'] || 0
+                });
+        }
+        
+        vis.satelliteData = sampledData;
+        
+        console.log(`Creating ${sampledData.length} satellites in animation`);
+        
+        // Create satellite elements - using images
+        const satellites = vis.satelliteLayer.selectAll('.satellite')
+            .data(vis.satelliteData);
+        
+        satellites.enter()
+            .append('image')
+            .attr('class', 'satellite')
+            .attr('xlink:href', 'images/satellite.png')
+            .attr('width', d => d.class_of_orbit === 'Elliptical' ? 16 : 12)
+            .attr('height', d => d.class_of_orbit === 'Elliptical' ? 16 : 12)
+            .merge(satellites)
+            .attr('x', d => vis.width / 2 + d.rx * Math.cos(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
+            .attr('y', d => vis.height / 2 + d.ry * Math.sin(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
+            .attr('transform', d => {
+                // Calculate current position
+                const x = vis.width / 2 + d.rx * Math.cos(d.angle);
+                const y = vis.height / 2 + d.ry * Math.sin(d.angle);
+                // Rotate around the center of the visualization
+                return `rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`;
+            })
+            .style('opacity', d => d.class_of_orbit === 'Elliptical' ? 1.0 : 0.9)
+            .on("mouseover", (event, d) =>{
+                vis.tooltip
+                    .style("opacity", 1)
+                    .html(`<strong>${d.current_official_name_of_satellite}</strong><br/>Power: ${d['power_(watts)']}W<br/>Orbit: ${d.class_of_orbit}`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 10) + "px");
+            })
+            .on("mouseleave", ()=>{
+                vis.tooltip.style("opacity",0)
+                    .html("")
+            });
+        
+        satellites.exit().remove();
+        
+        // Animate satellites
+        vis.satelliteAnimationTimer = d3.timer(() => {
+            vis.satelliteData.forEach(d => {
+                d.angle += d.speed;
+                if (d.angle > Math.PI * 2) d.angle -= Math.PI * 2;
+            });
+            
+            vis.satelliteLayer.selectAll('.satellite')
+                .attr('x', d => vis.width / 2 + d.rx * Math.cos(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
+                .attr('y', d => vis.height / 2 + d.ry * Math.sin(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6));
+        });
+    }
+
+    stopSatelliteAnimation() {
+        const vis = this;
+        if (vis.satelliteAnimationTimer) {
+            vis.satelliteAnimationTimer.stop();
+            vis.satelliteAnimationTimer = null;
+        }
+        vis.satelliteLayer.selectAll('.satellite').remove();
     }
 
     resize() {

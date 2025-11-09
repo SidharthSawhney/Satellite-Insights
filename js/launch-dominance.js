@@ -11,9 +11,15 @@ class LaunchDominance {
     this.node = this.host.node();
     this.rawData = data;
     
+    // Build DOM first so we can measure the chart container
+    this._buildScaffold();
+    
+    // Now measure the actual chart container (80% width)
+    const chartBbox = this.chartContainer.node().getBoundingClientRect();
+    
     // Visualization parameters
-    this.w = opts.width ?? this.node.clientWidth ?? 1200;
-    this.h = opts.height ?? this.node.clientHeight ?? 700;
+    this.w = opts.width ?? Math.floor(chartBbox.width) ?? 960;
+    this.h = opts.height ?? Math.floor(chartBbox.height) ?? 700;
     this.margin = { top: 80, right: 40, bottom: 100, left: 80 };
     this.chartW = this.w - this.margin.left - this.margin.right;
     this.chartH = this.h - this.margin.top - this.margin.bottom;
@@ -22,8 +28,8 @@ class LaunchDominance {
     this.selectedVehicle = null;
     this.sidebarOpen = false;
     
-    // Build DOM
-    this._buildScaffold();
+    // Continue building
+    this._buildSVG();
     this._processData();
     this._initScales();
     this._drawAxes();
@@ -34,7 +40,7 @@ class LaunchDominance {
     // Responsive
     if (window.ResizeObserver) {
       this._ro = new ResizeObserver(() => this.resize());
-      this._ro.observe(this.host.node());
+      this._ro.observe(this.chartContainer.node());
     }
     window.addEventListener('resize', () => this.resize());
   }
@@ -42,19 +48,18 @@ class LaunchDominance {
   _buildScaffold() {
     // Main container
     this.container = this.host.append('div')
-      .attr('class', 'launch-dom-container')
-      .style('position', 'relative')
-      .style('width', '100%')
-      .style('height', '100%')
-      .style('display', 'flex');
+      .attr('class', 'launch-dom-container');
     
-    // Chart container (will resize based on sidebar)
+    // Chart container (fixed 80% width via CSS)
     this.chartContainer = this.container.append('div')
-      .attr('class', 'chart-container')
-      .style('flex', '1')
-      .style('position', 'relative')
-      .style('transition', 'flex 0.3s ease');
+      .attr('class', 'chart-container');
     
+    // Sidebar (Fixed 20% width via CSS)
+    this.sidebarContainer = this.container.append('div')
+      .attr('class', 'launch-dom-sidebar');
+  }
+
+  _buildSVG() {
     // SVG for chart
     this.svg = this.chartContainer.append('svg')
       .attr('class', 'launch-dom-svg')
@@ -90,7 +95,7 @@ class LaunchDominance {
       .attr('text-anchor', 'middle')
       .style('font-size', '24px')
       .style('font-weight', 'bold')
-      .style('fill', '#00ff88')
+      .style('fill', '#5fa8d3')
       .style('text-transform', 'uppercase')
       .text('Cumulative Satellites: Falcon 9 vs. The World');
     
@@ -100,7 +105,7 @@ class LaunchDominance {
       .attr('y', -30)
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
-      .style('fill', '#8fb98f')
+      .style('fill', '#778da9')
       .style('font-family', 'Courier New, monospace')
       .text('Notice the explosive growth after 2016');
     
@@ -128,26 +133,15 @@ class LaunchDominance {
       .style('position', 'absolute')
       .style('visibility', 'hidden')
       .style('background', 'rgba(0, 0, 0, 0.95)')
-      .style('color', '#00ff88')
+      .style('color', '#5fa8d3')
       .style('padding', '12px')
       .style('border-radius', '4px')
-      .style('border', '1px solid #00ff88')
+      .style('border', '1px solid #5fa8d3')
       .style('font-family', 'Courier New, monospace')
       .style('font-size', '12px')
       .style('pointer-events', 'none')
       .style('z-index', '2000')
       .style('box-shadow', '0 0 20px rgba(0, 255, 136, 0.3)');
-    
-    // Sidebar
-    this.sidebarContainer = this.container.append('div')
-      .attr('class', 'launch-dom-sidebar')
-      .style('width', '0')
-      .style('background', 'rgba(0, 0, 0, 0.95)')
-      .style('border-left', '2px solid #00ff88')
-      .style('overflow-y', 'auto')
-      .style('overflow-x', 'hidden')
-      .style('transition', 'width 0.3s ease')
-      .style('box-shadow', '-4px 0 20px rgba(0, 255, 136, 0.2)');
   }
 
   _processData() {
@@ -256,10 +250,10 @@ class LaunchDominance {
     this.colorMap = new Map();
     this.vehicleData.forEach((v, i) => {
       if (v.vehicle === 'Falcon 9') {
-        this.colorMap.set(v.vehicle, '#00ffff'); // Bright cyan for Falcon 9
+        this.colorMap.set(v.vehicle, '#00d4ff'); // Bright cyan for Falcon 9
       } else {
-        // Muted colors for others
-        const mutedColors = ['#5a6b7a', '#6b5a7a', '#7a5a6b', '#5a7a6b', '#6b7a5a', '#7a6b5a', '#5a5a7a'];
+        // Muted colors for others - Blue/Purple Palette
+        const mutedColors = ['#5fa8d3', '#7b2cbf', '#778da9', '#415a77', '#9d4edd', '#4a90e2', '#6a4c93'];
         this.colorMap.set(v.vehicle, mutedColors[i % mutedColors.length]);
       }
     });
@@ -288,12 +282,12 @@ class LaunchDominance {
     this.xAxisGroup.call(xAxis);
     
     this.xAxisGroup.selectAll('text')
-      .style('fill', '#8fb98f')
+      .style('fill', '#778da9')
       .style('font-family', 'Courier New, monospace')
       .style('font-size', '11px');
     
     this.xAxisGroup.selectAll('.domain, .tick line')
-      .style('stroke', '#00ff88')
+      .style('stroke', '#5fa8d3')
       .style('stroke-opacity', 0.2);
     
     // Y axis
@@ -304,12 +298,12 @@ class LaunchDominance {
     this.yAxisGroup.call(yAxis);
     
     this.yAxisGroup.selectAll('text')
-      .style('fill', '#8fb98f')
+      .style('fill', '#778da9')
       .style('font-family', 'Courier New, monospace')
       .style('font-size', '11px');
     
     this.yAxisGroup.selectAll('.domain, .tick line')
-      .style('stroke', '#00ff88')
+      .style('stroke', '#5fa8d3')
       .style('stroke-opacity', 0.2);
     
     // Y axis label
@@ -320,7 +314,7 @@ class LaunchDominance {
       .attr('x', -this.chartH / 2)
       .attr('y', -55)
       .attr('text-anchor', 'middle')
-      .style('fill', '#00ff88')
+      .style('fill', '#5fa8d3')
       .style('font-family', 'Courier New, monospace')
       .style('font-size', '13px')
       .style('text-transform', 'uppercase')
@@ -450,13 +444,13 @@ class LaunchDominance {
                   <strong style="color: ${vis.colorMap.get(vehicleObj.vehicle)};">${vehicleObj.vehicle}</strong>
                 </div>
                 <div style="margin-bottom: 3px;">
-                  <span style="color: #8fb98f;">Year:</span> ${d.year}
+                  <span style="color: #778da9;">Year:</span> ${d.year}
                 </div>
                 <div style="margin-bottom: 3px;">
-                  <span style="color: #8fb98f;">Accumulated satellites:</span> ${d.accumulated_satellites.toLocaleString()}
+                  <span style="color: #778da9;">Accumulated satellites:</span> ${d.accumulated_satellites.toLocaleString()}
                 </div>
                 <div>
-                  <span style="color: #8fb98f;">Launches this year:</span> ${d.launches}
+                  <span style="color: #778da9;">Launches this year:</span> ${d.launches}
                 </div>
               `);
           }
@@ -486,7 +480,7 @@ class LaunchDominance {
     this.legendGroup.append('text')
       .attr('x', 0)
       .attr('y', -5)
-      .style('fill', '#00ff88')
+      .style('fill', '#5fa8d3')
       .style('font-family', 'Courier New, monospace')
       .style('font-size', '12px')
       .style('font-weight', 'bold')
@@ -511,7 +505,7 @@ class LaunchDominance {
         })
         .on('mouseover', function() {
           d3.select(this).select('text')
-            .style('fill', '#39ff14');
+            .style('fill', '#00d4ff');
         })
         .on('mouseout', function() {
           d3.select(this).select('text')
@@ -540,22 +534,53 @@ class LaunchDominance {
   }
 
   _drawSidebar() {
-    // Sidebar content will be populated when vehicle is selected
+    // Sidebar content
     this.sidebarContent = this.sidebarContainer.append('div')
       .attr('class', 'sidebar-content')
+      .style('position', 'relative')
       .style('padding', '20px')
-      .style('color', '#e0ffe0');
+      .style('color', '#e0e1dd')
+      .style('height', '100%');
+    
+    // Add title - small and faded in top right
+    this.sidebarContent.append('h2')
+      .attr('class', 'sidebar-title')
+      .style('font-size', '11px')
+      .style('color', '#4a6a4a')
+      .style('text-transform', 'uppercase')
+      .style('font-family', 'Courier New, monospace')
+      .style('text-align', 'right')
+      .style('margin', '0 0 10px 0')
+      .style('opacity', '0.6')
+      .style('font-weight', 'normal')
+      .text('LAUNCH VEHICLE INFO');
+    
+    // Add instruction text - centered in the middle
+    this.sidebarInstruction = this.sidebarContent.append('div')
+      .attr('class', 'sidebar-instruction')
+      .style('position', 'absolute')
+      .style('top', '50%')
+      .style('left', '50%')
+      .style('transform', 'translate(-50%, -50%)')
+      .style('width', '80%')
+      .style('font-size', '14px')
+      .style('color', '#778da9')
+      .style('text-align', 'center')
+      .style('line-height', '1.8')
+      .html('Click on a line<br/>to view vehicle details');
+    
+    // Details container (initially hidden)
+    this.sidebarDetails = this.sidebarContent.append('div')
+      .attr('class', 'sidebar-details')
+      .style('display', 'none');
   }
 
   _selectVehicle(vehicle) {
     this.selectedVehicle = vehicle;
     this.sidebarOpen = true;
     
-    // Resize chart to 80% (4/5 of screen)
-    this.chartContainer.style('flex', '0 0 80%');
-    this.sidebarContainer.style('width', '20%');
-    
-    // Update chart
+    // Don't resize - sidebar is fixed
+    // Just update chart visual state and sidebar content
     this._drawChart();
     
     // Update sidebar
@@ -568,54 +593,39 @@ class LaunchDominance {
     this.selectedVehicle = null;
     this.sidebarOpen = false;
     
-    // Reset chart to full width
-    this.chartContainer.style('flex', '1');
-    this.sidebarContainer.style('width', '0');
-    
-    // Update chart
+    // Don't resize - sidebar is fixed
+    // Just update chart visual state
     this._drawChart();
+    
+    // Hide details, show instruction
+    this.sidebarDetails.style('display', 'none');
+    this.sidebarInstruction.style('display', 'block');
   }
 
   _updateSidebar() {
     const vehicleObj = this.vehicleData.find(v => v.vehicle === this.selectedVehicle);
     if (!vehicleObj) return;
     
-    this.sidebarContent.html('');
+    // Hide instruction, show details
+    this.sidebarInstruction.style('display', 'none');
+    this.sidebarDetails.style('display', 'block');
     
-    // Close button
-    const closeBtn = this.sidebarContent.append('div')
-      .style('text-align', 'right')
-      .style('margin-bottom', '15px')
-      .append('button')
-      .style('background', 'transparent')
-      .style('border', '1px solid #00ff88')
-      .style('color', '#00ff88')
-      .style('padding', '5px 10px')
-      .style('cursor', 'pointer')
-      .style('font-family', 'Courier New, monospace')
-      .style('border-radius', '3px')
-      .text('✕ CLOSE')
-      .on('click', () => this._deselectVehicle())
-      .on('mouseover', function() {
-        d3.select(this).style('background', '#00ff88').style('color', '#000');
-      })
-      .on('mouseout', function() {
-        d3.select(this).style('background', 'transparent').style('color', '#00ff88');
-      });
+    // Clear and populate details
+    this.sidebarDetails.html('');
     
     // Title
-    this.sidebarContent.append('h2')
+    this.sidebarDetails.append('h2')
       .style('font-size', '18px')
       .style('margin-bottom', '20px')
-      .style('color', '#00ff88')
-      .style('border-bottom', '2px solid #00ff88')
+      .style('color', '#5fa8d3')
+      .style('border-bottom', '2px solid #5fa8d3')
       .style('padding-bottom', '10px')
       .style('text-transform', 'uppercase')
       .style('font-family', 'Courier New, monospace')
       .text(vehicleObj.vehicle);
     
     // Stats
-    const statsDiv = this.sidebarContent.append('div')
+    const statsDiv = this.sidebarDetails.append('div')
       .style('margin-bottom', '20px');
     
     this._addStatItem(statsDiv, 'Total Satellites', vehicleObj.totalSatellites);
@@ -623,16 +633,16 @@ class LaunchDominance {
     
     // Efficiency Rating based on mass and power
     const rating = this._calculateRating(vehicleObj);
-    const ratingDiv = this.sidebarContent.append('div')
+    const ratingDiv = this.sidebarDetails.append('div')
       .style('margin-bottom', '20px')
       .style('padding', '15px')
       .style('background', 'rgba(0, 255, 136, 0.1)')
-      .style('border-left', '3px solid #00ff88')
+      .style('border-left', '3px solid #5fa8d3')
       .style('border-radius', '4px');
     
     ratingDiv.append('div')
       .style('font-size', '12px')
-      .style('color', '#8fb98f')
+      .style('color', '#778da9')
       .style('margin-bottom', '8px')
       .style('font-family', 'Courier New, monospace')
       .text('EFFICIENCY RATING');
@@ -643,21 +653,21 @@ class LaunchDominance {
     
     for (let i = 1; i <= 5; i++) {
       starsDiv.append('span')
-        .style('color', i <= Math.round(rating) ? '#00ff88' : '#2a3a2a')
+        .style('color', i <= Math.round(rating) ? '#5fa8d3' : '#2a3a2a')
         .text('★');
     }
     
     // Add explanation
     ratingDiv.append('div')
       .style('font-size', '10px')
-      .style('color', '#8fb98f')
+      .style('color', '#778da9')
       .style('margin-top', '8px')
       .style('line-height', '1.4')
       .style('font-family', 'Courier New, monospace')
-      .html('Based on satellite efficiency:<br/><strong style="color: #00ff88;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
+      .html('Based on satellite efficiency:<br/><strong style="color: #5fa8d3;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
     
     // Description
-    this.sidebarContent.append('div')
+    this.sidebarDetails.append('div')
       .style('margin-top', '20px')
       .style('padding', '15px')
       .style('background', 'rgba(0, 255, 136, 0.05)')
@@ -665,8 +675,8 @@ class LaunchDominance {
       .style('font-size', '12px')
       .style('line-height', '1.6')
       .style('font-family', 'Courier New, monospace')
-      .style('color', '#8fb98f')
-      .html(`<strong style="color: #00ff88;">ABOUT:</strong><br/>${this._getVehicleInfo(vehicleObj.vehicle)}`);
+      .style('color', '#778da9')
+      .html(`<strong style="color: #5fa8d3;">ABOUT:</strong><br/>${this._getVehicleInfo(vehicleObj.vehicle)}`);
   }
 
   _addStatItem(container, label, value) {
@@ -677,7 +687,7 @@ class LaunchDominance {
     
     item.append('div')
       .style('font-size', '11px')
-      .style('color', '#8fb98f')
+      .style('color', '#778da9')
       .style('margin-bottom', '5px')
       .style('font-family', 'Courier New, monospace')
       .style('text-transform', 'uppercase')
@@ -686,7 +696,7 @@ class LaunchDominance {
     item.append('div')
       .style('font-size', '24px')
       .style('font-weight', 'bold')
-      .style('color', '#00ff88')
+      .style('color', '#5fa8d3')
       .style('font-family', 'Courier New, monospace')
       .text(value.toLocaleString());
   }
@@ -735,11 +745,11 @@ class LaunchDominance {
   }
 
   resize() {
-    const bbox = this.host.node().getBoundingClientRect();
-    const availableWidth = this.sidebarOpen ? bbox.width * 0.8 : bbox.width;
+    // Get the actual chart container dimensions (80% of total)
+    const chartBbox = this.chartContainer.node().getBoundingClientRect();
     
-    this.w = Math.max(800, Math.floor(availableWidth));
-    this.h = Math.max(500, Math.floor(bbox.height));
+    this.w = Math.max(400, Math.floor(chartBbox.width));
+    this.h = Math.max(500, Math.floor(chartBbox.height));
     
     this.chartW = this.w - this.margin.left - this.margin.right;
     this.chartH = this.h - this.margin.top - this.margin.bottom;

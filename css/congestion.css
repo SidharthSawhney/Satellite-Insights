@@ -1,19 +1,19 @@
 .legend_text, .legend_text{
-    fill: var(--text-primary);
-    font-family: var(--font-primary);
+    fill: #e0e1dd;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 .buttonBox{
     fill: none; /* Keep inside transparent */
-    stroke: var(--accent-green-bright); /* Neon outline */
+    stroke: #5fa8d3; /* Neon outline */
     stroke-width: 1px;
-    filter: drop-shadow(0 0 2px var(--accent-green))
-            drop-shadow(0 0 2px var(--accent-green))
-            drop-shadow(0 0 2px var(--glow-green));
+    filter: drop-shadow(0 0 2px #5fa8d3)
+            drop-shadow(0 0 2px #5fa8d3)
+            drop-shadow(0 0 2px rgba(95, 168, 211, 0.5));
 }
 
 .buttonText{
-    font-family: var(--font-primary);
+    font-family: "Segoe UI", Arial, sans-serif;
     fill: white;
 }
 
@@ -37,4 +37,16 @@
     font-size: 13px;
     background: rgba(0,0,0,0.8);
     color: #fff;
+}
+
+.satellite {
+    cursor: pointer;
+    transition: all 0.2s;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+}
+
+.satellite:hover {
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 1)) 
+            drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+    opacity: 1 !important;
 }

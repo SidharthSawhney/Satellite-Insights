@@ -102,15 +102,15 @@ class LaunchMetrics {
         // Update axes
         vis.xAxisG.call(vis.xAxis)
             .selectAll('text')
-            .style('fill', '#8fb98f');
+            .style('fill', '#778da9');
 
         vis.yAxisG.call(vis.yAxis)
             .selectAll('text')
-            .style('fill', '#8fb98f');
+            .style('fill', '#778da9');
 
         // Style axis lines and ticks
         vis.svg.selectAll('.axis path, .axis line')
-            .style('stroke', '#00a659')
+            .style('stroke', '#5fa8d3')
             .style('stroke-width', '1px');
     }
 
