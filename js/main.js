@@ -96,3 +96,15 @@ function loadGovernmentVsCommercial() {
     console.error("Government vs Commercial load error:", err);
   });
 }
+// Launch Metrics loader
+loadLaunchMetrics();
+
+function loadLaunchMetrics() {
+  // TODO: Load your data source here
+  d3.json("data/satellite_clean.json")
+    .then(data => {
+      const viz = new LaunchMetrics("launch-metrics", data);
+      if (viz && typeof viz.resize === "function") viz.resize();
+    })
+    .catch(err => console.error("Launch Metrics load error:", err));
+}

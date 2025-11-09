@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/launch_sites_map.css">
     <link rel="stylesheet" href="css/launch_dominance.css">
+    <link rel="stylesheet" href="css/launch_metrics.css">
     <link rel="stylesheet" href="css/congestion.css">
     <link rel="stylesheet" href="css/gov-vs-com.css">
 </head>
@@ -101,6 +102,31 @@
             </div>
         </section>
 
+        <!-- Transition Text -->
+        <section class="narrative-section">
+            <div class="container">
+                <p class="narrative-text">
+                    Beyond just counting launches, understanding the patterns and metrics reveals 
+                    the true scale of the transformation in space access.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section: Launch Metrics -->
+        <section class="viz-section" id="launch-metrics-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Launch Metrics Analysis</h2>
+                    <p class="section-description">
+                        Detailed analysis of launch mass and power over time.
+                    </p>
+                </div>
+                <div class="viz-container">
+                    <div id="launch-metrics" class="launch-widget"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- Key Insight -->
         <section class="insight-section">
             <div class="container">
@@ -179,6 +205,7 @@
     <script src="js/satellite-explosion.js"></script>
     <script src="js/gov-vs-com.js"></script>
     <script src="js/launch-dominance.js"></script>
+    <script src="js/launch-metrics.js"></script>
     <script src="js/congestion-risk.js"></script>
 
     <!-- Main application logic -->
