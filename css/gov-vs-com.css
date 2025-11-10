@@ -1,6 +1,6 @@
 /* =====================================================
    Government vs Commercial Visualization CSS
-   Blue Space Theme
+   Modern Blue Theme
    ===================================================== */
 
 #gov-vs-com {
@@ -17,90 +17,44 @@
 
 /* Axes styling */
 .x-axis-left path,
-.x-axis-right path,
-.diff-axis path,
-.line-x-axis path,
-.line-y-axis path {
-    stroke: #5fa8d3;
+.x-axis-right path {
+    stroke: #6B9BD1;
     stroke-opacity: 0.3;
 }
 
 .x-axis-left line,
-.x-axis-right line,
-.diff-axis line,
-.line-x-axis line,
-.line-y-axis line {
-    stroke: #5fa8d3;
+.x-axis-right line {
+    stroke: #6B9BD1;
     stroke-opacity: 0.2;
 }
 
 .x-axis-left text,
-.x-axis-right text,
-.diff-axis text,
-.line-x-axis text,
-.line-y-axis text {
-    fill: #778da9;
+.x-axis-right text {
+    fill: #6B9BD1;
     font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 11px;
+    font-size: 12px;
 }
 
-/* Bars */
+/* Bars - No hover styles here, handled by JavaScript */
 .gov-bar {
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.gov-bar:hover {
-    fill: #00d4ff !important;
-    filter: drop-shadow(0 0 10px #5fa8d3);
 }
 
 .com-bar {
     cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.com-bar:hover {
-    fill: #7b2cbf !important;
-    filter: drop-shadow(0 0 10px #00d4ff);
-}
-
-/* Trend line and dots */
-.trend-line {
-    stroke: #00d4ff;
-    stroke-width: 2px;
-    fill: none;
-    filter: drop-shadow(0 0 3px rgba(0, 212, 255, 0.5));
-}
-
-.trend-dot {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.trend-dot:hover {
-    r: 6;
-    filter: drop-shadow(0 0 8px currentColor);
 }
 
 /* Divider line */
 .divider-line {
-    stroke: #415a77;
-    stroke-width: 1px;
-    stroke-dasharray: 3, 3;
-    opacity: 0.5;
-}
-
-.zero-line {
-    stroke: #415a77;
-    stroke-width: 1px;
-    stroke-dasharray: 4, 3;
-    opacity: 0.5;
+    stroke: #444;
+    stroke-width: 1.5px;
+    stroke-dasharray: 4, 4;
+    opacity: 0.6;
 }
 
 /* Year labels */
 .year-label {
-    fill: #e0e1dd;
+    fill: #E8E8E8;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-weight: bold;
     font-size: 11px;
@@ -109,58 +63,27 @@
 
 /* Legend */
 .legend rect {
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-}
-
-.legend rect:hover {
-    filter: drop-shadow(0 0 5px currentColor);
+    opacity: 0.9;
 }
 
 .legend text {
-    fill: #e0e1dd;
+    fill: #E8E8E8;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 13px;
     pointer-events: none;
-}
-
-/* Toggle button */
-.toggle-btn rect {
-    fill: rgba(13, 27, 42, 0.9);
-    stroke: #5fa8d3;
-    stroke-width: 1.5px;
-    transition: all 0.3s ease;
-}
-
-.toggle-btn:hover rect {
-    fill: rgba(95, 168, 211, 0.2);
-    stroke: #00d4ff;
-    filter: drop-shadow(0 0 10px rgba(95, 168, 211, 0.5));
-}
-
-.toggle-btn text {
-    fill: #5fa8d3;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 13px;
-    pointer-events: none;
-}
-
-.toggle-btn:hover text {
-    fill: #00d4ff;
 }
 
 /* Chart title */
 .chart-title {
-    fill: #5fa8d3;
+    fill: #FFFFFF;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-weight: bold;
     font-size: 18px;
-    text-shadow: 0 0 10px rgba(95, 168, 211, 0.5);
 }
 
 /* Axis titles */
 .axis-title {
-    fill: #778da9;
+    fill: #999;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 13px;
 }
@@ -169,20 +92,20 @@
 .govcom-tip {
     position: absolute;
     pointer-events: none;
-    background: rgba(13, 27, 42, 0.95);
-    color: #e0e1dd;
+    background: rgba(20, 20, 30, 0.95);
+    color: #E8E8E8;
     padding: 12px 15px;
-    border-radius: 4px;
-    border: 2px solid #5fa8d3;
+    border-radius: 6px;
+    border: 2px solid #6B9BD1;
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 13px;
     line-height: 1.6;
-    box-shadow: 0 0 20px rgba(95, 168, 211, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     z-index: 1000;
 }
 
 .govcom-tip strong {
-    color: #5fa8d3;
+    color: #00D9FF;
     display: block;
     margin-bottom: 4px;
 }
@@ -204,6 +127,11 @@
     .legend text {
         font-size: 11px;
     }
+    
+    .x-axis-left text,
+    .x-axis-right text {
+        font-size: 10px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -215,7 +143,7 @@
         font-size: 14px;
     }
     
-    .toggle-btn rect {
-        width: 120px;
+    .year-label {
+        font-size: 9px;
     }
 }
