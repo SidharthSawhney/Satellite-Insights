@@ -124,7 +124,7 @@ loadLaunchMetrics();
 
 function loadLaunchMetrics() {
   // TODO: Load your data source here
-  d3.json("data/satellite_clean.json")
+  d3.json("data/launch_dominance.json")
     .then(data => {
       const viz = new LaunchMetrics("launch-metrics", data);
       if (viz && typeof viz.resize === "function") viz.resize();
