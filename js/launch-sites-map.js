@@ -149,6 +149,41 @@ class LaunchSitesMap {
         return null;
     }
 
+    _classifyOwnership(row) {
+        // Heuristic: look at a few likely columns that might encode ownership
+        const raw = (this._pick(row, [
+            'Ownership',
+            'Owner Type',
+            'Owner_Type',
+            'Operator Type',
+            'Operator_Category',
+            'User Type',
+            'Users'
+        ]) || '').toString().toLowerCase();
+
+        if (!raw) return 'unknown';
+
+        if (
+            raw.includes('gov') ||
+            raw.includes('military') ||
+            raw.includes('state') ||
+            raw.includes('civil') ||
+            raw.includes('government')
+        ) {
+            return 'government';
+        }
+
+        if (
+            raw.includes('comm') ||
+            raw.includes('commercial') ||
+            raw.includes('private')
+        ) {
+            return 'commercial';
+        }
+
+        return 'unknown';
+    }
+
     _acronym(siteName) {
         if (!siteName) return '??';
         const words = String(siteName).trim().toUpperCase().split(/\s+/);
@@ -159,6 +194,9 @@ class LaunchSitesMap {
     _prepLaunchEvents() {
         const rows = this.launchesRaw;
         const events = [];
+
+        // All-time stats per site (for tooltip)
+        const allTimeStats = new Map();
 
         for (const r of rows) {
             const siteName = this._pick(r, ['launch_site','Launch Site','Launch_Site','Site']) || '';
@@ -176,21 +214,57 @@ class LaunchSitesMap {
             if (isNaN(lat) || isNaN(lon)) {
                 const guess = this._siteFromName(siteName);
                 if (!guess) continue;
-                lat = guess.lat; lon = guess.lon;
+                lat = guess.lat;
+                lon = guess.lon;
             }
+
+            const country = this._pick(r, [
+                'Launch_Site_Country',
+                'Launch Site Country',
+                'Country of Launch',
+                'Launch Country',
+                'Country'
+            ]) || 'Unknown';
+
+            const ownerClass = this._classifyOwnership(r);
 
             const key = `${lon.toFixed(4)},${lat.toFixed(4)}`;
             const year = dt.getFullYear();
-            events.push({ key, lon, lat, year, siteName: siteName || 'Unknown site' });
+
+            // Track all-time stats for this site (for tooltip)
+            if (!allTimeStats.has(key)) {
+                allTimeStats.set(key, {
+                    key,
+                    lon,
+                    lat,
+                    siteName: siteName || 'Unknown site',
+                    country,
+                    total: 0,
+                    govTotal: 0,
+                    commTotal: 0
+                });
+            }
+            const stats = allTimeStats.get(key);
+            stats.total += 1;
+            if (ownerClass === 'government') {
+                stats.govTotal += 1;
+            } else if (ownerClass === 'commercial') {
+                stats.commTotal += 1;
+            } else {
+                // Fallback: count unknown as commercial so totals add up
+                stats.commTotal += 1;
+            }
+
+            events.push({ key, lon, lat, year, siteName: siteName || 'Unknown site', country });
         }
 
         // Sort by year
         events.sort((a,b) => a.year - b.year);
-        
+
         // Get unique years
         const yearsSet = new Set(events.map(e => e.year));
         this.years = Array.from(yearsSet).sort((a,b) => a - b);
-        
+
         // Group events by year
         this.eventsByYear = {};
         this.years.forEach(year => {
@@ -200,28 +274,36 @@ class LaunchSitesMap {
         // Cumulative data by year
         this.cumulativeByYear = {};
         const cumulative = new Map();
-        
+
         this.years.forEach(year => {
             this.eventsByYear[year].forEach(ev => {
                 if (!cumulative.has(ev.key)) {
+                    const allStats = allTimeStats.get(ev.key);
+
                     cumulative.set(ev.key, {
                         key: ev.key,
                         lon: ev.lon,
                         lat: ev.lat,
                         siteName: ev.siteName,
-                        count: 0
+                        country: allStats?.country || ev.country || 'Unknown',
+                        // cumulative up to this year (for radius)
+                        count: 0,
+                        // all-time totals (for tooltip)
+                        totalAllYears: allStats?.total ?? 0,
+                        govTotal: allStats?.govTotal ?? 0,
+                        commTotal: allStats?.commTotal ?? 0
                     });
                 }
                 cumulative.get(ev.key).count += 1;
             });
-            
+
             // Store snapshot for this year
             this.cumulativeByYear[year] = new Map(
-                Array.from(cumulative.entries()).map(([k, v]) => [k, {...v}])
+                Array.from(cumulative.entries()).map(([k, v]) => [k, { ...v }])
             );
         });
 
-        // Radius scale
+        // Radius scale based on maximum cumulative count
         const maxCount = Math.max(...Array.from(cumulative.values()).map(s => s.count), 1);
         this.radiusScale = d3.scaleSqrt()
             .domain([0, maxCount])
@@ -244,13 +326,13 @@ class LaunchSitesMap {
         // Backward button
         this.controls.append('button')
             .attr('class', 'control-btn')
-            .html('⏮')
+            .html('<')
             .on('click', () => this._stepBackward());
 
         // Forward button
         this.controls.append('button')
             .attr('class', 'control-btn')
-            .html('⏭')
+            .html('>')
             .on('click', () => this._stepForward());
 
         // Year slider
@@ -275,6 +357,12 @@ class LaunchSitesMap {
         if (this.isPlaying) {
             this._pause();
         } else {
+            // If we've already reached the last year, restart from the beginning
+            if (this.currentYearIndex >= this.years.length - 1) {
+                this.currentYearIndex = 0;
+                this.yearSlider.property('value', this.currentYearIndex);
+                this._updateVisualization();
+            }
             this._play();
         }
     }
@@ -367,43 +455,74 @@ class LaunchSitesMap {
             .style('fill', '#ffffff')
             .style('pointer-events', 'none')
             .style('font-weight', 700)
-            .style('font-size', '10px')
+            .style('font-size', '12px') // larger default
             .text(d => this._acronym(d.siteName));
 
         // Update
         const circlesAll = circlesEnter.merge(circles);
 
+        // Smooth radius transition
         circlesAll.select('circle')
             .transition()
-            .duration(300)
+            .duration(600)
+            .ease(d3.easeCubicInOut)
             .attr('r', d => this.radiusScale(d.count));
 
+        // Slightly larger font + scale with radius, with smooth transition
         circlesAll.select('text')
+            .transition()
+            .duration(600)
+            .ease(d3.easeCubicInOut)
             .text(d => this._acronym(d.siteName))
-            .style('font-size', d => Math.max(8, this.radiusScale(d.count) * 0.4) + 'px');
+            .style('font-size', d => Math.max(10, this.radiusScale(d.count) * 0.5) + 'px');
 
         // Exit
         circles.exit()
             .transition()
-            .duration(200)
+            .duration(400)
+            .ease(d3.easeCubicInOut)
             .style('opacity', 0)
             .remove();
     }
 
-    _showTip(e, d) {
+
+    _showTip(event, d) {
+        if (!this.tooltip) {
+            this.tooltip = d3.select(this.node)
+                .append('div')
+                .attr('class', 'map-tooltip');
+        }
+
+        const siteName = (d && d.siteName) || 'Unknown site';
+        const country  = (d && d.country)  || 'Unknown';
+
+        // Safely fall back if the all-time fields aren’t present
+        const total = (d && d.totalAllYears != null)
+            ? d.totalAllYears
+            : (d && d.count != null ? d.count : 0);
+
+        const gov  = (d && d.govTotal  != null) ? d.govTotal  : 'n/a';
+        const comm = (d && d.commTotal != null) ? d.commTotal : 'n/a';
+
         this.tooltip
             .style('visibility', 'visible')
             .html(
-                `<strong>${d.siteName}</strong><br/>` +
-                `Satellites: ${d.count}`
+                `<strong>${siteName}</strong>` +
+                `<div>Total satellites (all years): ${total}</div>` +
+                `<div>Government: ${gov}</div>` +
+                `<div>Commercial: ${comm}</div>`
             );
-        this._moveTip(e);
+
+        this._moveTip(event);
     }
 
-    _moveTip(e) {
+    _moveTip(event) {
+        // Get mouse position relative to the map container
+        const [x, y] = d3.pointer(event, this.node);
+
         this.tooltip
-            .style('left', (e.pageX + 12) + 'px')
-            .style('top',  (e.pageY - 12) + 'px');
+            .style('left', (x + 12) + 'px')
+            .style('top',  (y - 12) + 'px');
     }
 
     _hideTip() { 
