@@ -273,13 +273,20 @@ class Congestion {
         const vis = this;
         if(vis.state === 1){
             const orbits = vis.orbitLayer.selectAll('.orbit')
-                            .data(vis.dataCondensed);
+                            .data(vis.dataCondensed, d=> d.orbit_class);
             
             // Enter and merge
             orbits.enter().append('circle')
                             .merge(orbits)
-                            .attr('cx', vis.width/2)
-                            .attr('cy', vis.height/2)
+                            .attr('cx', (d)=>{
+                                console.log(vis.width)
+                                return vis.width/2;
+                            })
+                            .attr('cy', (d) =>{
+                                console.log(vis.height)
+                                return vis.height/2;
+
+                            })
                             .attr('r',(d,i)=>{
                                 return vis.orbitScale(d.orbit_class);
                             })
@@ -301,7 +308,8 @@ class Congestion {
                                     .text("")
                             }) 
                             ;
-
+            
+            orbits.order();
              //Remove unused orbits   
              orbits.exit().remove();
 

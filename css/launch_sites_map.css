@@ -69,8 +69,8 @@
     fill: #ffffff;
     pointer-events: none;
     font-weight: 700;
-    text-shadow: 0 0 4px rgba(0, 0, 0, 0.9),
-                 0 0 8px rgba(74, 144, 226, 0.5);
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    font-size: 12px; /* bigger default for easier reading */
 }
 
 /* Year display */
@@ -266,4 +266,6 @@
     .year-slider {
         width: 100px;
     }
+
+
 }
