@@ -79,7 +79,7 @@ class LaunchMetrics {
             .style('font-weight', 'bold')
             .style('fill', '#5fa8d3')
             .style('text-transform', 'uppercase')
-            .text('Launch Power vs. Year, Sized by Mass');
+            .text('Satellite Mass vs Power Consumed Over Time');
 
         // Add X-Axis Label
         vis.xAxisLabel = vis.svg.append('text')

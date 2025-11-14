@@ -97,7 +97,7 @@ class LaunchDominance {
       .style('font-weight', 'bold')
       .style('fill', '#5fa8d3')
       .style('text-transform', 'uppercase')
-      .text('Cumulative Satellites: Falcon 9 vs. The World');
+      .text('Cumulative Satellites launched per Major Rocket');
     
     this.titleGroup.append('text')
       .attr('class', 'chart-subtitle')
@@ -107,7 +107,7 @@ class LaunchDominance {
       .style('font-size', '14px')
       .style('fill', '#778da9')
       .style('font-family', 'Courier New, monospace')
-      .text('Notice the explosive growth after 2016');
+      .text('Click on a line to view vehicle details');
     
     // Axes groups
     this.xAxisGroup = this.chartGroup.append('g')
