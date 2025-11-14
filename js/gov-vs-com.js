@@ -267,6 +267,14 @@ class governmentVsCommercial {
     const vis = this;
     this.chart.selectAll(".legend").remove();
 
+    // Initialize visibility state if not exists
+    if (!this.categoryVisibility) {
+      this.categoryVisibility = {
+        Government: true,
+        Commercial: true
+      };
+    }
+
     const legend = this.chart.append("g").attr("class", "legend");
     const categories = [
       { name: "Government", color: "#6B9BD1" },
@@ -278,60 +286,61 @@ class governmentVsCommercial {
     const fontSize = this.w < 500 ? '11px' : '13px';
     const rectSize = this.w < 500 ? 16 : 18;
 
-    legend.selectAll("rect")
+    const legendItems = legend.selectAll("g.legend-item")
       .data(categories)
       .enter()
-      .append("rect")
+      .append("g")
+      .attr("class", "legend-item")
+      .style("cursor", "pointer")
+      .on("click", function(e, d) {
+        vis.categoryVisibility[d.name] = !vis.categoryVisibility[d.name];
+        const isVisible = vis.categoryVisibility[d.name];
+        const cls = d.name === "Government" ? ".gov-bar" : ".com-bar";
+        
+        // Update bars with pointer-events
+        vis.chart.selectAll(cls)
+          .transition()
+          .duration(300)
+          .style("opacity", isVisible ? 0.9 : 0)
+          .style("pointer-events", isVisible ? "all" : "none");
+        
+        // Update legend appearance
+        d3.select(this).select("rect")
+          .transition()
+          .duration(300)
+          .style("opacity", isVisible ? 0.9 : 0.3);
+        
+        d3.select(this).select("text")
+          .transition()
+          .duration(300)
+          .style("opacity", isVisible ? 1 : 0.5);
+      });
+
+    legendItems.append("rect")
       .attr("x", (d, i) => i * spacing)
       .attr("y", yOffset)
       .attr("width", rectSize)
       .attr("height", rectSize)
       .attr("rx", 3)
       .attr("fill", d => d.color)
-      .style("opacity", 0.9)
-      .style("cursor", "pointer")
-      .on("click", function(e, d) {
-        const cls = d.name === "Government" ? ".gov-bar" : ".com-bar";
-        const bars = vis.chart.selectAll(cls);
-        const currentOpacity = bars.style("opacity");
-        const isVisible = parseFloat(currentOpacity) > 0.5;
-        
-        bars.transition()
-          .duration(300)
-          .style("opacity", isVisible ? 0.2 : 0.9);
-        
-        d3.select(this)
-          .transition()
-          .duration(300)
-          .style("opacity", isVisible ? 0.3 : 0.9);
-      });
+      .style("opacity", d => vis.categoryVisibility[d.name] ? 0.9 : 0.3);
 
-    legend.selectAll("text")
-      .data(categories)
-      .enter()
-      .append("text")
+    legendItems.append("text")
       .attr("x", (d, i) => i * spacing + rectSize + 8)
       .attr("y", yOffset + rectSize - 4)
       .attr("fill", "#E8E8E8")
       .attr("font-size", fontSize)
-      .style("cursor", "pointer")
-      .text(d => d.name)
-      .on("click", function(e, d) {
-        const cls = d.name === "Government" ? ".gov-bar" : ".com-bar";
-        const bars = vis.chart.selectAll(cls);
-        const currentOpacity = bars.style("opacity");
-        const isVisible = parseFloat(currentOpacity) > 0.5;
-        
-        bars.transition()
-          .duration(300)
-          .style("opacity", isVisible ? 0.2 : 0.9);
-        
-        legend.selectAll("rect")
-          .filter(cat => cat.name === d.name)
-          .transition()
-          .duration(300)
-          .style("opacity", isVisible ? 0.3 : 0.9);
-      });
+      .style("opacity", d => vis.categoryVisibility[d.name] ? 1 : 0.5)
+      .text(d => d.name);
+
+    // Add hint text
+    legend.append("text")
+      .attr("x", 0)
+      .attr("y", yOffset - 10)
+      .attr("fill", "#999")
+      .attr("font-size", this.w < 500 ? '9px' : '10px')
+      .attr("font-style", "italic")
+      .text("Click a category to hide/show");
   }
 
   _updateTitle() {
