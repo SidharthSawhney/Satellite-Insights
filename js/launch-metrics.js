@@ -49,7 +49,6 @@ class LaunchMetrics {
         vis.yScale = d3.scaleLinear()
             .range([vis.height, 0]);
 
-        // Continue with your code
         // Scale for circle radius (using sqrt scale for area perception)
         vis.rScale = d3.scaleLinear()
             .range([vis.config.minRadius, vis.config.maxRadius]);
@@ -125,10 +124,6 @@ class LaunchMetrics {
      */
     wrangleData() {
         let vis = this;
-
-        // TODO: Process your data here
-        // Example: Filter, aggregate, or transform data as needed
-        
         // Filter data to include only entries with valid numbers for all required fields
         // We also filter out 0-power entries as they can't be shown meaningfully on a linear scale starting from 0
         vis.displayData = vis.data.filter(d => 
@@ -154,18 +149,6 @@ class LaunchMetrics {
     updateVis() {
         let vis = this;
 
-        // TODO: Update scales based on your data
-        // Example:
-        // vis.xScale.domain([minYear, maxYear]);
-        // vis.yScale.domain([0, maxValue]);
-
-        // TODO: Create your visualization elements here
-        // Examples:
-        // - Line charts: use d3.line()
-        // - Bar charts: use .selectAll('rect').data(...)
-        // - Area charts: use d3.area()
-        // - Scatter plots: use .selectAll('circle').data(...)
-
         // Update scale domains
         const yearPadding = 1;
         vis.xScale.domain([
@@ -182,18 +165,38 @@ class LaunchMetrics {
             .data(vis.displayData, d => d.launch_vehicle + d.year); // Use a key for object constancy
 
         // Enter: Append new circles
-        circles.enter().append('circle')
+        const circlesEnter = circles.enter().append('circle')
             .attr('class', 'data-point')
             .attr('cx', d => vis.xScale(d.year))
             .attr('cy', d => vis.yScale(d.avg_power_watts))
-            .attr('r', 0) // Start with radius 0 for transition
+            // .attr('r', 0) // Start with radius 0 for transition
             .style('fill', '#0077b6')
-            .style('fill-opacity', 0.6)
+            .style('fill-opacity', 0.6) // slightly more opaque so overlaps are visible
             .style('stroke', '#03045e')
-            .style('stroke-width', 1)
-            .style('cursor', 'pointer')
+            .style('stroke-width', 1.5)
+            .style('cursor', 'pointer');
+
+        // Exit: Remove old circles
+        circles.exit()
+            .transition().duration(500)
+            .attr('r', 0)
+            .remove();
+
+// MERGE Enter and Update selections
+        const circlesUpdate = circlesEnter.merge(circles);
+
+        // --- Apply event handlers to the MERGED selection ---
+        circlesUpdate
             // Add tooltip event listeners
-            .on('mouseover', (event, d) => {
+            .on('mouseover', function(event, d) {
+                // Enlarge circle
+                d3.select(this)
+                    .interrupt() // Stop any ongoing transitions
+                    .transition().duration(150)
+                    // .attr('r', vis.rScale(d.avg_launch_mass_kg) * 1.5) // Grow by 50%
+                    .style('stroke', '#000') // Add a highlight stroke
+                    .style('stroke-width', 2);
+
                 vis.tooltip
                     .style('visibility', 'visible')
                     .html(`
@@ -209,27 +212,31 @@ class LaunchMetrics {
                     .style('top', (event.pageY - vis.config.tooltipPadding - 10) + 'px') // Position above cursor
                     .style('left', (event.pageX + vis.config.tooltipPadding) + 'px');
             })
-            .on('mouseleave', () => {
+            .on('mouseleave', function(event, d) { // Use 'function' to get 'this'
+                
+                // Reset circle size and style
+                d3.select(this)
+                    .interrupt() // Stop any ongoing transitions
+                    .transition().duration(150)
+                    // .attr('r', vis.rScale(d.avg_launch_mass_kg)) // Back to original size
+                    .style('stroke', '#03045e') // Back to original stroke
+                    .style('stroke-width', 1);
+
                 vis.tooltip.style('visibility', 'hidden');
-            })
-            // Transition for new circles
-            .transition().duration(500)
-            .attr('r', d => vis.rScale(d.avg_launch_mass_kg));
+            });
 
         // Update: Update existing circles (for resizing)
-        circles
+        circlesUpdate
             .transition().duration(500)
             .attr('cx', d => vis.xScale(d.year))
             .attr('cy', d => vis.yScale(d.avg_power_watts))
             .attr('r', d => vis.rScale(d.avg_launch_mass_kg));
 
-        // Exit: Remove old circles
-        circles.exit()
-            .transition().duration(500)
-            .attr('r', 0)
-            .remove();
-
-       
+        // Reorder circles in the DOM so that larger circles are drawn first
+        // and smaller circles appear on top. This reduces the chance that
+        // small points get hidden behind big ones when they overlap.
+        vis.chart.selectAll('circle')
+            .sort((a, b) => vis.rScale(b.avg_launch_mass_kg) - vis.rScale(a.avg_launch_mass_kg));
 
         // Update axes
         vis.renderVis();
