@@ -1,15 +1,15 @@
 .legend_text, .legend_text{
-    fill: #e0e1dd;
+    fill: #e0e6f0;
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
 .buttonBox{
-    fill: none; /* Keep inside transparent */
-    stroke: #5fa8d3; /* Neon outline */
+    fill: none;
+    stroke: #4a90e2;
     stroke-width: 1px;
-    filter: drop-shadow(0 0 2px #5fa8d3)
-            drop-shadow(0 0 2px #5fa8d3)
-            drop-shadow(0 0 2px rgba(95, 168, 211, 0.5));
+    filter: drop-shadow(0 0 3px #4a90e2)
+            drop-shadow(0 0 5px #4a90e2)
+            drop-shadow(0 0 8px rgba(74, 144, 226, 0.5));
 }
 
 .buttonText{
@@ -20,23 +20,21 @@
 .label_box{
     rx: 10;
     ry: 10;
-
-    fill: #1c2530; /* Keep inside transparent */
-    
+    fill: #0d1128;
 }
 
 .tooltip {
     position: absolute;
     pointer-events: none;
     opacity: 0;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #aaa;
-    padding: 5px 10px;
-    border-radius: 5px;
+    background: rgba(13, 17, 40, 0.95);
+    border: 2px solid #4a90e2;
+    padding: 8px 14px;
+    border-radius: 6px;
     z-index: 1000;
     font-size: 13px;
-    background: rgba(0,0,0,0.8);
-    color: #fff;
+    color: #e0e6f0;
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
 }
 
 .satellite {
@@ -46,7 +44,7 @@
 }
 
 .satellite:hover {
-    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 1)) 
-            drop-shadow(0 0 10px rgba(0, 255, 136, 0.6));
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) 
+            drop-shadow(0 0 12px rgba(74, 144, 226, 0.8));
     opacity: 1 !important;
 }
