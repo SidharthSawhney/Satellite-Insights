@@ -1,23 +1,22 @@
-.legend_text, .legend_text{
+.legend_text,
+.legend_text {
     fill: #e0e6f0;
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
-.buttonBox{
+.buttonBox {
     fill: none;
     stroke: #4a90e2;
     stroke-width: 1px;
-    filter: drop-shadow(0 0 3px #4a90e2)
-            drop-shadow(0 0 5px #4a90e2)
-            drop-shadow(0 0 8px rgba(74, 144, 226, 0.5));
+    filter: drop-shadow(0 0 3px #4a90e2) drop-shadow(0 0 5px #4a90e2) drop-shadow(0 0 8px rgba(74, 144, 226, 0.5));
 }
 
-.buttonText{
+.buttonText {
     font-family: "Segoe UI", Arial, sans-serif;
     fill: white;
 }
 
-.label_box{
+.label_box {
     rx: 10;
     ry: 10;
     fill: #0d1128;
@@ -44,7 +43,20 @@
 }
 
 .satellite:hover {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) 
-            drop-shadow(0 0 12px rgba(74, 144, 226, 0.8));
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) drop-shadow(0 0 12px rgba(74, 144, 226, 0.8));
     opacity: 1 !important;
+}
+
+.legend-info-icon {
+    fill: #4a90e2;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    pointer-events: all;
+    /* make sure hover works */
+}
+
+.legend-info-icon:hover {
+    fill: #7ec8ff;
 }

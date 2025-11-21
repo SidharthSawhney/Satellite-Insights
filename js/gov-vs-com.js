@@ -6,7 +6,7 @@ class governmentVsCommercial {
     this.rawData = rawData;
 
     this.updateDimensions();
-    
+
     this.svg = this.host.append('svg')
       .attr('class', 'gov-vs-com-svg');
 
@@ -21,7 +21,7 @@ class governmentVsCommercial {
     this.data = this._processData();
 
     this.render();
-    
+
     // Add resize listener
     window.addEventListener('resize', () => this.handleResize());
   }
@@ -30,16 +30,16 @@ class governmentVsCommercial {
     const box = this.node.getBoundingClientRect();
     this.w = Math.max(300, box.width || 700);
     this.h = Math.max(300, Math.min(600, box.height || 500));
-    
+
     // Responsive margins
     const marginScale = Math.min(this.w / 700, 1);
-    this.margin = { 
-      top: 80 * marginScale, 
-      right: 60 * marginScale, 
-      bottom: 50 * marginScale, 
-      left: 80 * marginScale 
+    this.margin = {
+      top: 80 * marginScale,
+      right: 60 * marginScale,
+      bottom: 50 * marginScale,
+      left: 80 * marginScale
     };
-    
+
     this.chartW = this.w - this.margin.left - this.margin.right;
     this.chartH = this.h - this.margin.top - this.margin.bottom;
   }
@@ -78,7 +78,7 @@ class governmentVsCommercial {
       const vals = Array.isArray(ownerField) ? ownerField : [ownerField];
       const normalized = vals.map(v => String(v).toLowerCase());
       if (normalized.includes('commercial')) return 'Commercial';
-      if (normalized.includes('government')) return 'Government'; 
+      if (normalized.includes('government')) return 'Government';
       return 'Other';
     };
 
@@ -129,14 +129,14 @@ class governmentVsCommercial {
     });
 
     const sorted = Object.values(yearly).sort((a, b) => a.year - b.year);
-    
+
     // Calculate moving averages (3-year window)
     const window = 3;
     sorted.forEach((d, i) => {
       const start = Math.max(0, i - Math.floor(window / 2));
       const end = Math.min(sorted.length, i + Math.ceil(window / 2));
       const slice = sorted.slice(start, end);
-      
+
       d.govMA = slice.reduce((sum, x) => sum + x.government, 0) / slice.length;
       d.comMA = slice.reduce((sum, x) => sum + x.commercial, 0) / slice.length;
     });
@@ -223,11 +223,11 @@ class governmentVsCommercial {
       .attr('rx', 2)
       .style('opacity', 0.9)
       .style('transition', 'opacity 0.2s, fill 0.2s')
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this).style('opacity', 1).attr('fill', '#8AB5E1');
         vis._showTip(event, d, 'Government');
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         d3.select(this).style('opacity', 0.9).attr('fill', '#6B9BD1');
         vis._hideTip();
       });
@@ -245,15 +245,29 @@ class governmentVsCommercial {
       .attr('rx', 2)
       .style('opacity', 0.9)
       .style('transition', 'opacity 0.2s, fill 0.2s')
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this).style('opacity', 1).attr('fill', '#33E5FF');
         vis._showTip(event, d, 'Commercial');
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         d3.select(this).style('opacity', 0.9).attr('fill', '#00D9FF');
         vis._hideTip();
       });
   }
+
+  _showLegendMATip(event) {
+    const html = `
+    <strong>3-Year Moving Average</strong>
+    <p>Takes the average of the satellites launched in the current, prior and latter year to smoothen out fluctuations and show trend of satellites launched</p>
+  `;
+
+    this.tooltip
+      .style('opacity', 1)
+      .html(html)
+      .style('left', (event.pageX + 10) + 'px')
+      .style('top', (event.pageY - 20) + 'px');
+  }
+
 
   _drawMovingAverages() {
     const vis = this;
@@ -302,11 +316,11 @@ class governmentVsCommercial {
       .attr("r", 3)
       .attr("fill", "#FFD700")
       .style("opacity", 0.9)
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this).attr("r", 5).style("opacity", 1);
         vis._showMATooltip(event, d, 'Government');
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         d3.select(this).attr("r", 3).style("opacity", 0.9);
         vis._hideTip();
       });
@@ -321,11 +335,11 @@ class governmentVsCommercial {
       .attr("r", 3)
       .attr("fill", "#FFD700")
       .style("opacity", 0.9)
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this).attr("r", 5).style("opacity", 1);
         vis._showMATooltip(event, d, 'Commercial');
       })
-      .on('mouseout', function() {
+      .on('mouseout', function () {
         d3.select(this).attr("r", 3).style("opacity", 0.9);
         vis._hideTip();
       });
@@ -337,7 +351,7 @@ class governmentVsCommercial {
 
     const fontSize = this.w < 500 ? '9px' : '11px';
     const stripWidth = this.w < 500 ? 35 : 45;
-    
+
     // Add a vertical strip behind all year labels
     this.chart.append('rect')
       .attr('class', 'year-bg-strip')
@@ -347,7 +361,7 @@ class governmentVsCommercial {
       .attr('height', this.chartH)
       .attr('fill', '#0d1129')
       .attr('opacity', 0.95);
-    
+
     // Add individual background rectangles for each year label
     this.chart.selectAll('.year-bg-rect')
       .data(this.data)
@@ -360,7 +374,7 @@ class governmentVsCommercial {
       .attr('height', vis.yScale.bandwidth())
       .attr('fill', '#0d1129')
       .attr('opacity', 0.9);
-    
+
     // Add year labels on top of the strip
     this.chart.selectAll('.year-label')
       .data(this.data)
@@ -398,38 +412,57 @@ class governmentVsCommercial {
       .append("g")
       .attr("class", "legend-item");
 
-    legendItems.each(function(d, i) {
+    legendItems.each(function (d, i) {
       const item = d3.select(this);
-      
+      const baseX = i * spacing;
+      const baseY = yOffset;
+
       if (d.dashed) {
-        // Draw dashed line for moving average
+        // dashed line for moving average
         item.append("line")
-          .attr("x1", i * spacing)
-          .attr("x2", i * spacing + rectSize)
-          .attr("y1", yOffset + rectSize / 2)
-          .attr("y2", yOffset + rectSize / 2)
+          .attr("x1", baseX)
+          .attr("x2", baseX + rectSize)
+          .attr("y1", baseY + rectSize / 2)
+          .attr("y2", baseY + rectSize / 2)
           .attr("stroke", d.color)
           .attr("stroke-width", 3)
           .attr("stroke-dasharray", "5,3")
           .style("opacity", 0.9);
       } else {
         item.append("rect")
-          .attr("x", i * spacing)
-          .attr("y", yOffset)
+          .attr("x", baseX)
+          .attr("y", baseY)
           .attr("width", rectSize)
           .attr("height", rectSize)
           .attr("rx", 3)
           .attr("fill", d.color)
           .style("opacity", 0.9);
       }
-      
-      item.append("text")
-        .attr("x", i * spacing + rectSize + 8)
-        .attr("y", yOffset + rectSize - 4)
+
+      // main legend label
+      const label = item.append("text")
+        .attr("x", baseX + rectSize + 8)
+        .attr("y", baseY + rectSize - 4)
         .attr("fill", "#E8E8E8")
         .attr("font-size", fontSize)
         .text(d.name);
+
+
+      if (d.dashed) {
+        const labelWidth = label.node().getComputedTextLength();
+
+        item.append("text")
+          .attr("class", "legend-info-icon")
+          .attr("x", baseX + rectSize + 8 + labelWidth + 6)
+          .attr("y", baseY + rectSize - 4)
+          .text("ⓘ")
+          .on("mouseover", (event) => {
+            vis._showLegendMATip(event);
+          })
+          .on("mouseout", () => vis._hideTip());
+      }
     });
+
 
     // Add note about scaling
     legend.append("text")
@@ -446,9 +479,9 @@ class governmentVsCommercial {
 
     const fontSize = this.w < 500 ? '13px' : this.w < 700 ? '16px' : '18px';
     const yOffset = this.w < 500 ? -70 : -60;
-    const titleText = this.w < 500 
+    const titleText = this.w < 500
       ? "Gov vs Commercial Launches"
-      : "Government vs Commercial Satellite Launches";
+      : "Government vs Commercial Satellites Launched";
 
     this.chart
       .append("text")

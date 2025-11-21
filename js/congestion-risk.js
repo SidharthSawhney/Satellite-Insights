@@ -137,35 +137,68 @@ class Congestion {
             });
 
         
-        // Show the color legend
-        vis.legend = vis.svg.append("g")
-                        .attr("class", "legend");
+// Legend for orbit classes
+vis.legend = vis.svg.append("g")
+    .attr("class", "legend");
 
-        vis.legend.append("text")
-                    .attr("x", 0)
-                    .attr("y", 10)
-                    .attr("class", "legend_title")
-                    .text("Orbit Class")
-                    .style("fill", "white");
-        
-        vis.legend.selectAll("rect")
-                    .data(vis.colorScale.domain())
-                    .enter()
-                    .append("rect")
-                    .attr("x",0)
-                    .attr("y", (d,i)=> i*25 + 30)
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .style("fill", d=> this.colorScale(d));
+// Title text
+const legendTitle = vis.legend.append("text")
+    .attr("x", 0)
+    .attr("y", 10)
+    .attr("class", "legend_title")
+    .text("Orbit Class")
+    .style("fill", "white");
 
-        vis.legend.selectAll("legend_text")
-                    .data(vis.colorScale.domain())
-                    .enter()
-                    .append("text")
-                    .attr("class", "legend_text")
-                    .attr("x", 30)
-                    .attr("y", (d,i) => i*25 + 45)
-                    .text(d=>d);
+// --- info icon right next to the title ---
+const titleWidth = legendTitle.node().getComputedTextLength();
+
+vis.legend.append("text")
+    .attr("class", "legend-info-icon")
+    .attr("x", titleWidth + 8)   // ⬅️ close to the text
+    .attr("y", 10)
+    .text("ⓘ")
+    .on("mouseover", (event) => {
+        vis.tooltip
+            .style("opacity", 1)
+            .html(`
+                <strong>Orbit Classes</strong><br/>
+                <strong>LEO: Low Earth Orbit</strong> - Close to Earth, Starlink and Earth-imaging satellites here. Very crowded<br/>
+                <strong>MEO: Medium Earth Orbit</strong> – A bit higher up. For navigation satellites like GPS<br/>
+                <strong>GEO: Geostationary Orbit</strong> – Very high up. Perfect for TV & weather<br/>
+                <strong>Elliptical</strong> –  Oval shaped path. used for special missions
+            `)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top",  (event.pageY - 20) + "px");
+    })
+    .on("mousemove", (event) => {
+        vis.tooltip
+            .style("left", (event.pageX + 10) + "px")
+            .style("top",  (event.pageY - 20) + "px");
+    })
+    .on("mouseout", () => {
+        vis.tooltip.style("opacity", 0);
+    });
+
+// color boxes
+vis.legend.selectAll("rect")
+    .data(vis.colorScale.domain())
+    .enter()
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", (d, i) => i * 25 + 30)
+    .attr("width", 20)
+    .attr("height", 20)
+    .style("fill", d => vis.colorScale(d));
+
+// labels
+vis.legend.selectAll("legend_text")
+    .data(vis.colorScale.domain())
+    .enter()
+    .append("text")
+    .attr("class", "legend_text")
+    .attr("x", 30)
+    .attr("y", (d, i) => i * 25 + 45)
+    .text(d => d);
 
         // Add tooltips
         vis.tooltip = d3.select("body").append("div")

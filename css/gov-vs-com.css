@@ -111,24 +111,38 @@
     margin-bottom: 4px;
 }
 
+
+.legend-info-icon {
+    fill: #e0e6f0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    pointer-events: all !important;
+}
+
+.legend-info-icon:hover {
+    fill: #00d4ff;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #gov-vs-com {
         height: 500px;
     }
-    
+
     .chart-title {
         font-size: 16px;
     }
-    
+
     .axis-title {
         font-size: 11px;
     }
-    
+
     .legend text {
         font-size: 11px;
     }
-    
+
     .x-axis-left text,
     .x-axis-right text {
         font-size: 10px;
@@ -139,15 +153,17 @@
     #gov-vs-com {
         height: 400px;
     }
-    
+
     .chart-title {
         font-size: 14px;
     }
-    
+
     .year-label {
         font-size: 9px;
     }
-}/* =====================================================
+}
+
+/* =====================================================
    Government vs Commercial Visualization CSS
    Deep Space Theme
    ===================================================== */
@@ -265,19 +281,19 @@
     #gov-vs-com {
         height: 500px;
     }
-    
+
     .chart-title {
         font-size: 16px;
     }
-    
+
     .axis-title {
         font-size: 11px;
     }
-    
+
     .legend text {
         font-size: 11px;
     }
-    
+
     .x-axis-left text,
     .x-axis-right text {
         font-size: 10px;
@@ -288,11 +304,11 @@
     #gov-vs-com {
         height: 400px;
     }
-    
+
     .chart-title {
         font-size: 14px;
     }
-    
+
     .year-label {
         font-size: 9px;
     }
