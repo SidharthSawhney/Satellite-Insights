@@ -88,7 +88,6 @@
 
 #launch-metrics .data-point:hover {
     fill: #00d4ff;
-    r: 8;
     filter: drop-shadow(0 0 12px #4a90e2);
 }
 
