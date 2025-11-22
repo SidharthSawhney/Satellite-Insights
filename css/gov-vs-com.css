@@ -1,6 +1,6 @@
 /* =====================================================
    Government vs Commercial Visualization CSS
-   Deep Space Theme
+   Blue Tech Theme
    ===================================================== */
 
 #gov-vs-com {
@@ -18,246 +18,133 @@
 /* Axes styling */
 .x-axis-left path,
 .x-axis-right path {
-    stroke: #4a90e2;
-    stroke-opacity: 0.3;
+    stroke: #0066a6;
+    stroke-opacity: 0.5;
 }
 
 .x-axis-left line,
 .x-axis-right line {
-    stroke: #4a90e2;
-    stroke-opacity: 0.2;
+    stroke: #0066a6;
+    stroke-opacity: 0.3;
 }
 
 .x-axis-left text,
 .x-axis-right text {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #8fa9b9;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Bars - No hover styles here, handled by JavaScript */
 .gov-bar {
     cursor: pointer;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 5px rgba(0, 102, 166, 0.4));
 }
 
 .com-bar {
     cursor: pointer;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 5px rgba(0, 170, 204, 0.4));
 }
 
 /* Divider line */
 .divider-line {
-    stroke: #2d5aa8;
-    stroke-width: 1.5px;
-    stroke-dasharray: 4, 4;
-    opacity: 0.6;
+    stroke: #0066a6;
+    stroke-width: 2px;
+    stroke-dasharray: 6, 6;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 8px rgba(0, 102, 166, 0.6));
 }
 
 /* Year labels */
 .year-label {
-    fill: #e0e6f0;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-weight: bold;
     font-size: 11px;
     pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Legend */
 .legend rect {
     opacity: 0.9;
+    stroke: #0066a6;
+    stroke-width: 1px;
+    filter: drop-shadow(0 0 5px rgba(0, 102, 166, 0.4));
 }
 
 .legend text {
-    fill: #e0e6f0;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
     pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
 }
 
 /* Chart title */
 .chart-title {
-    fill: #4a90e2;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #0066a6;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-weight: bold;
     font-size: 18px;
-    text-shadow: 0 0 10px rgba(74, 144, 226, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    filter: drop-shadow(0 0 15px rgba(0, 102, 166, 0.8))
+            drop-shadow(0 0 30px rgba(0, 102, 166, 0.5));
 }
 
 /* Axis titles */
 .axis-title {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #8fa9b9;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 /* Tooltip */
 .govcom-tip {
     position: absolute;
     pointer-events: none;
-    background: rgba(13, 17, 40, 0.95);
-    color: #e0e6f0;
-    padding: 12px 15px;
-    border-radius: 6px;
-    border: 2px solid #4a90e2;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    background: rgba(10, 13, 14, 0.97);
+    color: #e0f0ff;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 2px solid #0066a6;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
     line-height: 1.6;
-    box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+    box-shadow: 
+        0 0 30px rgba(0, 102, 166, 0.6),
+        0 0 50px rgba(0, 170, 204, 0.3),
+        inset 0 0 25px rgba(0, 102, 166, 0.1);
     z-index: 1000;
 }
 
-.govcom-tip strong {
-    color: #00d4ff;
+.govcom-tip::before {
+    content: '>>> DATA';
     display: block;
-    margin-bottom: 4px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #gov-vs-com {
-        height: 500px;
-    }
-    
-    .chart-title {
-        font-size: 16px;
-    }
-    
-    .axis-title {
-        font-size: 11px;
-    }
-    
-    .legend text {
-        font-size: 11px;
-    }
-    
-    .x-axis-left text,
-    .x-axis-right text {
-        font-size: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    #gov-vs-com {
-        height: 400px;
-    }
-    
-    .chart-title {
-        font-size: 14px;
-    }
-    
-    .year-label {
-        font-size: 9px;
-    }
-}/* =====================================================
-   Government vs Commercial Visualization CSS
-   Deep Space Theme
-   ===================================================== */
-
-#gov-vs-com {
-    width: 100%;
-    height: 600px;
-    position: relative;
-}
-
-.gov-vs-com-svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* Axes styling */
-.x-axis-left path,
-.x-axis-right path {
-    stroke: #4a90e2;
-    stroke-opacity: 0.3;
-}
-
-.x-axis-left line,
-.x-axis-right line {
-    stroke: #4a90e2;
-    stroke-opacity: 0.2;
-}
-
-.x-axis-left text,
-.x-axis-right text {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 12px;
-}
-
-/* Bars - No hover styles here, handled by JavaScript */
-.gov-bar {
-    cursor: pointer;
-}
-
-.com-bar {
-    cursor: pointer;
-}
-
-/* Divider line */
-.divider-line {
-    stroke: #2d5aa8;
-    stroke-width: 1.5px;
-    stroke-dasharray: 4, 4;
-    opacity: 0.6;
-}
-
-/* Year labels */
-.year-label {
-    fill: #e0e6f0;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-weight: bold;
-    font-size: 11px;
-    pointer-events: none;
-}
-
-/* Legend */
-.legend rect {
-    opacity: 0.9;
-}
-
-.legend text {
-    fill: #e0e6f0;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 13px;
-    pointer-events: none;
-}
-
-/* Chart title */
-.chart-title {
-    fill: #4a90e2;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-weight: bold;
-    font-size: 18px;
-    text-shadow: 0 0 10px rgba(74, 144, 226, 0.6);
-}
-
-/* Axis titles */
-.axis-title {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 13px;
-}
-
-/* Tooltip */
-.govcom-tip {
-    position: absolute;
-    pointer-events: none;
-    background: rgba(13, 17, 40, 0.95);
-    color: #e0e6f0;
-    padding: 12px 15px;
-    border-radius: 6px;
-    border: 2px solid #4a90e2;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 13px;
-    line-height: 1.6;
-    box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
-    z-index: 1000;
+    color: #0066a6;
+    font-size: 10px;
+    margin-bottom: 8px;
+    letter-spacing: 0.3em;
+    border-bottom: 1px solid #0066a6;
+    padding-bottom: 4px;
+    text-shadow: 0 0 10px rgba(0, 102, 166, 0.6);
 }
 
 .govcom-tip strong {
-    color: #00d4ff;
+    color: #0066a6;
     display: block;
     margin-bottom: 4px;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.6);
 }
 
 /* Responsive adjustments */

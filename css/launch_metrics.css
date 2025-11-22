@@ -1,7 +1,7 @@
 /* =====================================================
    launch_metrics.css
    Styles for Launch Metrics Visualization
-   Deep Space Theme
+   Follows Dark Green Techy Theme
    ===================================================== */
 
 /* ============ LAUNCH METRICS SECTION ============ */
@@ -11,8 +11,8 @@
 
 #launch-metrics-section .viz-container {
     background: linear-gradient(135deg, 
-        rgba(74, 144, 226, 0.05) 0%, 
-        rgba(13, 17, 40, 0.8) 100%);
+        rgba(0, 166, 89, 0.03) 0%, 
+        rgba(0, 0, 0, 0.5) 100%);
 }
 
 /* ============ LAUNCH METRICS CONTAINER ============ */
@@ -31,20 +31,20 @@
 /* ============ AXES STYLING ============ */
 #launch-metrics .axis path,
 #launch-metrics .axis line {
-    stroke: #4a90e2;
+    stroke: #00a659;
     stroke-width: 1px;
     shape-rendering: crispEdges;
 }
 
 #launch-metrics .axis text {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #8fb98f;
+    font-family: 'Courier New', monospace;
     font-size: 12px;
 }
 
 #launch-metrics .axis-label {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #8fb98f;
+    font-family: 'Courier New', monospace;
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -52,26 +52,26 @@
 
 /* ============ CHART ELEMENTS ============ */
 #launch-metrics .chart-title {
-    fill: #4a90e2;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #00a659;
+    font-family: 'Courier New', monospace;
     font-size: 18px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    text-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+    text-shadow: 0 0 10px rgba(0, 166, 89, 0.5);
 }
 
 /* Lines (for line charts) */
 #launch-metrics .line {
     fill: none;
-    stroke: #4a90e2;
+    stroke: #00a659;
     stroke-width: 2px;
     stroke-linejoin: round;
     stroke-linecap: round;
 }
 
 #launch-metrics .line-glow {
-    stroke: #4a90e2;
+    stroke: #00a659;
     stroke-width: 4px;
     opacity: 0.3;
     filter: blur(3px);
@@ -79,47 +79,48 @@
 
 /* Data points (for scatter/line charts) */
 #launch-metrics .data-point {
-    fill: #4a90e2;
-    stroke: #00d4ff;
+    fill: #00a659;
+    stroke: #28be0e;
     stroke-width: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 #launch-metrics .data-point:hover {
-    fill: #00d4ff;
-    filter: drop-shadow(0 0 12px #4a90e2);
+    fill: #28be0e;
+    r: 8;
+    filter: drop-shadow(0 0 10px #00a659);
 }
 
 /* Bars (for bar charts) */
 #launch-metrics .bar {
-    fill: #4a90e2;
-    stroke: #00d4ff;
+    fill: #00a659;
+    stroke: #28be0e;
     stroke-width: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 #launch-metrics .bar:hover {
-    fill: #00d4ff;
-    filter: drop-shadow(0 0 12px #4a90e2);
+    fill: #28be0e;
+    filter: drop-shadow(0 0 10px #00a659);
 }
 
 /* Areas (for area charts) */
 #launch-metrics .area {
-    fill: #4a90e2;
+    fill: #00a659;
     opacity: 0.3;
 }
 
 #launch-metrics .area-stroke {
     fill: none;
-    stroke: #4a90e2;
+    stroke: #00a659;
     stroke-width: 2px;
 }
 
 /* ============ GRID LINES ============ */
 #launch-metrics .grid line {
-    stroke: rgba(74, 144, 226, 0.1);
+    stroke: rgba(0, 166, 89, 0.1);
     stroke-dasharray: 2, 2;
 }
 
@@ -129,7 +130,7 @@
 
 /* ============ LEGEND ============ */
 #launch-metrics .legend {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Courier New', monospace;
     font-size: 12px;
 }
 
@@ -143,35 +144,35 @@
 }
 
 #launch-metrics .legend-text {
-    fill: #e0e6f0;
+    fill: #e0ffe0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 #launch-metrics .legend-rect {
-    stroke: #00d4ff;
+    stroke: #28be0e;
     stroke-width: 1px;
 }
 
 #launch-metrics .legend-circle {
-    stroke: #00d4ff;
+    stroke: #28be0e;
     stroke-width: 2px;
 }
 
 /* ============ TOOLTIP ============ */
 #launch-metrics .tooltip {
     position: absolute;
-    background-color: rgba(13, 17, 40, 0.95);
-    border: 2px solid #4a90e2;
-    border-radius: 6px;
+    background-color: rgba(10, 14, 13, 0.95);
+    border: 2px solid #00a659;
+    border-radius: 4px;
     padding: 12px 15px;
     pointer-events: none;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Courier New', monospace;
     font-size: 13px;
     line-height: 1.6;
-    color: #e0e6f0;
+    color: #e0ffe0;
     box-shadow: 
-        0 0 25px rgba(74, 144, 226, 0.5),
+        0 0 20px rgba(0, 166, 89, 0.4),
         inset 0 0 20px rgba(0, 0, 0, 0.5);
     z-index: 1000;
     min-width: 150px;
@@ -180,44 +181,44 @@
 #launch-metrics .tooltip::before {
     content: '> DATA';
     display: block;
-    color: #4a90e2;
+    color: #00a659;
     font-size: 10px;
     margin-bottom: 8px;
     letter-spacing: 0.2em;
-    border-bottom: 1px solid #4a90e2;
+    border-bottom: 1px solid #00a659;
     padding-bottom: 4px;
 }
 
 #launch-metrics .tooltip-label {
-    color: #8b9dc3;
+    color: #8fb98f;
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.1em;
 }
 
 #launch-metrics .tooltip-value {
-    color: #4a90e2;
+    color: #00a659;
     font-weight: bold;
     font-size: 14px;
-    text-shadow: 0 0 8px rgba(74, 144, 226, 0.6);
+    text-shadow: 0 0 5px rgba(0, 166, 89, 0.5);
 }
 
 /* ============ ANNOTATIONS ============ */
 #launch-metrics .annotation {
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Courier New', monospace;
     font-size: 11px;
-    fill: #8b9dc3;
+    fill: #8fb98f;
 }
 
 #launch-metrics .annotation-line {
-    stroke: #8b9dc3;
+    stroke: #8fb98f;
     stroke-width: 1px;
     stroke-dasharray: 4, 4;
     opacity: 0.5;
 }
 
 #launch-metrics .annotation-label {
-    fill: #e0e6f0;
+    fill: #e0ffe0;
     font-size: 12px;
     text-transform: uppercase;
 }
@@ -256,7 +257,7 @@
 
 /* ============ INTERACTIVE STATES ============ */
 #launch-metrics .highlighted {
-    filter: drop-shadow(0 0 20px #4a90e2);
+    filter: drop-shadow(0 0 15px #00a659);
     z-index: 10;
 }
 
@@ -266,8 +267,8 @@
 
 /* ============ LOADING STATE ============ */
 #launch-metrics .loading-text {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    fill: #8fb98f;
+    font-family: 'Courier New', monospace;
     font-size: 16px;
     text-anchor: middle;
     animation: blink 1.5s ease-in-out infinite;
@@ -318,7 +319,7 @@
 
 /* ============ TECH ACCENTS ============ */
 #launch-metrics .tech-border {
-    stroke: #4a90e2;
+    stroke: #00a659;
     stroke-width: 1px;
     fill: none;
     stroke-dasharray: 5, 5;
@@ -329,29 +330,4 @@
     to {
         stroke-dashoffset: -100;
     }
-}
-
-/* Corner brackets for tech aesthetic */
-#launch-metrics-section::before,
-#launch-metrics-section::after {
-    content: '';
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border: 2px solid #4a90e2;
-    opacity: 0.3;
-}
-
-#launch-metrics-section::before {
-    top: 20px;
-    left: 20px;
-    border-right: none;
-    border-bottom: none;
-}
-
-#launch-metrics-section::after {
-    bottom: 20px;
-    right: 20px;
-    border-left: none;
-    border-top: none;
 }

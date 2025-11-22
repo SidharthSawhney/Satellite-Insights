@@ -1,6 +1,6 @@
 /* ===================================
-   Stellaris Theme Enhancements
-   Additional styling from Stellaris template
+   Retro Cyberpunk Theme Enhancements
+   Pink & Purple Neon Aesthetic
    =================================== */
 
 /* ============ NAVBAR ============ */
@@ -10,16 +10,19 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(10, 14, 13, 0.85);
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 2px solid #ff006e;
     padding: 1rem 0;
     transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.3);
 }
 
 .navbar.scrolled {
-    background: rgba(10, 14, 13, 0.95);
-    box-shadow: 0 2px 20px rgba(0, 255, 136, 0.1);
+    background: rgba(10, 10, 15, 0.95);
+    box-shadow: 
+        0 2px 30px rgba(255, 0, 110, 0.4),
+        0 0 40px rgba(191, 0, 255, 0.2);
 }
 
 .navbar .container {
@@ -30,12 +33,16 @@
 
 .navbar-brand {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: #5fa8d3;
+    font-weight: 900;
+    font-family: 'Courier New', 'Consolas', monospace;
+    color: #ff006e;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     text-decoration: none;
-    text-shadow: 0 0 10px #5fa8d3;
+    text-shadow: 
+        0 0 15px rgba(255, 0, 110, 0.8),
+        0 0 30px rgba(255, 0, 110, 0.4),
+        2px 2px 0 rgba(191, 0, 255, 0.3);
 }
 
 .nav-menu {
@@ -47,10 +54,11 @@
 }
 
 .nav-menu a {
-    color: #778da9;
+    color: #d4a5ff;
     text-decoration: none;
     text-transform: uppercase;
     font-size: 0.9rem;
+    font-family: 'Courier New', 'Consolas', monospace;
     letter-spacing: 0.1em;
     transition: all 0.3s ease;
     position: relative;
@@ -64,13 +72,15 @@
     left: 0;
     width: 0;
     height: 2px;
-    background: #5fa8d3;
+    background: linear-gradient(90deg, #ff006e, #bf00ff);
     transition: width 0.3s ease;
+    box-shadow: 0 0 8px rgba(255, 0, 110, 0.6);
 }
 
 .nav-menu a:hover,
 .nav-menu a.active {
-    color: #5fa8d3;
+    color: #ff006e;
+    text-shadow: 0 0 10px rgba(255, 0, 110, 0.6);
 }
 
 .nav-menu a:hover::after,
@@ -81,20 +91,21 @@
 .mobile-toggle {
     display: none;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     cursor: pointer;
     padding: 0.5rem;
 }
 
 .mobile-toggle span {
-    width: 25px;
-    height: 2px;
-    background: #5fa8d3;
+    width: 28px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff006e, #bf00ff);
     transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(255, 0, 110, 0.6);
 }
 
 .mobile-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translateY(8px);
+    transform: rotate(45deg) translateY(10px);
 }
 
 .mobile-toggle.active span:nth-child(2) {
@@ -102,7 +113,7 @@
 }
 
 .mobile-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translateY(-8px);
+    transform: rotate(-45deg) translateY(-10px);
 }
 
 /* ============ MOBILE NAVIGATION ============ */
@@ -116,12 +127,13 @@
         top: 70px;
         left: -100%;
         flex-direction: column;
-        background: rgba(10, 14, 13, 0.98);
+        background: rgba(10, 10, 15, 0.98);
         width: 100%;
         padding: 2rem;
         gap: 1.5rem;
         transition: left 0.3s ease;
-        border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        border-bottom: 2px solid #ff006e;
+        box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
     }
 
     .nav-menu.active {
@@ -143,11 +155,12 @@
 /* ============ COSMIC PARTICLES ============ */
 .cosmic-particle {
     position: fixed;
-    background: radial-gradient(circle, rgba(0, 166, 89, 0.6) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 0, 110, 0.6) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     z-index: -1;
     animation: float 10s infinite ease-in-out;
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
 }
 
 @keyframes float {
@@ -156,7 +169,7 @@
         opacity: 0.3;
     }
     50% {
-        transform: translateY(-30px) translateX(15px) scale(1.1);
+        transform: translateY(-40px) translateX(20px) scale(1.2);
         opacity: 0.7;
     }
 }
@@ -166,11 +179,12 @@
 .viz-section::after {
     content: '';
     position: absolute;
-    width: 40px;
-    height: 40px;
-    border: 2px solid #5fa8d3;
-    opacity: 0.2;
-    transition: opacity 0.3s ease;
+    width: 50px;
+    height: 50px;
+    border: 3px solid #ff006e;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
 }
 
 .viz-section::before {
@@ -189,7 +203,8 @@
 
 .viz-section:hover::before,
 .viz-section:hover::after {
-    opacity: 0.5;
+    opacity: 0.7;
+    box-shadow: 0 0 25px rgba(255, 0, 110, 0.6);
 }
 
 /* ============ GLITCH EFFECT ============ */
@@ -198,16 +213,16 @@
         transform: translate(0);
     }
     20% {
-        transform: translate(-2px, 2px);
+        transform: translate(-3px, 3px);
     }
     40% {
-        transform: translate(-2px, -2px);
+        transform: translate(-3px, -3px);
     }
     60% {
-        transform: translate(2px, 2px);
+        transform: translate(3px, 3px);
     }
     80% {
-        transform: translate(2px, -2px);
+        transform: translate(3px, -3px);
     }
 }
 
@@ -227,17 +242,19 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    padding: 0.5rem 1rem;
-    background: rgba(0, 0, 0, 0.95);
-    color: #5fa8d3;
-    border: 1px solid #5fa8d3;
-    border-radius: 4px;
+    padding: 0.6rem 1.2rem;
+    background: rgba(10, 10, 15, 0.95);
+    color: #ff006e;
+    border: 2px solid #ff006e;
+    border-radius: 6px;
     font-size: 0.875rem;
+    font-family: 'Courier New', 'Consolas', monospace;
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
     z-index: 1000;
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.6);
 }
 
 [data-tooltip]:hover::before {
@@ -249,10 +266,11 @@
     display: inline-block;
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(0, 166, 89, 0.3);
-    border-top-color: #5fa8d3;
+    border: 3px solid rgba(191, 0, 255, 0.3);
+    border-top-color: #ff006e;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
 }
 
 @keyframes spin {
@@ -263,22 +281,24 @@
 
 /* ============ SCROLLBAR STYLING ============ */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #001242;
-    border-left: 1px solid rgba(0, 255, 136, 0.1);
+    background: #0a0a0f;
+    border-left: 1px solid rgba(255, 0, 110, 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #5fa8d3 0%, #7b2cbf 100%);
-    border-radius: 5px;
+    background: linear-gradient(180deg, #ff006e 0%, #bf00ff 100%);
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.6);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #00d4ff 0%, #5fa8d3 100%);
+    background: linear-gradient(180deg, #bf00ff 0%, #ff006e 100%);
+    box-shadow: 0 0 15px rgba(191, 0, 255, 0.8);
 }
 
 /* ============ FADE IN ANIMATION ============ */
@@ -296,17 +316,18 @@
 /* ============ NEON GLOW BUTTON ============ */
 .neon-button {
     background: transparent;
-    border: 2px solid #5fa8d3;
-    color: #5fa8d3;
+    border: 2px solid #ff006e;
+    color: #ff006e;
     padding: 0.75rem 2rem;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 1rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em;
     cursor: pointer;
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.3);
 }
 
 .neon-button::before {
@@ -316,20 +337,22 @@
     left: 50%;
     width: 0;
     height: 0;
-    background: #5fa8d3;
+    background: linear-gradient(135deg, #ff006e, #bf00ff);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: width 0.5s ease, height 0.5s ease;
 }
 
 .neon-button:hover {
-    color: #0a1128;
-    box-shadow: 0 0 20px #5fa8d3;
+    color: #0a0a0f;
+    box-shadow: 
+        0 0 25px rgba(255, 0, 110, 0.6),
+        inset 0 0 20px rgba(255, 0, 110, 0.2);
 }
 
 .neon-button:hover::before {
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
 }
 
 .neon-button span {
@@ -340,9 +363,9 @@
 /* ============ TECH GRID PATTERN ============ */
 .tech-grid {
     background-image: 
-        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-    background-size: 20px 20px;
+        linear-gradient(rgba(255, 0, 110, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 110, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
 }
 
 /* ============ PULSE ANIMATION ============ */
@@ -354,10 +377,12 @@
     0%, 100% {
         transform: scale(1);
         opacity: 1;
+        filter: drop-shadow(0 0 5px rgba(255, 0, 110, 0.6));
     }
     50% {
         transform: scale(1.05);
         opacity: 0.8;
+        filter: drop-shadow(0 0 15px rgba(255, 0, 110, 0.8));
     }
 }
 
@@ -366,18 +391,18 @@
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
-    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    border-bottom: 2px solid rgba(255, 0, 110, 0.3);
 }
 
 .mission-tab {
     padding: 1rem 2rem;
     background: transparent;
     border: none;
-    color: #778da9;
+    color: #d4a5ff;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Courier New', 'Consolas', monospace;
     transition: all 0.3s ease;
     position: relative;
 }
@@ -385,17 +410,19 @@
 .mission-tab::after {
     content: '';
     position: absolute;
-    bottom: -1px;
+    bottom: -2px;
     left: 0;
     width: 0;
     height: 2px;
-    background: #5fa8d3;
+    background: linear-gradient(90deg, #ff006e, #bf00ff);
     transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 0, 110, 0.8);
 }
 
 .mission-tab:hover,
 .mission-tab.active {
-    color: #5fa8d3;
+    color: #ff006e;
+    text-shadow: 0 0 10px rgba(255, 0, 110, 0.6);
 }
 
 .mission-tab.active::after {
@@ -409,4 +436,71 @@
 
 .mission-content.active {
     display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============ SCAN LINE EFFECT ============ */
+.scanline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff006e, transparent);
+    animation: scan 3s linear infinite;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.3;
+}
+
+@keyframes scan {
+    0% {
+        transform: translateY(-100vh);
+    }
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+/* ============ HOLOGRAPHIC EFFECT ============ */
+.holographic {
+    position: relative;
+}
+
+.holographic::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ff006e, #bf00ff, #ff006e);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    animation: hologram-rotate 3s linear infinite;
+}
+
+.holographic:hover::before {
+    opacity: 0.5;
+}
+
+@keyframes hologram-rotate {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        filter: hue-rotate(360deg);
+    }
 }

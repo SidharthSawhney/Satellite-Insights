@@ -1,50 +1,58 @@
 .legend_text, .legend_text{
-    fill: #e0e6f0;
-    font-family: "Segoe UI", Arial, sans-serif;
+    fill: #e0c3fc;
+    font-family: 'Courier New', 'Consolas', monospace;
 }
 
 .buttonBox{
     fill: none;
-    stroke: #4a90e2;
-    stroke-width: 1px;
-    filter: drop-shadow(0 0 3px #4a90e2)
-            drop-shadow(0 0 5px #4a90e2)
-            drop-shadow(0 0 8px rgba(74, 144, 226, 0.5));
+    stroke: #ff006e;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 5px #ff006e)
+            drop-shadow(0 0 10px #ff006e)
+            drop-shadow(0 0 15px rgba(255, 0, 110, 0.6));
 }
 
 .buttonText{
-    font-family: "Segoe UI", Arial, sans-serif;
-    fill: white;
+    font-family: 'Courier New', 'Consolas', monospace;
+    fill: #e0c3fc;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .label_box{
     rx: 10;
     ry: 10;
-    fill: #0d1128;
+    fill: #0a0a0f;
+    stroke: #bf00ff;
+    stroke-width: 1px;
 }
 
 .tooltip {
     position: absolute;
     pointer-events: none;
     opacity: 0;
-    background: rgba(13, 17, 40, 0.95);
-    border: 2px solid #4a90e2;
-    padding: 8px 14px;
-    border-radius: 6px;
+    background: rgba(10, 10, 15, 0.95);
+    border: 2px solid #ff006e;
+    padding: 10px 16px;
+    border-radius: 8px;
     z-index: 1000;
     font-size: 13px;
-    color: #e0e6f0;
-    box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
+    font-family: 'Courier New', monospace;
+    color: #e0c3fc;
+    box-shadow: 
+        0 0 25px rgba(255, 0, 110, 0.6),
+        inset 0 0 20px rgba(255, 0, 110, 0.1);
 }
 
 .satellite {
     cursor: pointer;
     transition: all 0.2s;
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+    filter: drop-shadow(0 0 3px rgba(191, 0, 255, 0.8));
 }
 
 .satellite:hover {
-    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) 
-            drop-shadow(0 0 12px rgba(74, 144, 226, 0.8));
+    filter: drop-shadow(0 0 10px rgba(255, 0, 110, 1)) 
+            drop-shadow(0 0 15px rgba(191, 0, 255, 0.8))
+            drop-shadow(0 0 20px rgba(255, 0, 110, 0.6));
     opacity: 1 !important;
 }
