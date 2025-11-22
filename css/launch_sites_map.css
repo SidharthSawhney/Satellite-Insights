@@ -1,32 +1,24 @@
 .map-title {
-    position: absolute;
-    left: 20px;
-    top: 0px;
-    color: #e0f0ff;
-    font-size: 16px;
-    font-weight: 600;
-    background: rgba(10, 13, 14, 0.85);
-    padding: 8px 12px;
-    border-radius: 6px;
-    z-index: 10;
-    border: 1px solid rgba(0, 102, 166, 0.3);
-    box-shadow: 0 0 10px rgba(0, 102, 166, 0.15);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    left: 25px;
+    top: 20px;
+    fill: #0066a6;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-weight: bold;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
 }
 
 .map-prompt {
     position: absolute;
     top: 50px;
-    left: 24px;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #8fa9b9;
-    z-index: 9;
+    left: 25px;
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 13px;
     pointer-events: none;
-    opacity: 0.9;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
 }
 
 .map-info-btn {
@@ -78,8 +70,8 @@
 
 .site-detail-panel {
     position: absolute;
-    right: 24px;
-    bottom: 32px;          
+    right: 0px;
+    bottom: 0px;          
     width: 320px;
     max-width: 32%;
     padding: 12px 14px;

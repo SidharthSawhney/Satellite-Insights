@@ -93,9 +93,9 @@ class LaunchDominance {
       .attr('x', this.chartW / 2)
       .attr('y', -50)
       .attr('text-anchor', 'middle')
-      .style('font-size', '24px')
+      .style('font-size', '20px')
       .style('font-weight', 'bold')
-      .style('fill', '#5fa8d3')
+      .style('fill', '#0066a6')
       .style('text-transform', 'uppercase')
       .text('Cumulative Satellites launched per Major Rocket');
     
@@ -104,8 +104,8 @@ class LaunchDominance {
       .attr('x', this.chartW / 2)
       .attr('y', -30)
       .attr('text-anchor', 'middle')
-      .style('font-size', '14px')
-      .style('fill', '#778da9')
+      .style('font-size', '12px')
+      .style('fill', '#8fa9b9')
       .style('font-family', 'Courier New, monospace')
       .text('Click on a line to view vehicle details');
     
@@ -391,7 +391,12 @@ class LaunchDominance {
       .attr('stroke', d => vis.colorMap.get(d.vehicle))
       .on('click', function(event, d) {
         event.stopPropagation();
-        vis._selectVehicle(d.vehicle);
+        // If clicking the same vehicle, deselect it, otherwise select new one
+        if (vis.selectedVehicle === d.vehicle) {
+          vis._deselectVehicle();
+        } else {
+          vis._selectVehicle(d.vehicle);
+        }
       })
       .on('mouseover', function(event, d) {
         if (!vis.selectedVehicle) {
@@ -429,7 +434,12 @@ class LaunchDominance {
         .style('opacity', d => d.accumulated_satellites > 0 ? 1 : 0)
         .on('click', function(event, d) {
           event.stopPropagation();
-          vis._selectVehicle(vehicleObj.vehicle);
+          // If clicking the same vehicle, deselect it, otherwise select new one
+          if (vis.selectedVehicle === vehicleObj.vehicle) {
+            vis._deselectVehicle();
+          } else {
+            vis._selectVehicle(vehicleObj.vehicle);
+          }
         })
         .on('mouseover', function(event, d) {
           if (d.accumulated_satellites > 0) {
@@ -480,7 +490,7 @@ class LaunchDominance {
     this.legendGroup.append('text')
       .attr('x', 0)
       .attr('y', -5)
-      .style('fill', '#5fa8d3')
+      .style('fill', '#0066a6')
       .style('font-family', 'Courier New, monospace')
       .style('font-size', '12px')
       .style('font-weight', 'bold')
@@ -500,8 +510,14 @@ class LaunchDominance {
         .attr('class', 'legend-item')
         .attr('transform', `translate(${x}, ${y})`)
         .style('cursor', 'pointer')
-        .on('click', function() {
-          vis._selectVehicle(v.vehicle);
+        .on('click', function(event) {
+          event.stopPropagation();
+          // If clicking the same vehicle, deselect it, otherwise select new one
+          if (vis.selectedVehicle === v.vehicle) {
+            vis._deselectVehicle();
+          } else {
+            vis._selectVehicle(v.vehicle);
+          }
         })
         .on('mouseover', function() {
           d3.select(this).select('text')
@@ -539,21 +555,8 @@ class LaunchDominance {
       .attr('class', 'sidebar-content')
       .style('position', 'relative')
       .style('padding', '20px')
-      .style('color', '#e0e1dd')
+      .style('color', '#e0f0ff')
       .style('height', '100%');
-    
-    // Add title - small and faded in top right
-    this.sidebarContent.append('h2')
-      .attr('class', 'sidebar-title')
-      .style('font-size', '11px')
-      .style('color', '#00aacc')
-      .style('text-transform', 'uppercase')
-      .style('font-family', 'Courier New, monospace')
-      .style('text-align', 'right')
-      .style('margin', '0 0 10px 0')
-      .style('opacity', '0.6')
-      .style('font-weight', 'normal')
-      .text('LAUNCH VEHICLE INFO');
     
     // Add instruction text - centered in the middle
     this.sidebarInstruction = this.sidebarContent.append('div')
@@ -564,10 +567,11 @@ class LaunchDominance {
       .style('transform', 'translate(-50%, -50%)')
       .style('width', '80%')
       .style('font-size', '14px')
-      .style('color', '#778da9')
+      .style('color', '#8fa9b9')
       .style('text-align', 'center')
       .style('line-height', '1.8')
-      .html('Click on a line<br/>to view vehicle details');
+      .style('font-family', 'Courier New, monospace')
+      .html('Select a rocket line<br/>to view details');
     
     // Details container (initially hidden)
     this.sidebarDetails = this.sidebarContent.append('div')
@@ -617,8 +621,8 @@ class LaunchDominance {
     this.sidebarDetails.append('h2')
       .style('font-size', '18px')
       .style('margin-bottom', '20px')
-      .style('color', '#5fa8d3')
-      .style('border-bottom', '2px solid #5fa8d3')
+      .style('color', '#0066a6')
+      .style('border-bottom', '2px solid #0066a6')
       .style('padding-bottom', '10px')
       .style('text-transform', 'uppercase')
       .style('font-family', 'Courier New, monospace')
@@ -636,13 +640,13 @@ class LaunchDominance {
     const ratingDiv = this.sidebarDetails.append('div')
       .style('margin-bottom', '20px')
       .style('padding', '15px')
-      .style('background', 'rgba(0, 255, 136, 0.1)')
-      .style('border-left', '3px solid #5fa8d3')
+      .style('background', 'rgba(0, 102, 166, 0.1)')
+      .style('border-left', '3px solid #0066a6')
       .style('border-radius', '4px');
     
     ratingDiv.append('div')
       .style('font-size', '12px')
-      .style('color', '#778da9')
+      .style('color', '#8fa9b9')
       .style('margin-bottom', '8px')
       .style('font-family', 'Courier New, monospace')
       .text('EFFICIENCY RATING');
@@ -653,41 +657,41 @@ class LaunchDominance {
     
     for (let i = 1; i <= 5; i++) {
       starsDiv.append('span')
-        .style('color', i <= Math.round(rating) ? '#5fa8d3' : '#2a3a2a')
+        .style('color', i <= Math.round(rating) ? '#0066a6' : 'rgba(0, 102, 166, 0.2)')
         .text('★');
     }
     
     // Add explanation
     ratingDiv.append('div')
       .style('font-size', '10px')
-      .style('color', '#778da9')
+      .style('color', '#8fa9b9')
       .style('margin-top', '8px')
       .style('line-height', '1.4')
       .style('font-family', 'Courier New, monospace')
-      .html('Based on satellite efficiency:<br/><strong style="color: #5fa8d3;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
+      .html('Based on satellite efficiency:<br/><strong style="color: #0066a6;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
     
     // Description
     this.sidebarDetails.append('div')
       .style('margin-top', '20px')
       .style('padding', '15px')
-      .style('background', 'rgba(0, 255, 136, 0.05)')
+      .style('background', 'rgba(0, 102, 166, 0.05)')
       .style('border-radius', '4px')
       .style('font-size', '12px')
       .style('line-height', '1.6')
       .style('font-family', 'Courier New, monospace')
-      .style('color', '#778da9')
-      .html(`<strong style="color: #5fa8d3;">ABOUT:</strong><br/>${this._getVehicleInfo(vehicleObj.vehicle)}`);
+      .style('color', '#8fa9b9')
+      .html(`<strong style="color: #0066a6;">ABOUT:</strong><br/>${this._getVehicleInfo(vehicleObj.vehicle)}`);
   }
 
   _addStatItem(container, label, value) {
     const item = container.append('div')
       .style('margin-bottom', '15px')
       .style('padding-bottom', '15px')
-      .style('border-bottom', '1px solid #2a3a2a');
+      .style('border-bottom', '1px solid rgba(0, 102, 166, 0.2)');
     
     item.append('div')
       .style('font-size', '11px')
-      .style('color', '#778da9')
+      .style('color', '#8fa9b9')
       .style('margin-bottom', '5px')
       .style('font-family', 'Courier New, monospace')
       .style('text-transform', 'uppercase')
@@ -696,7 +700,7 @@ class LaunchDominance {
     item.append('div')
       .style('font-size', '24px')
       .style('font-weight', 'bold')
-      .style('color', '#5fa8d3')
+      .style('color', '#0066a6')
       .style('font-family', 'Courier New, monospace')
       .text(value.toLocaleString());
   }

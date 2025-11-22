@@ -29,14 +29,14 @@ class governmentVsCommercial {
   updateDimensions() {
     const box = this.node.getBoundingClientRect();
     this.w = Math.max(300, box.width || 700);
-    this.h = Math.max(300, Math.min(600, box.height || 500));
+    this.h = Math.max(400, box.height || 700);
 
-    // Responsive margins
+    // Responsive margins - reduce right margin to center better
     const marginScale = Math.min(this.w / 700, 1);
     this.margin = {
-      top: 80 * marginScale,
-      right: 60 * marginScale,
-      bottom: 50 * marginScale,
+      top: 100 * marginScale,
+      right: 80 * marginScale,
+      bottom: 60 * marginScale,
       left: 80 * marginScale
     };
 
@@ -219,16 +219,16 @@ class governmentVsCommercial {
       .attr('y', d => vis.yScale(d.year))
       .attr('width', d => vis.xScale(d.government))
       .attr('height', vis.yScale.bandwidth())
-      .attr('fill', '#6B9BD1')
+      .attr('fill', '#0e8ebe')
       .attr('rx', 2)
-      .style('opacity', 0.9)
+      .style('opacity', 0.8)
       .style('transition', 'opacity 0.2s, fill 0.2s')
       .on('mouseover', function (event, d) {
-        d3.select(this).style('opacity', 1).attr('fill', '#8AB5E1');
+        d3.select(this).style('opacity', 1).attr('fill', '#00aacc');
         vis._showTip(event, d, 'Government');
       })
       .on('mouseout', function () {
-        d3.select(this).style('opacity', 0.9).attr('fill', '#6B9BD1');
+        d3.select(this).style('opacity', 0.8).attr('fill', '#0e8ebe');
         vis._hideTip();
       });
 
@@ -241,16 +241,16 @@ class governmentVsCommercial {
       .attr('y', d => vis.yScale(d.year))
       .attr('width', d => vis.xScale(d.commercial))
       .attr('height', vis.yScale.bandwidth())
-      .attr('fill', '#00D9FF')
+      .attr('fill', '#00d4ff')
       .attr('rx', 2)
-      .style('opacity', 0.9)
+      .style('opacity', 0.8)
       .style('transition', 'opacity 0.2s, fill 0.2s')
       .on('mouseover', function (event, d) {
-        d3.select(this).style('opacity', 1).attr('fill', '#33E5FF');
+        d3.select(this).style('opacity', 1).attr('fill', '#4dffff');
         vis._showTip(event, d, 'Commercial');
       })
       .on('mouseout', function () {
-        d3.select(this).style('opacity', 0.9).attr('fill', '#00D9FF');
+        d3.select(this).style('opacity', 0.8).attr('fill', '#00d4ff');
         vis._hideTip();
       });
   }
@@ -283,7 +283,7 @@ class governmentVsCommercial {
       .datum(this.data)
       .attr("class", "ma-line-gov")
       .attr("fill", "none")
-      .attr("stroke", "#FFD700")
+      .attr("stroke", "#8c4effff")
       .attr("stroke-width", 3)
       .attr("stroke-dasharray", "8,4")
       .attr("d", govLine)
@@ -299,7 +299,7 @@ class governmentVsCommercial {
       .datum(this.data)
       .attr("class", "ma-line-com")
       .attr("fill", "none")
-      .attr("stroke", "#FFD700")
+      .attr("stroke", "#8c4effff")
       .attr("stroke-width", 3)
       .attr("stroke-dasharray", "8,4")
       .attr("d", comLine)
@@ -314,7 +314,7 @@ class governmentVsCommercial {
       .attr("cx", d => vis.chartW / 2 - vis.xScale(d.govMA))
       .attr("cy", d => vis.yScale(d.year) + vis.yScale.bandwidth() / 2)
       .attr("r", 3)
-      .attr("fill", "#FFD700")
+      .attr("fill", "#8c4effff")
       .style("opacity", 0.9)
       .on('mouseover', function (event, d) {
         d3.select(this).attr("r", 5).style("opacity", 1);
@@ -333,7 +333,7 @@ class governmentVsCommercial {
       .attr("cx", d => vis.chartW / 2 + vis.xScale(d.comMA))
       .attr("cy", d => vis.yScale(d.year) + vis.yScale.bandwidth() / 2)
       .attr("r", 3)
-      .attr("fill", "#FFD700")
+      .attr("fill", "#8c4effff")
       .style("opacity", 0.9)
       .on('mouseover', function (event, d) {
         d3.select(this).attr("r", 5).style("opacity", 1);
@@ -396,13 +396,14 @@ class governmentVsCommercial {
 
     const legend = this.chart.append("g").attr("class", "legend");
     const categories = [
-      { name: "Government", color: "#6B9BD1" },
-      { name: "Commercial", color: "#00D9FF" },
-      { name: "3-Year Moving Avg", color: "#FFD700", dashed: true }
+      { name: "Government", color: "#0e8ebe" },
+      { name: "Commercial", color: "#00d4ff" },
+      { name: "3-Year Moving Avg", color: "#8c4effff", dashed: true }
     ];
 
-    const spacing = this.w < 500 ? 110 : 150;
-    const yOffset = this.w < 500 ? -50 : -35;
+    const verticalSpacing = 25;
+    const xOffset = this.chartW + 10;
+    const yStart = -70;
     const fontSize = this.w < 500 ? '11px' : '13px';
     const rectSize = this.w < 500 ? 16 : 18;
 
@@ -414,14 +415,13 @@ class governmentVsCommercial {
 
     legendItems.each(function (d, i) {
       const item = d3.select(this);
-      const baseX = i * spacing;
-      const baseY = yOffset;
+      const baseY = yStart + (i * verticalSpacing);
 
       if (d.dashed) {
         // dashed line for moving average
         item.append("line")
-          .attr("x1", baseX)
-          .attr("x2", baseX + rectSize)
+          .attr("x1", xOffset - rectSize - 8)
+          .attr("x2", xOffset - 8)
           .attr("y1", baseY + rectSize / 2)
           .attr("y2", baseY + rectSize / 2)
           .attr("stroke", d.color)
@@ -430,69 +430,87 @@ class governmentVsCommercial {
           .style("opacity", 0.9);
       } else {
         item.append("rect")
-          .attr("x", baseX)
+          .attr("x", xOffset - rectSize - 8)
           .attr("y", baseY)
           .attr("width", rectSize)
           .attr("height", rectSize)
           .attr("rx", 3)
           .attr("fill", d.color)
-          .style("opacity", 0.9);
+          .style("opacity", 0.8);
       }
 
-      // main legend label
+      // main legend label (right-aligned)
       const label = item.append("text")
-        .attr("x", baseX + rectSize + 8)
+        .attr("x", xOffset - rectSize - 16)
         .attr("y", baseY + rectSize - 4)
-        .attr("fill", "#E8E8E8")
+        .attr("fill", "#e0f0ff")
         .attr("font-size", fontSize)
+        .attr("text-anchor", "end")
         .text(d.name);
 
 
       if (d.dashed) {
         const labelWidth = label.node().getComputedTextLength();
 
+        // Add info icon circle background
+        item.append("circle")
+          .attr("cx", xOffset - rectSize - 16 - labelWidth - 14)
+          .attr("cy", baseY + rectSize / 2)
+          .attr("r", 9)
+          .attr("fill", "rgba(0, 102, 166, 0.3)")
+          .attr("stroke", "#0066a6")
+          .attr("stroke-width", 1);
+
         item.append("text")
           .attr("class", "legend-info-icon")
-          .attr("x", baseX + rectSize + 8 + labelWidth + 6)
+          .attr("x", xOffset - rectSize - 16 - labelWidth - 14)
           .attr("y", baseY + rectSize - 4)
-          .text("ⓘ")
+          .attr("text-anchor", "middle")
+          .attr("fill", "#e0f0ff")
+          .attr("font-size", "14px")
+          .attr("font-weight", "bold")
+          .style("cursor", "pointer")
+          .text("i")
           .on("mouseover", (event) => {
             vis._showLegendMATip(event);
           })
           .on("mouseout", () => vis._hideTip());
       }
     });
-
-
-    // Add note about scaling
-    legend.append("text")
-      .attr("x", 0)
-      .attr("y", yOffset - 15)
-      .attr("fill", "#999")
-      .attr("font-size", this.w < 500 ? '9px' : '10px')
-      .attr("font-style", "italic")
-      .text("Hover over bars and moving average dots for details");
   }
 
   _updateTitle() {
     this.chart.selectAll(".chart-title").remove();
+    this.chart.selectAll(".chart-instruction").remove();
 
-    const fontSize = this.w < 500 ? '13px' : this.w < 700 ? '16px' : '18px';
-    const yOffset = this.w < 500 ? -70 : -60;
-    const titleText = this.w < 500
-      ? "Gov vs Commercial Launches"
-      : "Government vs Commercial Satellites Launched";
+    const fontSize = this.w < 500 ? '16px' : this.w < 700 ? '18px' : '20px';
+    const instructionFontSize = this.w < 500 ? '11px' : '12px';
 
+    // Title - top left
     this.chart
       .append("text")
       .attr("class", "chart-title")
-      .attr("x", this.chartW / 2)
-      .attr("y", yOffset)
-      .attr("text-anchor", "middle")
-      .attr("fill", "#FFFFFF")
+      .attr("x", 0)
+      .attr("y", -70)
+      .attr("text-anchor", "start")
+      .attr("fill", "#0066a6")
       .attr("font-weight", "bold")
       .style("font-size", fontSize)
-      .text(titleText);
+      .text("Government vs Commercial Satellites Launched");
+
+    // Instruction text below title - more obvious
+    this.chart
+      .append("text")
+      .attr("class", "chart-instruction")
+      .attr("x", 0)
+      .attr("y", -48)
+      .attr("text-anchor", "start")
+      .attr("fill", "#e0f0ff")
+      .style("font-size", instructionFontSize)
+      .style("text-transform", "uppercase")
+      .style("letter-spacing", "0.05em")
+      .style("font-weight", "600")
+      .text("Hover over bars and moving average dots for details");
   }
 
   _showTip(event, d, side) {
