@@ -1,7 +1,7 @@
 /**
  * Launch Sites Map Visualization
  * - Each launch site is a circle whose radius grows with cumulative launches.
- * - YouTube-style controls: play/pause, backward, forward, year slider
+ * - Timeline controls: play/pause, backward, forward, year slider
  * - Tooltip shows satellite count per site
  */
 
@@ -10,14 +10,19 @@ class LaunchSitesMap {
         this.host = d3.select('#' + hostId).classed('map-root', true);
         this.node = this.host.node();
 
-
         // Ensure visible height even if page CSS fails
         if (!this.node.clientHeight || this.node.clientHeight < 80) {
             this.host.style('height', '70vh');
         }
 
-        this.w = opts.width ?? this.node.clientWidth ?? 1100;
+        this.w = opts.width  ?? this.node.clientWidth  ?? 1100;
         this.h = opts.height ?? this.node.clientHeight ?? 720;
+
+        // Lock aspect ratio so resize is width-driven, not feedback from height
+        this.aspectRatio = this.h / this.w;
+        if (!isFinite(this.aspectRatio) || this.aspectRatio <= 0) {
+            this.aspectRatio = 0.65; // default if something gEts weird
+        }
 
         this.world = worldGeo;
         this.launchesRaw = launches;
@@ -60,25 +65,34 @@ class LaunchSitesMap {
         this.gLand = this.g.append('g');
         this.gSites = this.g.append('g'); // circles
 
-        // Title
-        // Title container
+        // Small instruction text above the viz
+        this.prompt = d3.select(this.node).append('div')
+            .attr('class', 'map-prompt')
+            .text('Hover over and click a circle to learn more about that launch site.');
+
+        // Title with small round (i) button
         this.title = d3.select(this.node).append('div')
             .attr('class', 'map-title');
 
-        // Add title text
         this.title.append('span')
             .attr('class', 'map-title-text')
-            .text('Satellite Launches by Space Station');
+            .text('Satellite Launches by Location');
 
-        // Add info icon
-        this._attachInfoIcon(
-            this.title,
-            `
-    <h3>Space Station</h3>
-    <p>A launch site is where rockets (aka launch vehicles) are launched. These rockets carry satellites to deploy into space<p>
-    `
-        );
+        this.infoButton = this.title.append('button')
+            .attr('class', 'map-info-btn')
+            .attr('type', 'button')
+            .html('i')
+            .on('click', () => this._toggleInfoPopover());
 
+        // Info popover that explains what the circles are
+        this.infoPopover = d3.select(this.node).append('div')
+            .attr('class', 'map-info-popover')
+            .style('display', 'none')
+            .html(`
+            <strong>What do the circles show?</strong>
+            <p>Each circle represents a <em>launch site</em> – a spaceport or launch complex where rockets carrying satellites lift off.</p>
+            <p>The size of the circle shows the cumulative number of satellite launches from that site. Hover to see totals, and click to explore its launch history.</p>
+        `);
 
         // Year display
         this.yearDisplay = d3.select(this.node).append('div')
@@ -86,7 +100,46 @@ class LaunchSitesMap {
             .text('');
 
         // Tooltip
-        this.tooltip = d3.select(this.node).append('div').attr('class', 'map-tooltip');
+        this.tooltip = d3.select(this.node).append('div')
+            .attr('class', 'map-tooltip');
+
+        // Right-hand detail panel (copied conceptually from launch dominance box)
+        this.sitePanel = d3.select(this.node).append('div')
+            .attr('class', 'site-detail-panel');
+
+        const header = this.sitePanel.append('div')
+            .attr('class', 'site-panel-header');
+
+        this.sitePanelTitle = header.append('div')
+            .attr('class', 'site-panel-title')
+            .text('Launch Site Details');
+
+        this.sitePanelSubtitle = header.append('div')
+            .attr('class', 'site-panel-subtitle')
+            .text('Click a circle to see yearly launches.');
+
+        this.sitePanelInfo = this.sitePanel.append('div')
+            .attr('class', 'site-panel-info')
+            .text('No site selected yet.');
+
+        // SVG for stacked horizontal bar chart
+        this.sitePanelSvg = this.sitePanel.append('svg')
+            .attr('class', 'site-panel-chart')
+            .attr('viewBox', '0 0 320 220')
+            .attr('preserveAspectRatio', 'xMidYMid meet');
+
+        // Clicking anywhere else in the container hides the info popover
+        d3.select(this.node).on('click.map-info-dismiss', (event) => {
+            if (!this.infoPopover) return;
+            const target = event.target;
+            const inButton  = target.closest && target.closest('.map-info-btn');
+            const inPopover = target.closest && target.closest('.map-info-popover');
+            if (!inButton && !inPopover) {
+                this.infoPopover.style('display', 'none');
+            }
+        });
+
+
     }
 
     _layout() {
@@ -119,27 +172,33 @@ class LaunchSitesMap {
 
     /* ---------- Data helpers ---------- */
 
+    _toggleInfoPopover() {
+        if (!this.infoPopover) return;
+        const visible = this.infoPopover.style('display') !== 'none';
+        this.infoPopover.style('display', visible ? 'none' : 'block');
+    }
+
     _installSiteDictionary() {
         this.siteDict = [
-            { test: /\b(kourou|guiana)\b/i, lon: -52.768, lat: 5.239, name: 'Guiana Space Center' },
-            { test: /\bcape\s*canaveral|kennedy\b/i, lon: -80.605, lat: 28.396, name: 'Cape Canaveral / KSC' },
-            { test: /\bvandenberg\b/i, lon: -120.611, lat: 34.632, name: 'Vandenberg' },
-            { test: /\bbaikonur\b/i, lon: 63.305, lat: 45.964, name: 'Baikonur Cosmodrome' },
-            { test: /\bplesetsk\b/i, lon: 40.577, lat: 62.925, name: 'Plesetsk Cosmodrome' },
-            { test: /\bjiuquan\b/i, lon: 100.298, lat: 40.960, name: 'Jiuquan SLC' },
-            { test: /\bxichang\b/i, lon: 102.026, lat: 28.246, name: 'Xichang SLC' },
-            { test: /\btaiyuan\b/i, lon: 111.608, lat: 38.846, name: 'Taiyuan SLC' },
-            { test: /\bwenchang\b/i, lon: 110.951, lat: 19.614, name: 'Wenchang SLS' },
-            { test: /\btanegashima\b/i, lon: 130.957, lat: 30.375, name: 'Tanegashima' },
-            { test: /\buchinoura|kagoshima\b/i, lon: 131.081, lat: 31.251, name: 'Uchinoura' },
-            { test: /\bsvobodny|vostochny\b/i, lon: 128.12, lat: 51.42, name: 'Svobodny/Vostochny' },
-            { test: /\bsatish|sriharikota|shar\b/i, lon: 80.235, lat: 13.733, name: 'Satish Dhawan (Sriharikota)' },
-            { test: /\bnaro\b/i, lon: 127.535, lat: 34.431, name: 'Naro' },
-            { test: /\bwallops\b/i, lon: -75.466, lat: 37.940, name: 'Wallops' },
-            { test: /\bkodiak|psca\b/i, lon: -152.339, lat: 57.435, name: 'Kodiak (PSCA)' },
-            { test: /\bmah[ií]a|rocket\s*lab|lc-1\b/i, lon: 177.865, lat: -39.262, name: 'LC-1 Mahia' },
-            { test: /\bdombarov|yasny\b/i, lon: 59.533, lat: 50.803, name: 'Dombarovsky (Yasny)' },
-            { test: /\bsea\s*launch|odyssey\b/i, lon: -154.0, lat: 0.000, name: 'Sea Launch (equator)' }
+            { test:/\b(kourou|guiana)\b/i,                 lon:-52.768, lat: 5.239,   name:'Guiana Space Center' },
+            { test:/\bcape\s*canaveral|kennedy\b/i,        lon:-80.605, lat:28.396,   name:'Cape Canaveral / KSC' },
+            { test:/\bvandenberg\b/i,                      lon:-120.611,lat:34.632,   name:'Vandenberg' },
+            { test:/\bbaikonur\b/i,                        lon: 63.305, lat:45.964,   name:'Baikonur Cosmodrome' },
+            { test:/\bplesetsk\b/i,                        lon: 40.577, lat:62.925,   name:'Plesetsk Cosmodrome' },
+            { test:/\bjiuquan\b/i,                         lon:100.298, lat:40.960,   name:'Jiuquan SLC' },
+            { test:/\bxichang\b/i,                         lon:102.026, lat:28.246,   name:'Xichang SLC' },
+            { test:/\btaiyuan\b/i,                         lon:111.608, lat:38.846,   name:'Taiyuan SLC' },
+            { test:/\bwenchang\b/i,                        lon:110.951, lat:19.614,   name:'Wenchang SLS' },
+            { test:/\btanegashima\b/i,                     lon:130.957, lat:30.375,   name:'Tanegashima' },
+            { test:/\buchinoura|kagoshima\b/i,             lon:131.081, lat:31.251,   name:'Uchinoura' },
+            { test:/\bsvobodny|vostochny\b/i,              lon:128.12,  lat:51.42,    name:'Svobodny/Vostochny' },
+            { test:/\bsatish|sriharikota|shar\b/i,         lon: 80.235, lat:13.733,   name:'Satish Dhawan (Sriharikota)' },
+            { test:/\bnaro\b/i,                            lon:127.535, lat:34.431,   name:'Naro' },
+            { test:/\bwallops\b/i,                         lon:-75.466, lat:37.940,   name:'Wallops' },
+            { test:/\bkodiak|psca\b/i,                     lon:-152.339,lat:57.435,   name:'Kodiak (PSCA)' },
+            { test:/\bmah[ií]a|rocket\s*lab|lc-1\b/i,      lon:177.865, lat:-39.262,  name:'LC-1 Mahia' },
+            { test:/\bdombarov|yasny\b/i,                  lon: 59.533, lat:50.803,   name:'Dombarovsky (Yasny)' },
+            { test:/\bsea\s*launch|odyssey\b/i,            lon:-154.0,  lat: 0.000,   name:'Sea Launch (equator)' }
         ];
     }
 
@@ -153,7 +212,7 @@ class LaunchSitesMap {
         const d = new Date(raw);
         if (!isNaN(+d)) return d;
         const m = String(raw).match(/^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/);
-        if (m) return new Date(+m[1], (m[2] ? +m[2] - 1 : 0), (m[3] ? +m[3] : 1));
+        if (m) return new Date(+m[1], (m[2]? +m[2]-1:0), (m[3]? +m[3]:1));
         return null;
     }
 
@@ -166,16 +225,28 @@ class LaunchSitesMap {
     }
 
     _classifyOwnership(row) {
-        // Heuristic: look at a few likely columns that might encode ownership
-        const raw = (this._pick(row, [
+        // Look first at commonly used columns
+        const primary = this._pick(row, [
             'Ownership',
             'Owner Type',
             'Owner_Type',
             'Operator Type',
             'Operator_Category',
             'User Type',
-            'Users'
-        ]) || '').toString().toLowerCase();
+            'User type',
+            'Users',
+            'Owner/Operator',
+            'Operator/Owner'
+        ]);
+
+        // Fallback: scan any ownership / user / operator fields if needed
+        let raw = (primary || '').toString().toLowerCase();
+        if (!raw) {
+            raw = Object.keys(row)
+                .filter(k => /owner|user|operat|category|type/i.test(k))
+                .map(k => (row[k] || '').toString().toLowerCase())
+                .join(' | ');
+        }
 
         if (!raw) return 'unknown';
 
@@ -202,9 +273,24 @@ class LaunchSitesMap {
 
     _acronym(siteName) {
         if (!siteName) return '??';
-        const words = String(siteName).trim().toUpperCase().split(/\s+/);
-        if (words.length === 1) return words[0].slice(0, 2);
-        return (words[0][0] || '') + (words[1][0] || '');
+
+        // Remove things in parentheses and non-alphanumeric punctuation
+        const cleaned = String(siteName)
+            .replace(/\(.*?\)/g, ' ')        // drop "(Yasny)" etc.
+            .replace(/[^A-Za-z0-9\s]/g, ' '); // remove punctuation like "-" etc.
+
+        // Split into tokens and keep only ones starting with a letter
+        const tokens = cleaned
+            .trim()
+            .toUpperCase()
+            .split(/\s+/)
+            .filter(t => /^[A-Z]/.test(t));
+
+        if (tokens.length === 0) return '??';
+        if (tokens.length === 1) return tokens[0].slice(0, 2);
+
+        // First letter of first two "real" words
+        return (tokens[0][0] || '') + (tokens[1][0] || '');
     }
 
     _prepLaunchEvents() {
@@ -214,24 +300,33 @@ class LaunchSitesMap {
         // All-time stats per site (for tooltip)
         const allTimeStats = new Map();
 
+        // Per-site, per-year breakdown for the right-hand panel
+        this.siteYearly = new Map();
+
         for (const r of rows) {
-            const siteName = this._pick(r, ['launch_site', 'Launch Site', 'Launch_Site', 'Site']) || '';
-            const dateRaw = this._pick(r, ['date_of_launch', 'Date of Launch', 'Launch_Date', 'Launch Date', 'Date']);
+            const rawSiteName = this._pick(r, ['launch_site','Launch Site','Launch_Site','Site']) || '';
+            const dateRaw  = this._pick(r, ['date_of_launch','Date of Launch','Launch_Date','Launch Date','Date']);
             const dt = this._parseDate(dateRaw);
             if (!dt) continue;
 
-            // lat/lon, or fuzzy map
+            // lat/lon (prefer data; fall back to fuzzy site dictionary)
             let lat = +this._pick(r, [
-                'Launch_Site_Lat', 'Launch Site Lat', 'Launch Site Latitude', 'site_lat', 'lat', 'Latitude'
+                'Launch_Site_Lat','Launch Site Lat','Launch Site Latitude','site_lat','lat','Latitude'
             ]);
             let lon = +this._pick(r, [
-                'Launch_Site_Lon', 'Launch Site Lon', 'Launch Site Longitude', 'site_lon', 'lon', 'Longitude'
+                'Launch_Site_Lon','Launch Site Lon','Launch Site Longitude','site_lon','lon','Longitude'
             ]);
+
+            const lookup = this._siteFromName(rawSiteName);
+            const canonicalName = (lookup?.canonical) || rawSiteName || 'Unknown site';
+
             if (isNaN(lat) || isNaN(lon)) {
-                const guess = this._siteFromName(siteName);
-                if (!guess) continue;
-                lat = guess.lat;
-                lon = guess.lon;
+                if (lookup) {
+                    lat = lookup.lat;
+                    lon = lookup.lon;
+                } else {
+                    continue;
+                }
             }
 
             const country = this._pick(r, [
@@ -247,13 +342,13 @@ class LaunchSitesMap {
             const key = `${lon.toFixed(4)},${lat.toFixed(4)}`;
             const year = dt.getFullYear();
 
-            // Track all-time stats for this site (for tooltip)
+            // ---- All-time stats (for tooltip) ----
             if (!allTimeStats.has(key)) {
                 allTimeStats.set(key, {
                     key,
                     lon,
                     lat,
-                    siteName: siteName || 'Unknown site',
+                    siteName: canonicalName,
                     country,
                     total: 0,
                     govTotal: 0,
@@ -266,20 +361,53 @@ class LaunchSitesMap {
                 stats.govTotal += 1;
             } else if (ownerClass === 'commercial') {
                 stats.commTotal += 1;
-            } else {
-                // Fallback: count unknown as commercial so totals add up
-                stats.commTotal += 1;
             }
 
-            events.push({ key, lon, lat, year, siteName: siteName || 'Unknown site', country });
+            // ---- Yearly breakdown for stacked bar chart ----
+            if (!this.siteYearly.has(key)) {
+                this.siteYearly.set(key, {
+                    key,
+                    lon,
+                    lat,
+                    siteName: canonicalName,
+                    country,
+                    byYear: new Map()
+                });
+            }
+            const siteYearData = this.siteYearly.get(key);
+            if (!siteYearData.byYear.has(year)) {
+                siteYearData.byYear.set(year, {
+                    year,
+                    gov: 0,
+                    comm: 0,
+                    total: 0
+                });
+            }
+            const yEntry = siteYearData.byYear.get(year);
+            yEntry.total += 1;
+            if (ownerClass === 'government') {
+                yEntry.gov += 1;
+            } else if (ownerClass === 'commercial') {
+                yEntry.comm += 1;
+            }
+
+            // Event for cumulative timeline
+            events.push({
+                key,
+                lon,
+                lat,
+                year,
+                siteName: canonicalName,
+                country
+            });
         }
 
         // Sort by year
-        events.sort((a, b) => a.year - b.year);
+        events.sort((a,b) => a.year - b.year);
 
-        // Get unique years
+        // Unique years
         const yearsSet = new Set(events.map(e => e.year));
-        this.years = Array.from(yearsSet).sort((a, b) => a - b);
+        this.years = Array.from(yearsSet).sort((a,b) => a - b);
 
         // Group events by year
         this.eventsByYear = {};
@@ -295,16 +423,13 @@ class LaunchSitesMap {
             this.eventsByYear[year].forEach(ev => {
                 if (!cumulative.has(ev.key)) {
                     const allStats = allTimeStats.get(ev.key);
-
                     cumulative.set(ev.key, {
                         key: ev.key,
                         lon: ev.lon,
                         lat: ev.lat,
-                        siteName: ev.siteName,
+                        siteName: allStats?.siteName || ev.siteName,
                         country: allStats?.country || ev.country || 'Unknown',
-                        // cumulative up to this year (for radius)
-                        count: 0,
-                        // all-time totals (for tooltip)
+                        count: 0, // cumulative up to this year
                         totalAllYears: allStats?.total ?? 0,
                         govTotal: allStats?.govTotal ?? 0,
                         commTotal: allStats?.commTotal ?? 0
@@ -313,7 +438,6 @@ class LaunchSitesMap {
                 cumulative.get(ev.key).count += 1;
             });
 
-            // Store snapshot for this year
             this.cumulativeByYear[year] = new Map(
                 Array.from(cumulative.entries()).map(([k, v]) => [k, { ...v }])
             );
@@ -321,17 +445,22 @@ class LaunchSitesMap {
 
         // Radius scale based on maximum cumulative count
         const maxCount = Math.max(...Array.from(cumulative.values()).map(s => s.count), 1);
-        this.radiusScale = d3.scaleLinear()
+        this.radiusScale = d3.scaleSqrt()
             .domain([0, maxCount])
-            .range([0, 50]);
+            .range([0, 35]);
+
+        // Default: show cumulative 2023 data (or the last available year if 2023 is missing)
+        const defaultYear = 2023;
+        const idx = this.years.indexOf(defaultYear);
+        this.currentYearIndex = idx >= 0 ? idx : this.years.length - 1;
     }
 
     /* ---------- Controls ---------- */
 
     _buildControls() {
-        // Controls container
+        // Controls container (hidden under overlay at first)
         this.controls = d3.select(this.node).append('div')
-            .attr('class', 'map-controls');
+            .attr('class', 'map-controls timeline-hidden');
 
         // Play/Pause button
         this.playButton = this.controls.append('button')
@@ -357,7 +486,7 @@ class LaunchSitesMap {
             .attr('class', 'year-slider')
             .attr('min', 0)
             .attr('max', this.years.length - 1)
-            .attr('value', 0)
+            .attr('value', this.currentYearIndex)
             .on('input', (event) => {
                 this.currentYearIndex = +event.target.value;
                 this._updateVisualization();
@@ -366,44 +495,26 @@ class LaunchSitesMap {
         // Year label
         this.yearLabel = this.controls.append('span')
             .attr('class', 'year-label')
-            .text(this.years[0] || '');
+            .text(this.years[this.currentYearIndex] || '');
+
+        // Sexy overlay that covers the timeline initially
+        this.timelineOverlay = d3.select(this.node).append('div')
+            .attr('class', 'map-timeline-overlay');
+
+        this.timelineOverlay.append('button')
+            .attr('class', 'map-timeline-overlay-btn')
+            .text('Play timeline')
+            .on('click', () => {
+                // Remove overlay, reveal controls, restart from first year and auto-play
+                this.timelineOverlay.remove();
+                this.controls.classed('timeline-hidden', false);
+
+                this.currentYearIndex = 0;
+                this.yearSlider.property('value', this.currentYearIndex);
+                this._updateVisualization();
+                this._play();
+            });
     }
-
-    /**
- * Reusable info icon + hover popover
- */
-_attachInfoIcon(container, html) {
-    const icon = container.append('span')
-        .attr('class', 'map-info-icon')
-        .text('i');
-
-    const pop = d3.select(this.node)
-        .append('div')
-        .attr('class', 'map-info-popover')
-        .style('visibility', 'hidden')
-        .style('opacity', 0)
-        .html(html);
-
-    const show = (event) => {
-        const rectIcon = icon.node().getBoundingClientRect();
-        const rectHost = this.node.getBoundingClientRect();
-
-        pop.style('left', (rectIcon.right - rectHost.left + 10) + 'px')
-           .style('top',  (rectIcon.top - rectHost.top + 10) + 'px')
-           .style('visibility', 'visible')
-           .style('opacity', 1);
-    };
-
-    const hide = () => {
-        pop.style('visibility', 'hidden')
-           .style('opacity', 0);
-    };
-
-    icon.on('mouseenter', show)
-        .on('mousemove', show)
-        .on('mouseleave', hide);
-}
-
 
     _togglePlay() {
         if (this.isPlaying) {
@@ -435,7 +546,7 @@ _attachInfoIcon(container, html) {
 
     _startPlayback() {
         if (this.playbackTimer) clearInterval(this.playbackTimer);
-
+        
         this.playbackTimer = setInterval(() => {
             if (this.currentYearIndex < this.years.length - 1) {
                 this.currentYearIndex++;
@@ -492,13 +603,11 @@ _attachInfoIcon(container, html) {
         circlesEnter.append('circle')
             .attr('class', 'site-circle')
             .attr('r', 0)
-            .attr('fill', '#5fa8d3')
-            .attr('fill-opacity', 0.8)
-            .attr('stroke', '#fff')
-            .attr('stroke-width', 1.5)
+            .style('opacity', 0)
             .on('mouseover', (e, d) => this._showTip(e, d))
             .on('mousemove', (e, d) => this._moveTip(e, d))
-            .on('mouseout', () => this._hideTip());
+            .on('mouseout', () => this._hideTip())
+            .on('click', (e, d) => this._updateSitePanel(d));
 
         circlesEnter.append('text')
             .attr('class', 'site-label')
@@ -507,7 +616,8 @@ _attachInfoIcon(container, html) {
             .style('fill', '#ffffff')
             .style('pointer-events', 'none')
             .style('font-weight', 700)
-            .style('font-size', '12px') // larger default
+            .style('font-size', '12px')
+            .style('opacity', 0)
             .text(d => this._acronym(d.siteName));
 
         // Update
@@ -518,15 +628,16 @@ _attachInfoIcon(container, html) {
             .transition()
             .duration(600)
             .ease(d3.easeCubicInOut)
-            .attr('r', d => this.radiusScale(d.count));
+            .attr('r', d => this.radiusScale(d.count))
+            .style('opacity', 1);
 
-        // Slightly larger font + scale with radius, with smooth transition
         circlesAll.select('text')
             .transition()
             .duration(600)
             .ease(d3.easeCubicInOut)
             .text(d => this._acronym(d.siteName))
-            .style('font-size', d => Math.max(10, this.radiusScale(d.count) * 0.5) + 'px');
+            .style('font-size', d => Math.max(10, this.radiusScale(d.count) * 0.5) + 'px')
+            .style('opacity', 1);
 
         // Exit
         circles.exit()
@@ -546,14 +657,14 @@ _attachInfoIcon(container, html) {
         }
 
         const siteName = (d && d.siteName) || 'Unknown site';
-        const country = (d && d.country) || 'Unknown';
+        const country  = (d && d.country)  || 'Unknown';
 
         // Safely fall back if the all-time fields aren’t present
         const total = (d && d.totalAllYears != null)
             ? d.totalAllYears
             : (d && d.count != null ? d.count : 0);
 
-        const gov = (d && d.govTotal != null) ? d.govTotal : 'n/a';
+        const gov  = (d && d.govTotal  != null) ? d.govTotal  : 'n/a';
         const comm = (d && d.commTotal != null) ? d.commTotal : 'n/a';
 
         this.tooltip
@@ -568,32 +679,250 @@ _attachInfoIcon(container, html) {
         this._moveTip(event);
     }
 
+    _updateSitePanel(d) {
+        if (!d || !this.siteYearly) return;
+
+        const site = this.siteYearly.get(d.key);
+        if (!site) {
+            this.sitePanelTitle.text(d.siteName || 'Launch site');
+            this.sitePanelSubtitle.text(d.country || '');
+            this.sitePanelInfo.text('No launch data available for this site.');
+            this.sitePanelSvg.selectAll('*').remove();
+            return;
+        }
+
+        // Header text
+        this.sitePanelTitle.text(site.siteName);
+        this.sitePanelSubtitle.text(this._inferCountry(site.siteName, site.country));
+
+        const desc = this._getSiteDescription(site.siteName, site.country);
+        this.sitePanelInfo.text(desc);
+
+        const data = Array.from(site.byYear.values())
+            .sort((a, b) => a.year - b.year);
+
+        const svg = this.sitePanelSvg;
+        svg.selectAll('*').remove();
+
+        const margin = { top: 16, right: 12, bottom: 28, left: 48 };
+        const width = 320 - margin.left - margin.right;
+        const height = 220 - margin.top - margin.bottom;
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        const maxTotal = d3.max(data, d => d.total) || 1;
+
+        const x = d3.scaleLinear()
+            .domain([0, maxTotal])
+            .range([0, width]);
+
+        const y = d3.scaleBand()
+            .domain(data.map(d => d.year))
+            .range([0, height])
+            .padding(0.2);
+
+        // Year axis
+        const years = data.map(d => d.year);
+        const step = Math.max(1, Math.ceil(years.length / 8)); // at most ~8 labels
+        const tickValues = years.filter((_, i) => i % step === 0);
+
+        g.append('g')
+            .attr('class', 'site-panel-axis')
+            .call(
+                d3.axisLeft(y)
+                    .tickValues(tickValues)
+                    .tickFormat(d3.format('d'))
+            );
+
+        // One row per year
+        const row = g.selectAll('.site-panel-row')
+            .data(data)
+            .enter()
+            .append('g')
+            .attr('class', 'site-panel-row')
+            .attr('transform', d => `translate(0,${y(d.year)})`);
+
+        // Government segment
+        row.append('rect')
+            .attr('class', 'site-panel-bar site-panel-bar-gov')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('height', y.bandwidth())
+            .attr('width', d => x(d.gov));
+
+        // Commercial segment
+        row.append('rect')
+            .attr('class', 'site-panel-bar site-panel-bar-comm')
+            .attr('x', d => x(d.gov))
+            .attr('y', 0)
+            .attr('height', y.bandwidth())
+            .attr('width', d => x(d.comm));
+
+        // Total labels at bar end
+        row.append('text')
+            .attr('class', 'site-panel-bar-label')
+            .attr('x', d => x(d.total) + 4)
+            .attr('y', y.bandwidth() / 2)
+            .attr('dy', '0.35em')
+            .text(d => d.total);
+
+        // Legend
+        const legend = g.append('g')
+            .attr('class', 'site-panel-legend')
+            .attr('transform', `translate(0,${height + 8})`);
+
+        const items = [
+            { key: 'Government', cls: 'site-panel-legend-gov' },
+            { key: 'Commercial', cls: 'site-panel-legend-comm' }
+        ];
+
+        const li = legend.selectAll('.site-panel-legend-item')
+            .data(items)
+            .enter()
+            .append('g')
+            .attr('class', 'site-panel-legend-item')
+            .attr('transform', (d, i) => `translate(${i * 120},0)`);
+
+        li.append('rect')
+            .attr('width', 12)
+            .attr('height', 12)
+            .attr('class', d => 'site-panel-legend-swatch ' + d.cls);
+
+        li.append('text')
+            .attr('x', 18)
+            .attr('y', 6)
+            .attr('dy', '0.35em')
+            .text(d => d.key);
+    }
+
+    _inferCountry(name, fallback) {
+        const n = (name || '').toLowerCase();
+
+        // Hand-researched major launch sites, yes it was painful but oh well
+        if (n.includes('guiana')) return 'French Guiana (France)';
+        if (n.includes('cape canaveral') || n.includes('kennedy')) return 'United States';
+        if (n.includes('vandenberg')) return 'United States';
+        if (n.includes('wallops')) return 'United States';
+        if (n.includes('kodiak') || n.includes('psca')) return 'United States';
+        if (n.includes('baikonur')) return 'Kazakhstan';
+        if (n.includes('plesetsk')) return 'Russia';
+        if (n.includes('svobodny') || n.includes('vostochny')) return 'Russia';
+        if (n.includes('dombarovsky') || n.includes('yasny')) return 'Russia';
+        if (n.includes('jiuquan')) return 'China';
+        if (n.includes('xichang')) return 'China';
+        if (n.includes('taiyuan')) return 'China';
+        if (n.includes('wenchang')) return 'China';
+        if (n.includes('tanegashima')) return 'Japan';
+        if (n.includes('uchinoura') || n.includes('kagoshima')) return 'Japan';
+        if (n.includes('sriharikota') || n.includes('satish dhawan') || n.includes('shar')) return 'India';
+        if (n.includes('naro')) return 'South Korea';
+        if (n.includes('mahia') || n.includes('rocket lab') || n.includes('lc-1')) return 'New Zealand';
+        if (n.includes('sea launch') || n.includes('odyssey')) return 'International waters';
+
+        // Fall back to dataset country if it isn't literally "unknown"
+        if (fallback && fallback.toString().toLowerCase() !== 'unknown') {
+            return fallback;
+        }
+        // Final fallback: blank rather than "Unknown"
+        return '';
+    }
+
+    _getSiteDescription(name, country) {
+        const key = (name || '').toLowerCase();
+
+        if (key.includes('guiana')) {
+            return 'Europe’s main equatorial launch site, used by Arianespace and ESA for heavy-lift and commercial missions.';
+        }
+        if (key.includes('cape canaveral') || key.includes('kennedy')) {
+            return 'NASA and US commercial providers use Cape Canaveral and Kennedy Space Center for a wide range of civil, military, and commercial launches.';
+        }
+        if (key.includes('vandenberg')) {
+            return 'A US West Coast launch base optimized for polar and sun-synchronous orbits, frequently used for defence and commercial missions.';
+        }
+        if (key.includes('baikonur')) {
+            return 'Historically the Soviet Union’s main spaceport and still one of the busiest launch sites, supporting crewed and uncrewed missions.';
+        }
+        if (key.includes('plesetsk')) {
+            return 'A Russian military spaceport in northern Russia, focused mainly on defence and Earth-observation satellites.';
+        }
+        if (key.includes('jiuquan')) {
+            return 'One of China’s primary inland launch centres, used for both crewed missions and robotic satellites.';
+        }
+        if (key.includes('xichang')) {
+            return 'Chinese launch site in Sichuan that supports many communications and navigation satellite missions.';
+        }
+        if (key.includes('taiyuan')) {
+            return 'A Chinese site specialising in polar-orbit launches, especially for Earth-observation payloads.';
+        }
+        if (key.includes('wenchang')) {
+            return 'China’s newest coastal spaceport on Hainan Island, designed for heavy-lift rockets and deep-space missions.';
+        }
+        if (key.includes('tanegashima')) {
+            return 'Japan’s main space centre operated by JAXA, used for H-II rockets and international missions.';
+        }
+        if (key.includes('sriharikota') || key.includes('satish dhawan')) {
+            return 'India’s Satish Dhawan Space Centre hosts ISRO’s PSLV and GSLV launches for domestic and international satellites.';
+        }
+        if (key.includes('mahia') || key.includes('rocket lab')) {
+            return 'Rocket Lab’s privately operated launch site in New Zealand, focused on small commercial satellites.';
+        }
+        if (key.includes('kodiak')) {
+            return 'First used for the Athena 1 craft, this remote Alaskan spaceport is expected to see increase commercial and government launches.';
+        }
+        if (key.includes('wallops')) {
+            return 'Low-cost launch site originally built for NASA and now focused on commercial use.';
+        }
+        if (key.includes('sea launch')) {
+            return 'Sea launches near the equator have become increasingly popular to take advantage of the point where the rotational force of Earth is at its max.';
+        }
+        if (key.includes('svobodny')) {
+            return 'Currently unused cosmodome.';
+        }
+        if (key.includes('dombarovsky')) {
+            return 'Russian military airbase with a space port component.';
+        }
+
+        if (country && country !== 'Unknown') {
+            return `Satellite launches from this site in ${country} include a mix of government and commercial missions.`;
+        }
+        return 'Satellite launches from this site include a mix of government and commercial missions.';
+    }
+
     _moveTip(event) {
         // Get mouse position relative to the map container
         const [x, y] = d3.pointer(event, this.node);
 
         this.tooltip
             .style('left', (x + 12) + 'px')
-            .style('top', (y - 12) + 'px');
+            .style('top',  (y - 12) + 'px');
     }
 
-    _hideTip() {
-        this.tooltip.style('visibility', 'hidden');
+    _hideTip() { 
+        this.tooltip.style('visibility', 'hidden'); 
     }
+
+    /* ---------- Resize ---------- */
 
     /* ---------- Resize ---------- */
 
     _attachResize() {
         const onResize = () => {
             const bbox = this.node.getBoundingClientRect();
-            this.w = Math.max(320, Math.floor(bbox.width));
-            this.h = Math.max(240, Math.floor(bbox.height));
-            d3.select(this.node).select('svg').attr('viewBox', `0 0 ${this.w} ${this.h}`);
 
+            // Width from container; height from fixed aspect ratio
+            this.w = Math.max(320, Math.floor(bbox.width));
+            this.h = Math.max(240, Math.floor(this.w * this.aspectRatio));
+
+            // Just change the viewBox (don’t mess with DOM height here)
+            d3.select(this.node)
+                .select('svg')
+                .attr('viewBox', `0 0 ${this.w} ${this.h}`);
+
+            // Recompute projection + redraw paths & circle positions
             this._layout();
             this.gLand.selectAll('path').attr('d', this.geoPath);
 
-            // Reposition circles
             this.gSites.selectAll('g.site')
                 .attr('transform', d => {
                     const [x, y] = this.projection([d.lon, d.lat]);
@@ -606,6 +935,8 @@ _attachInfoIcon(container, html) {
             this._ro.observe(this.node);
         }
         window.addEventListener('resize', onResize);
+
+        // Initial layout
         onResize();
     }
 }
