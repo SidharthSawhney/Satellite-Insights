@@ -1,5 +1,20 @@
-.map-title-text {
-    white-space: nowrap;
+.map-title {
+    position: absolute;
+    left: 20px;
+    bottom: 32px;   
+    top: auto;     
+    color: #e0e6f0;
+    font-size: 16px;
+    font-weight: 600;
+    background: rgba(13, 17, 40, 0.85);
+    padding: 8px 12px;
+    border-radius: 6px;
+    z-index: 10;
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    box-shadow: 0 0 15px rgba(74, 144, 226, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .map-prompt {
@@ -66,7 +81,7 @@
 .site-detail-panel {
     position: absolute;
     right: 24px;
-    bottom: 90px;
+    bottom: 32px;          
     width: 320px;
     max-width: 32%;
     padding: 12px 14px;
@@ -487,3 +502,4 @@
 
 
 }
+
