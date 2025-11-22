@@ -207,21 +207,21 @@ vis.legend.selectAll("legend_text")
         // Add annotation
         vis.annotation = vis.svg.append("g")
                                 .attr("class", "annotation")
-                                .attr("transform", `translate(${150}, 0)`);
+                                .attr("transform", `translate(${100}, 0)`);
         
         vis.annotation.append("rect")
                         .attr("class", "label_box")
                         .attr("x",0)
                         .attr("y",0)
-                        .attr("width", 950) 
+                        .attr("width", 800) 
                         .attr("height",40);
         
         vis.annotation.append("text")
                         .attr("class", "annotation")
                         .text("Each orbital layer's thickness indicates the density of satellites within that orbital region.")
                         .style("fill", "white")
-                        .attr("x", 30)
-                        .attr("y", 25);
+                        .attr("x", 0)
+                        .attr("y", 15);
         
         vis.annotation.style("opacity", 0);
         

@@ -55,24 +55,14 @@ class LaunchSitesMap {
     /* ---------- DOM / layout ---------- */
 
     _build() {
-        // SVG root
-        this.svg = d3.select(this.node)
-            .append('svg')
-            .attr('viewBox', `0 0 ${this.w} ${this.h}`)
-            .attr('preserveAspectRatio', 'xMidYMid meet');
-
-        this.g = this.svg.append('g');
-        this.gLand = this.g.append('g');
-        this.gSites = this.g.append('g'); // circles
-
-        // Small instruction text above the viz
-        this.prompt = d3.select(this.node).append('div')
-            .attr('class', 'map-prompt')
-            .text('Hover over and click a circle to learn more about that launch site.');
-
         // Title with small round (i) button
         this.title = d3.select(this.node).append('div')
             .attr('class', 'map-title');
+
+        // Instructions
+        this.prompt = d3.select(this.node).append('div')
+            .attr('class', 'map-prompt')
+            .text('Hover over and click a circle to learn more about that launch site.');
 
         this.title.append('span')
             .attr('class', 'map-title-text')
@@ -83,6 +73,16 @@ class LaunchSitesMap {
             .attr('type', 'button')
             .html('i')
             .on('click', () => this._toggleInfoPopover());
+
+        // SVG root
+        this.svg = d3.select(this.node)
+            .append('svg')
+            .attr('viewBox', `0 0 ${this.w} ${this.h}`)
+            .attr('preserveAspectRatio', 'xMidYMid meet');
+
+        this.g = this.svg.append('g');
+        this.gLand = this.g.append('g');
+        this.gSites = this.g.append('g'); // circles
 
         // Info popover that explains what the circles are
         this.infoPopover = d3.select(this.node).append('div')
@@ -144,8 +144,8 @@ class LaunchSitesMap {
 
     _layout() {
         this.projection = d3.geoNaturalEarth1()
-            .translate([this.w / 2, this.h / 2])
-            .scale(Math.min(this.w, this.h) * 0.32);
+            .translate([this.w / 2, this.h / 2 + 30])
+            .scale(Math.min(this.w, this.h) * 0.31);
 
         this.geoPath = d3.geoPath(this.projection);
     }
@@ -704,96 +704,92 @@ class LaunchSitesMap {
         const svg = this.sitePanelSvg;
         svg.selectAll('*').remove();
 
-        const margin = { top: 16, right: 12, bottom: 28, left: 48 };
+        const margin = { top: 16, right: 12, bottom: 30, left: 48 };
         const width = 320 - margin.left - margin.right;
-        const height = 220 - margin.top - margin.bottom;
+        const height = 180 - margin.top - margin.bottom;
 
         const g = svg.append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
         const maxTotal = d3.max(data, d => d.total) || 1;
 
+        // X scale for years
         const x = d3.scaleLinear()
-            .domain([0, maxTotal])
+            .domain([d3.min(data, d => d.year), d3.max(data, d => d.year)])
             .range([0, width]);
 
-        const y = d3.scaleBand()
-            .domain(data.map(d => d.year))
-            .range([0, height])
-            .padding(0.2);
+        // Y scale for launch count
+        const y = d3.scaleLinear()
+            .domain([0, maxTotal])
+            .range([height, 0])
+            .nice();
 
-        // Year axis
+        // X axis
         const years = data.map(d => d.year);
-        const step = Math.max(1, Math.ceil(years.length / 8)); // at most ~8 labels
-        const tickValues = years.filter((_, i) => i % step === 0);
+        const step = Math.max(1, Math.ceil(years.length / 6));
+        const [minYear, maxYear] = x.domain();
+        const nTicks = 6;
+
+        const tickValues = d3.range(nTicks).map(i =>
+            Math.round(minYear + (i / (nTicks - 1)) * (maxYear - minYear))
+        );
 
         g.append('g')
             .attr('class', 'site-panel-axis')
+            .attr('transform', `translate(0,${height})`)
             .call(
-                d3.axisLeft(y)
+                d3.axisBottom(x)
                     .tickValues(tickValues)
                     .tickFormat(d3.format('d'))
             );
 
-        // One row per year
-        const row = g.selectAll('.site-panel-row')
+        // Y axis
+        g.append('g')
+            .attr('class', 'site-panel-axis')
+            .call(
+                d3.axisLeft(y)
+                    .ticks(5)
+                    .tickFormat(d3.format('d'))
+            );
+
+        // Y axis label
+        g.append('text')
+            .attr('class', 'site-panel-axis-label')
+            .attr('transform', 'rotate(-90)')
+            .attr('x', -height / 2)
+            .attr('y', -35)
+            .attr('text-anchor', 'middle')
+            .style('fill', '#8fa9b9')
+            .style('font-size', '10px')
+            .text('Launches per Year');
+
+        // Line generator
+        const line = d3.line()
+            .x(d => x(d.year))
+            .y(d => y(d.total))
+            .curve(d3.curveMonotoneX);
+
+        // Draw line
+        g.append('path')
+            .datum(data)
+            .attr('class', 'site-panel-line')
+            .attr('fill', 'none')
+            .attr('stroke', '#0e8ebe')
+            .attr('stroke-width', 2)
+            .attr('d', line);
+
+        // Draw dots
+        g.selectAll('.site-panel-dot')
             .data(data)
             .enter()
-            .append('g')
-            .attr('class', 'site-panel-row')
-            .attr('transform', d => `translate(0,${y(d.year)})`);
-
-        // Government segment
-        row.append('rect')
-            .attr('class', 'site-panel-bar site-panel-bar-gov')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('height', y.bandwidth())
-            .attr('width', d => x(d.gov));
-
-        // Commercial segment
-        row.append('rect')
-            .attr('class', 'site-panel-bar site-panel-bar-comm')
-            .attr('x', d => x(d.gov))
-            .attr('y', 0)
-            .attr('height', y.bandwidth())
-            .attr('width', d => x(d.comm));
-
-        // Total labels at bar end
-        row.append('text')
-            .attr('class', 'site-panel-bar-label')
-            .attr('x', d => x(d.total) + 4)
-            .attr('y', y.bandwidth() / 2)
-            .attr('dy', '0.35em')
-            .text(d => d.total);
-
-        // Legend
-        const legend = g.append('g')
-            .attr('class', 'site-panel-legend')
-            .attr('transform', `translate(0,${height + 8})`);
-
-        const items = [
-            { key: 'Government', cls: 'site-panel-legend-gov' },
-            { key: 'Commercial', cls: 'site-panel-legend-comm' }
-        ];
-
-        const li = legend.selectAll('.site-panel-legend-item')
-            .data(items)
-            .enter()
-            .append('g')
-            .attr('class', 'site-panel-legend-item')
-            .attr('transform', (d, i) => `translate(${i * 120},0)`);
-
-        li.append('rect')
-            .attr('width', 12)
-            .attr('height', 12)
-            .attr('class', d => 'site-panel-legend-swatch ' + d.cls);
-
-        li.append('text')
-            .attr('x', 18)
-            .attr('y', 6)
-            .attr('dy', '0.35em')
-            .text(d => d.key);
+            .append('circle')
+            .attr('class', 'site-panel-dot')
+            .attr('cx', d => x(d.year))
+            .attr('cy', d => y(d.total))
+            .attr('r', 3)
+            .attr('fill', '#0066a6')
+            .attr('stroke', '#0e8ebe')
+            .attr('stroke-width', 1.5);
     }
 
     _inferCountry(name, fallback) {
