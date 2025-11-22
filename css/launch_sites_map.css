@@ -284,6 +284,56 @@
     margin-bottom: 4px;
     text-shadow: 0 0 5px rgba(0, 102, 166, 0.6);
 }
+/* ===== INFO ICON + POPOVER ===== */
+
+.map-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.map-info-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.6);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    transition: 0.15s ease;
+    text-shadow: 0 0 3px #000;
+}
+
+.map-info-icon:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.12);
+}
+
+.map-info-popover {
+    position: absolute;
+    max-width: 320px;
+    background: rgba(13,17,40,0.97);
+    padding: 14px 18px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 999;
+    border: 1px solid rgba(74,144,226,0.4);
+    box-shadow: 0 0 20px rgba(74,144,226,0.4);
+    transition: opacity 0.15s ease-out;
+    color: white;
+}
+
+.map-info-popover h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #4a90e2;
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

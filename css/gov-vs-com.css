@@ -152,19 +152,19 @@
     #gov-vs-com {
         height: 500px;
     }
-    
+
     .chart-title {
         font-size: 16px;
     }
-    
+
     .axis-title {
         font-size: 11px;
     }
-    
+
     .legend text {
         font-size: 11px;
     }
-    
+
     .x-axis-left text,
     .x-axis-right text {
         font-size: 10px;
@@ -175,11 +175,11 @@
     #gov-vs-com {
         height: 400px;
     }
-    
+
     .chart-title {
         font-size: 14px;
     }
-    
+
     .year-label {
         font-size: 9px;
     }

@@ -3,7 +3,7 @@
     font-family: 'Courier New', 'Consolas', monospace;
 }
 
-.buttonBox{
+.buttonBox {
     fill: none;
     stroke: #ff006e;
     stroke-width: 2px;
@@ -19,7 +19,7 @@
     letter-spacing: 0.1em;
 }
 
-.label_box{
+.label_box {
     rx: 10;
     ry: 10;
     fill: #0a0a0f;
@@ -55,4 +55,18 @@
             drop-shadow(0 0 15px rgba(191, 0, 255, 0.8))
             drop-shadow(0 0 20px rgba(255, 0, 110, 0.6));
     opacity: 1 !important;
+}
+
+.legend-info-icon {
+    fill: #4a90e2;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    pointer-events: all;
+    /* make sure hover works */
+}
+
+.legend-info-icon:hover {
+    fill: #7ec8ff;
 }

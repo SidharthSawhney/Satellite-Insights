@@ -183,11 +183,16 @@ p {
 }
 
 .section-header {
+
     text-align: center;
+    max-width: 1400px;
+    margin: 0 auto;
+
+
+
     margin-bottom: 3rem;
-    max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
+
+
 }
 
 .section-title {
@@ -226,6 +231,7 @@ p {
 
 /* ============ VISUALIZATION CONTAINERS ============ */
 .viz-container {
+
     width: 100%;
     min-height: 600px;
     background-color: var(--bg-card);
@@ -317,6 +323,7 @@ p {
     font-size: clamp(1.5rem, 2.5vw, 2rem);
     text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
 }
+
 
 /* ============ INSIGHT SECTION ============ */
 .insight-section {
