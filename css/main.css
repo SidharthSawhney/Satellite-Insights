@@ -403,6 +403,25 @@ p {
     border-radius: 4px;
 }
 
+.video-box {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;      /* optional: how big it can get on large screens */
+    margin: 2rem auto;
+    padding-top: 56.25%;    /* 16:9 aspect ratio (9 / 16 * 100) */
+    overflow: hidden;
+    border-radius: 10px;    /* optional */
+}
+
+.video-box iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0; /* overrides the frameborder attr */
+}
+
 /* ============ FOOTER ============ */
 .footer {
     background-color: var(--bg-darker);

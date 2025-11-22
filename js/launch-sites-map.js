@@ -321,9 +321,9 @@ class LaunchSitesMap {
 
         // Radius scale based on maximum cumulative count
         const maxCount = Math.max(...Array.from(cumulative.values()).map(s => s.count), 1);
-        this.radiusScale = d3.scaleSqrt()
+        this.radiusScale = d3.scaleLinear()
             .domain([0, maxCount])
-            .range([0, 35]);
+            .range([0, 50]);
     }
 
     /* ---------- Controls ---------- */

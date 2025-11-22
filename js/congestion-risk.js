@@ -415,7 +415,7 @@ vis.legend.selectAll("legend_text")
         }
 
         // Sample satellites from the data (limit to ~100 for performance, prioritize elliptical)
-        const sampleSize = Math.min(60, vis.data.length);
+        const sampleSize = Math.min(80, vis.data.length);
         const sampledData = [];
         
         // First, get all elliptical orbit satellites
@@ -439,9 +439,12 @@ vis.legend.selectAll("legend_text")
                 const c = (ap - pe) / 2; // distance from center to focus
                 const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
                 
-                // Speed based on power - normalize to reasonable rotation speed
-                const power = +sat['power_(watts)'] || 100;
-                const speed = (power / 1000) * 0.01; // Adjust multiplier for visible movement
+                // Speed based on apogee and perigee
+                const baseSpeed = 0.02;
+                const exponent  = 0.5;
+
+                // farther orbit -> smaller speed
+                const speed = baseSpeed / Math.pow(a, exponent);
                 
                 sampledData.push({
                     ...sat,
@@ -463,9 +466,12 @@ vis.legend.selectAll("legend_text")
                 const c = (ap - pe) / 2; // distance from center to focus
                 const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
                 
-                // Speed based on power - normalize to reasonable rotation speed
-                const power = +sat['power_(watts)'] || 100;
-                const speed = (power / 1000) * 0.01; // Adjust multiplier for visible movement
+                // Speed based on apogee and perigee
+                const baseSpeed = 0.02;
+                const exponent  = 0.4;
+
+                // farther orbit -> smaller speed
+                const speed = baseSpeed / Math.pow(a, exponent);
                 
                 sampledData.push({
                     ...sat,
