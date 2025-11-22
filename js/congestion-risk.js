@@ -24,7 +24,7 @@ class Congestion {
         // color scale for orbit classes
         this.colorScale = d3.scaleOrdinal()
             .domain(["LEO", "MEO", "GEO", "Elliptical"])
-            .range(['#00d4ff', '#5fa8d3', '#7b2cbf', '#ff006e']);
+            .range(['#82e6ffff', '#77adffff', '#7174ffff', '#9d69ffff']);
 
         //sets current state to 0
         this.state = 0;
@@ -62,7 +62,7 @@ class Congestion {
             .attr("cx", vis.width / 2)
             .attr("cy", vis.height / 2)
             .attr("r", vis.projection.scale())
-            .attr("fill", "#1b4965");
+            .attr("fill", "#0066a6");
 
         // Load World Map 
         d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(worldData => {
@@ -71,9 +71,9 @@ class Congestion {
             vis.land = vis.svg.append("g").selectAll("path")
                 .data(countries.features)
                 .enter().append("path")
-                .attr("fill", "#2a9d8f")
-                .attr("stroke", "#264653")
-                .attr("stroke-width", 0.3);
+                .attr("fill", "#0e8ebe")
+                .attr("stroke", "#0e8ebe")
+                .attr("stroke-width", 1);
 
             //  Rotation Animation 
             vis.rotation = [0, -10]; // initial [lambda, phi]
@@ -511,7 +511,7 @@ vis.legend.selectAll("legend_text")
             .on("mouseover", (event, d) =>{
                 vis.tooltip
                     .style("opacity", 1)
-                    .html(`<strong>${d.current_official_name_of_satellite}</strong><br/>Power: ${d['power_(watts)']}W<br/>Orbit: ${d.class_of_orbit}`)
+                    .html(`<strong>Name: ${d.current_official_name_of_satellite}</strong><br/>Orbit: ${d.class_of_orbit}`)
                     .style("left", (event.pageX + 10) + "px")
                     .style("top", (event.pageY - 10) + "px");
             })

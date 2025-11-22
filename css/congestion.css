@@ -1,20 +1,20 @@
 .legend_text, .legend_text{
-    fill: #e0c3fc;
+    fill: #e0f0ff;
     font-family: 'Courier New', 'Consolas', monospace;
 }
 
 .buttonBox {
     fill: none;
-    stroke: #ff006e;
+    stroke: #0066a6;
     stroke-width: 2px;
-    filter: drop-shadow(0 0 5px #ff006e)
-            drop-shadow(0 0 10px #ff006e)
-            drop-shadow(0 0 15px rgba(255, 0, 110, 0.6));
+    filter: drop-shadow(0 0 5px #0066a6)
+            drop-shadow(0 0 10px #0066a6)
+            drop-shadow(0 0 15px rgba(0, 102, 166, 0.6));
 }
 
 .buttonText{
     font-family: 'Courier New', 'Consolas', monospace;
-    fill: #e0c3fc;
+    fill: #e0f0ff;
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
@@ -22,8 +22,8 @@
 .label_box {
     rx: 10;
     ry: 10;
-    fill: #0a0a0f;
-    stroke: #bf00ff;
+    fill: #0a0d0e;
+    stroke: #0066a6;
     stroke-width: 1px;
 }
 
@@ -31,34 +31,34 @@
     position: absolute;
     pointer-events: none;
     opacity: 0;
-    background: rgba(10, 10, 15, 0.95);
-    border: 2px solid #ff006e;
+    background: rgba(10, 13, 14, 0.95);
+    border: 2px solid #0066a6;
     padding: 10px 16px;
     border-radius: 8px;
     z-index: 1000;
     font-size: 13px;
     font-family: 'Courier New', monospace;
-    color: #e0c3fc;
+    color: #e0f0ff;
     box-shadow: 
-        0 0 25px rgba(255, 0, 110, 0.6),
-        inset 0 0 20px rgba(255, 0, 110, 0.1);
+        0 0 25px rgba(0, 102, 166, 0.6),
+        inset 0 0 20px rgba(0, 102, 166, 0.1);
 }
 
 .satellite {
     cursor: pointer;
     transition: all 0.2s;
-    filter: drop-shadow(0 0 3px rgba(191, 0, 255, 0.8));
+    filter: drop-shadow(0 0 3px rgba(0, 102, 166, 0.8));
 }
 
 .satellite:hover {
-    filter: drop-shadow(0 0 10px rgba(255, 0, 110, 1)) 
-            drop-shadow(0 0 15px rgba(191, 0, 255, 0.8))
-            drop-shadow(0 0 20px rgba(255, 0, 110, 0.6));
+    filter: drop-shadow(0 0 10px rgba(0, 170, 204, 1)) 
+            drop-shadow(0 0 15px rgba(0, 102, 166, 0.8))
+            drop-shadow(0 0 20px rgba(0, 170, 204, 0.6));
     opacity: 1 !important;
 }
 
 .legend-info-icon {
-    fill: #4a90e2;
+    fill: #0066a6;
     font-family: "Segoe UI", Arial, sans-serif;
     font-size: 14px;
     font-weight: 700;
@@ -68,5 +68,5 @@
 }
 
 .legend-info-icon:hover {
-    fill: #7ec8ff;
+    fill: #0e8ebe;
 }

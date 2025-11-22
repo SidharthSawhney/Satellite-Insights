@@ -546,7 +546,7 @@ class LaunchDominance {
     this.sidebarContent.append('h2')
       .attr('class', 'sidebar-title')
       .style('font-size', '11px')
-      .style('color', '#4a6a4a')
+      .style('color', '#00aacc')
       .style('text-transform', 'uppercase')
       .style('font-family', 'Courier New, monospace')
       .style('text-align', 'right')

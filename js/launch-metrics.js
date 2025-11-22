@@ -248,49 +248,20 @@ class LaunchMetrics {
     renderVis() {
         let vis = this;
 
-        // Update axes
-        vis.xAxisG.call(vis.xAxis)
-            .selectAll('text')
-            .style('fill', '#333');
-
-        vis.yAxisG.call(vis.yAxis)
-            .selectAll('text')
-            .style('fill', '#333');
-
-        // Style axis lines and ticks
-        vis.svg.selectAll('.axis path, .axis line')
-            .style('stroke', '#ccc')
-            .style('stroke-width', '1px');
-
-        vis.svg.selectAll('.axis .domain')
-            .style('stroke-width', '1px');
+        // Update axes (CSS will handle styling)
+        vis.xAxisG.call(vis.xAxis);
+        vis.yAxisG.call(vis.yAxis);
     }
 
     /**
      * Handle window resize
      */
-    resize() {
+    renderVis() {
         let vis = this;
 
-        // Recalculate dimensions
-        vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
-        
-        // Update SVG size
-        vis.svg
-            .attr('width', vis.width + vis.config.margin.left + vis.config.margin.right);
-
-        // Update scales
-        vis.xScale.range([0, vis.width]);
-
-        // Update axis positions
-        vis.xAxisLabel
-            .attr('x', vis.config.margin.left + vis.width / 2);
-
-        vis.chartTitle
-            .attr('x', vis.config.margin.left + vis.width / 2);
-
-        // Re-render visualization
-        vis.updateVis();
+        // Update axes (CSS will handle styling)
+        vis.xAxisG.call(vis.xAxis);
+        vis.yAxisG.call(vis.yAxis);
     }
 }
 
