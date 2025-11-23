@@ -445,7 +445,7 @@ class governmentVsCommercial {
       .attr('x', this.chartW / 2)
       .attr('y', -40)
       .attr("text-anchor", "middle")
-                              .text("Hover over bars and moving average dots for details.");
+      .text("Hover over bars and moving average dots for details.");
   }
 
   _showTip(event, d, side) {
