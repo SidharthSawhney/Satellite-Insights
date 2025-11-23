@@ -87,8 +87,7 @@ class LaunchSitesMap {
         // Info popover that explains what the circles are
         this.infoPopover = d3.select(this.node).append('div')
             .attr('class', 'map-info-popover')
-            .style('display', 'none')
-            .html(`
+                        .html(`
             <strong>What do the circles show?</strong>
             <p>Each circle represents a <em>launch site</em> – a spaceport or launch complex where rockets carrying satellites lift off.</p>
             <p>The size of the circle shows the cumulative number of satellite launches from that site. Hover to see totals, and click to explore its launch history.</p>
@@ -613,11 +612,7 @@ class LaunchSitesMap {
             .attr('class', 'site-label')
             .attr('text-anchor', 'middle')
             .attr('dy', '0.35em')
-            .style('fill', '#ffffff')
-            .style('pointer-events', 'none')
-            .style('font-weight', 700)
-            .style('font-size', '12px')
-            .style('opacity', 0)
+                                                            .style('opacity', 0)
             .text(d => this._acronym(d.siteName));
 
         // Update
@@ -759,8 +754,7 @@ class LaunchSitesMap {
             .attr('x', -height / 2)
             .attr('y', -35)
             .attr('text-anchor', 'middle')
-            .style('fill', '#8fa9b9')
-            .style('font-size', '10px')
+                        .style('font-size', '10px')
             .text('Launches per Year');
 
         // Line generator

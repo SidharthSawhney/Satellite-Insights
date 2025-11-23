@@ -1,24 +1,39 @@
-.map-title {
-    left: 25px;
-    top: 20px;
-    fill: #0066a6;
-    font-family: 'Courier New', 'Consolas', monospace;
-    font-weight: bold;
-    font-size: 18px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
+/* Make the SVG container the positioning reference */
+.map-root {
+    position: relative;
 }
 
+/* Center title horizontally */
+.map-title {
+    position: absolute;
+    top: 0px; 
+    left: 50%;
+    transform: translateX(-50%);
+    color: #5fa8d3;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-weight: bold;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba(0, 102, 166, 0.5);
+    z-index: 10;
+}
+
+/* Center the instructions below the title */
 .map-prompt {
     position: absolute;
-    top: 50px;
-    left: 25px;
-    fill: #e0f0ff;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-42%);
+    color: #e0f0ff;
     font-family: 'Courier New', 'Consolas', monospace;
-    font-size: 13px;
+    font-size: 16px;
     pointer-events: none;
     letter-spacing: 0.08em;
     text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+    z-index: 10;
+    opacity: 0.7;
+    width: 800px;
 }
 
 .map-info-btn {
@@ -484,4 +499,48 @@
     .year-slider {
         width: 100px;
     }
+}
+/* Additional styles from JS file */
+
+/* Info popover display */
+.map-info-popover {
+    display: none;
+}
+
+/* Site labels */
+.site-label {
+    fill: #ffffff;
+    pointer-events: none;
+    font-weight: 700;
+    font-size: 12px;
+    opacity: 0;
+}
+
+.site-label.visible {
+    opacity: 1;
+}
+
+/* Panel chart axis text */
+.site-panel-axis text {
+    fill: #8fa9b9;
+    font-size: 10px;
+}
+
+/* Panel legend text */
+.site-panel-legend text {
+    fill: #ffffff;
+}
+
+/* Tooltip visibility */
+.map-tooltip {
+    visibility: hidden;
+}
+
+.map-tooltip.visible {
+    visibility: visible;
+}
+
+/* Host height for map widget */
+#launch-sites {
+    height: 70vh;
 }

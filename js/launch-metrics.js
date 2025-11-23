@@ -73,11 +73,6 @@ class LaunchMetrics {
             .attr('class', 'chart-title')
             .attr('x', (vis.width / 2) + vis.config.margin.left)
             .attr('y', vis.config.margin.top / 2)
-            .attr('text-anchor', 'middle')
-            .style('font-size', '24px')
-            .style('font-weight', 'bold')
-            .style('fill', '#5fa8d3')
-            .style('text-transform', 'uppercase')
             .text('Satellite Mass vs Power Consumed Over Time');
 
         // Add X-Axis Label
@@ -86,8 +81,7 @@ class LaunchMetrics {
             .attr('x', (vis.width / 2) + vis.config.margin.left)
             .attr('y', vis.height + vis.config.margin.top + vis.config.margin.bottom / 1.5)
             .attr('text-anchor', 'middle')
-            .style('fill', '#5fa8d3')
-            .text('Year');
+                        .text('Year');
 
         // Add Y-Axis Label
         vis.yAxisLabel = vis.svg.append('text')
@@ -96,26 +90,12 @@ class LaunchMetrics {
             .attr('x', -(vis.height / 2) - vis.config.margin.top)
             .attr('y', vis.config.margin.left / 3)
             .attr('text-anchor', 'middle')
-            .style('fill', '#5fa8d3')
-            .text('Average Power (Watts)');
+                        .text('Average Power (Watts)');
 
         // Initialize Tooltip
         vis.tooltip = d3.select('body').append('div')
             .attr('class', 'd3-tooltip')
-            .style('position', 'absolute')
-            .style('z-index', '10')
-            .style('visibility', 'hidden')
-            .style('background-color', 'rgba(255, 255, 255, 0.95)')
-            .style('border', '1px solid #ccc')
-            .style('border-radius', '8px')
-            .style('padding', '10px')
-            .style('font-family', 'Inter, sans-serif')
-            .style('font-size', '12px')
-            .style('color', '#333')
-            .style('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
-
-
-        // Process data and update visualization
+                                                                                                                                            // Process data and update visualization
         vis.wrangleData();
     }
 
@@ -170,13 +150,8 @@ class LaunchMetrics {
             .attr('cx', d => vis.xScale(d.year))
             .attr('cy', d => vis.yScale(d.avg_power_watts))
             // .attr('r', 0) // Start with radius 0 for transition
-            .style('fill', '#0077b6')
-            .style('fill-opacity', 0.6) // slightly more opaque so overlaps are visible
-            .style('stroke', '#03045e')
-            .style('stroke-width', 1.5)
-            .style('cursor', 'pointer');
-
-        // Exit: Remove old circles
+                        .style('fill-opacity', 0.6) // slightly more opaque so overlaps are visible
+                                            // Exit: Remove old circles
         circles.exit()
             .transition().duration(500)
             .attr('r', 0)

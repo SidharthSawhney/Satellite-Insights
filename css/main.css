@@ -399,7 +399,6 @@ p {
 .video-box {
     position: relative;
     width: 100%;
-    max-width: 1000px;      /* optional: how big it can get on large screens */
     margin: 2rem auto;
     padding-top: 56.25%;    /* 16:9 aspect ratio (9 / 16 * 100) */
     overflow: hidden;

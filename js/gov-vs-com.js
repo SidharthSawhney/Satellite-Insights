@@ -8,7 +8,13 @@ class governmentVsCommercial {
     this.updateDimensions();
 
     this.svg = this.host.append('svg')
-      .attr('class', 'gov-vs-com-svg');
+      .attr('class', 'gov-vs-com-svg')
+      .on('click', () => {
+        // Hide info tooltip when clicking anywhere on the chart
+        if (this.infoTooltipVisible) {
+          this._hideInfoTip();
+        }
+      });
 
     this.chart = this.svg.append('g')
       .attr('class', 'chart-group');
@@ -17,6 +23,8 @@ class governmentVsCommercial {
       .append('div')
       .attr('class', 'tooltip govcom-tip')
       .style('opacity', 0);
+    
+    this.infoTooltipVisible = false;
 
     this.data = this._processData();
 
@@ -172,36 +180,24 @@ class governmentVsCommercial {
       .attr('transform', `translate(0, ${this.chartH})`)
       .call(xAxisLeft)
       .selectAll('text')
-      .style('fill', '#6B9BD1')
-      .style('font-size', this.w < 500 ? '10px' : '12px');
-
-    this.chart.append('g')
+                this.chart.append('g')
       .attr('class', 'x-axis-right')
       .attr('transform', `translate(${this.chartW / 2}, ${this.chartH})`)
       .call(xAxisRight)
       .selectAll('text')
-      .style('fill', '#6B9BD1')
-      .style('font-size', this.w < 500 ? '10px' : '12px');
-
-    this.chart.append('line')
+                this.chart.append('line')
       .attr('class', 'divider-line')
       .attr('x1', this.chartW / 2)
       .attr('x2', this.chartW / 2)
       .attr('y1', 0)
       .attr('y2', this.chartH)
-      .attr('stroke', '#444')
-      .attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '4,4');
-
-    const fontSize = this.w < 500 ? '11px' : '13px';
+                      const fontSize = this.w < 500 ? '11px' : '13px';
     this.chart.append("text")
       .attr("class", "axis-title")
       .attr("x", this.chartW / 2)
       .attr("y", this.chartH + (this.w < 500 ? 35 : 40))
       .attr("text-anchor", "middle")
-      .attr("fill", "#999")
-      .attr("font-size", fontSize)
-      .text("Number of Satellites Launched");
+                  .text("Number of Satellites Launched");
   }
 
   _drawBars() {
@@ -219,11 +215,7 @@ class governmentVsCommercial {
       .attr('y', d => vis.yScale(d.year))
       .attr('width', d => vis.xScale(d.government))
       .attr('height', vis.yScale.bandwidth())
-      .attr('fill', '#0e8ebe')
-      .attr('rx', 2)
-      .style('opacity', 0.8)
-      .style('transition', 'opacity 0.2s, fill 0.2s')
-      .on('mouseover', function (event, d) {
+                              .on('mouseover', function (event, d) {
         d3.select(this).style('opacity', 1).attr('fill', '#00aacc');
         vis._showTip(event, d, 'Government');
       })
@@ -241,11 +233,7 @@ class governmentVsCommercial {
       .attr('y', d => vis.yScale(d.year))
       .attr('width', d => vis.xScale(d.commercial))
       .attr('height', vis.yScale.bandwidth())
-      .attr('fill', '#00d4ff')
-      .attr('rx', 2)
-      .style('opacity', 0.8)
-      .style('transition', 'opacity 0.2s, fill 0.2s')
-      .on('mouseover', function (event, d) {
+                              .on('mouseover', function (event, d) {
         d3.select(this).style('opacity', 1).attr('fill', '#4dffff');
         vis._showTip(event, d, 'Commercial');
       })
@@ -257,15 +245,18 @@ class governmentVsCommercial {
 
   _showLegendMATip(event) {
     const html = `
-    <strong>3-Year Moving Average</strong>
-    <p>Takes the average of the satellites launched in the current, prior and latter year to smoothen out fluctuations and show trend of satellites launched</p>
-  `;
+                  <strong>3-Year Moving Average</strong>
+                  <p>Takes the average of the satellites launched in the current, prior and latter year to smoothen out fluctuations and show trend of satellites launched</p>
+                `;
 
     this.tooltip
       .style('opacity', 1)
       .html(html)
       .style('left', (event.pageX + 10) + 'px')
       .style('top', (event.pageY - 20) + 'px');
+    
+    // Mark that tooltip is showing for info icon
+    this.infoTooltipVisible = true;
   }
 
 
@@ -282,14 +273,8 @@ class governmentVsCommercial {
     this.chart.append("path")
       .datum(this.data)
       .attr("class", "ma-line-gov")
-      .attr("fill", "none")
-      .attr("stroke", "#8c4effff")
-      .attr("stroke-width", 3)
-      .attr("stroke-dasharray", "8,4")
-      .attr("d", govLine)
-      .style("opacity", 0.9);
-
-    // Commercial MA line (right side)
+                              .attr("d", govLine)
+          // Commercial MA line (right side)
     const comLine = d3.line()
       .x(d => vis.chartW / 2 + vis.xScale(d.comMA))
       .y(d => vis.yScale(d.year) + vis.yScale.bandwidth() / 2)
@@ -298,14 +283,8 @@ class governmentVsCommercial {
     this.chart.append("path")
       .datum(this.data)
       .attr("class", "ma-line-com")
-      .attr("fill", "none")
-      .attr("stroke", "#8c4effff")
-      .attr("stroke-width", 3)
-      .attr("stroke-dasharray", "8,4")
-      .attr("d", comLine)
-      .style("opacity", 0.9);
-
-    // Add dots at each data point for better visibility
+                              .attr("d", comLine)
+          // Add dots at each data point for better visibility
     this.chart.selectAll(".ma-dot-gov")
       .data(this.data)
       .enter()
@@ -313,15 +292,12 @@ class governmentVsCommercial {
       .attr("class", "ma-dot-gov")
       .attr("cx", d => vis.chartW / 2 - vis.xScale(d.govMA))
       .attr("cy", d => vis.yScale(d.year) + vis.yScale.bandwidth() / 2)
-      .attr("r", 3)
-      .attr("fill", "#8c4effff")
-      .style("opacity", 0.9)
-      .on('mouseover', function (event, d) {
+                        .on('mouseover', function (event, d) {
         d3.select(this).attr("r", 5).style("opacity", 1);
         vis._showMATooltip(event, d, 'Government');
       })
       .on('mouseout', function () {
-        d3.select(this).attr("r", 3).style("opacity", 0.9);
+        d3.select(this).attr("r", 3);
         vis._hideTip();
       });
 
@@ -332,15 +308,12 @@ class governmentVsCommercial {
       .attr("class", "ma-dot-com")
       .attr("cx", d => vis.chartW / 2 + vis.xScale(d.comMA))
       .attr("cy", d => vis.yScale(d.year) + vis.yScale.bandwidth() / 2)
-      .attr("r", 3)
-      .attr("fill", "#8c4effff")
-      .style("opacity", 0.9)
-      .on('mouseover', function (event, d) {
+                        .on('mouseover', function (event, d) {
         d3.select(this).attr("r", 5).style("opacity", 1);
         vis._showMATooltip(event, d, 'Commercial');
       })
       .on('mouseout', function () {
-        d3.select(this).attr("r", 3).style("opacity", 0.9);
+        d3.select(this).attr("r", 3);
         vis._hideTip();
       });
   }
@@ -359,10 +332,7 @@ class governmentVsCommercial {
       .attr('y', 0)
       .attr('width', stripWidth)
       .attr('height', this.chartH)
-      .attr('fill', '#0d1129')
-      .attr('opacity', 0.95);
-
-    // Add individual background rectangles for each year label
+                // Add individual background rectangles for each year label
     this.chart.selectAll('.year-bg-rect')
       .data(this.data)
       .enter()
@@ -372,10 +342,7 @@ class governmentVsCommercial {
       .attr('y', d => vis.yScale(d.year))
       .attr('width', stripWidth)
       .attr('height', vis.yScale.bandwidth())
-      .attr('fill', '#0d1129')
-      .attr('opacity', 0.9);
-
-    // Add year labels on top of the strip
+                // Add year labels on top of the strip
     this.chart.selectAll('.year-label')
       .data(this.data)
       .enter()
@@ -384,10 +351,7 @@ class governmentVsCommercial {
       .attr('x', this.chartW / 2)
       .attr('y', d => vis.yScale(d.year) + vis.yScale.bandwidth() / 2 + 4)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#E8E8E8')
-      .attr('font-weight', 'bold')
-      .style('font-size', fontSize)
-      .text(d => d.year);
+                        .text(d => d.year);
   }
 
   _addLegend() {
@@ -402,8 +366,8 @@ class governmentVsCommercial {
     ];
 
     const verticalSpacing = 25;
-    const xOffset = this.chartW + 10;
-    const yStart = -70;
+    const xOffset = this.chartW + 5;
+    const yStart = 0;
     const fontSize = this.w < 500 ? '11px' : '13px';
     const rectSize = this.w < 500 ? 16 : 18;
 
@@ -425,27 +389,21 @@ class governmentVsCommercial {
           .attr("y1", baseY + rectSize / 2)
           .attr("y2", baseY + rectSize / 2)
           .attr("stroke", d.color)
-          .attr("stroke-width", 3)
-          .attr("stroke-dasharray", "5,3")
-          .style("opacity", 0.9);
-      } else {
+                    .attr("stroke-dasharray", "5,3")
+                } else {
         item.append("rect")
           .attr("x", xOffset - rectSize - 8)
           .attr("y", baseY)
           .attr("width", rectSize)
           .attr("height", rectSize)
-          .attr("rx", 3)
-          .attr("fill", d.color)
-          .style("opacity", 0.8);
-      }
+                    .attr("fill", d.color)
+                }
 
       // main legend label (right-aligned)
       const label = item.append("text")
         .attr("x", xOffset - rectSize - 16)
         .attr("y", baseY + rectSize - 4)
-        .attr("fill", "#e0f0ff")
-        .attr("font-size", fontSize)
-        .attr("text-anchor", "end")
+                        .attr("text-anchor", "end")
         .text(d.name);
 
 
@@ -453,28 +411,14 @@ class governmentVsCommercial {
         const labelWidth = label.node().getComputedTextLength();
 
         // Add info icon circle background
-        item.append("circle")
-          .attr("cx", xOffset - rectSize - 16 - labelWidth - 14)
-          .attr("cy", baseY + rectSize / 2)
-          .attr("r", 9)
-          .attr("fill", "rgba(0, 102, 166, 0.3)")
-          .attr("stroke", "#0066a6")
-          .attr("stroke-width", 1);
-
-        item.append("text")
-          .attr("class", "legend-info-icon")
-          .attr("x", xOffset - rectSize - 16 - labelWidth - 14)
-          .attr("y", baseY + rectSize - 4)
-          .attr("text-anchor", "middle")
-          .attr("fill", "#e0f0ff")
-          .attr("font-size", "14px")
-          .attr("font-weight", "bold")
-          .style("cursor", "pointer")
-          .text("i")
-          .on("mouseover", (event) => {
-            vis._showLegendMATip(event);
-          })
-          .on("mouseout", () => vis._hideTip());
+        
+        item.append('button')
+            .attr('class', "legend-info-icon")
+            .attr('type', 'button')
+            .attr("x", xOffset - rectSize - labelWidth - 5)
+            .attr("y", baseY + rectSize - 4)
+            .html('i')
+            .on('click', () => this._toggleInfoPopover());
       }
     });
   }
@@ -490,27 +434,18 @@ class governmentVsCommercial {
     this.chart
       .append("text")
       .attr("class", "chart-title")
-      .attr("x", 0)
-      .attr("y", -70)
-      .attr("text-anchor", "start")
-      .attr("fill", "#0066a6")
-      .attr("font-weight", "bold")
-      .style("font-size", fontSize)
+      .attr('x', this.chartW / 2)
+      .attr('y', -80)
       .text("Government vs Commercial Satellites Launched");
 
-    // Instruction text below title - more obvious
+    // Instruction text below title
     this.chart
       .append("text")
       .attr("class", "chart-instruction")
-      .attr("x", 0)
-      .attr("y", -48)
-      .attr("text-anchor", "start")
-      .attr("fill", "#e0f0ff")
-      .style("font-size", instructionFontSize)
-      .style("text-transform", "uppercase")
-      .style("letter-spacing", "0.05em")
-      .style("font-weight", "600")
-      .text("Hover over bars and moving average dots for details");
+      .attr('x', this.chartW / 2)
+      .attr('y', -40)
+      .attr("text-anchor", "middle")
+                              .text("Hover over bars and moving average dots for details");
   }
 
   _showTip(event, d, side) {
@@ -537,6 +472,14 @@ class governmentVsCommercial {
   }
 
   _hideTip() {
+    // Only hide if it's not the info icon tooltip
+    if (!this.infoTooltipVisible) {
+      this.tooltip.style('opacity', 0);
+    }
+  }
+
+  _hideInfoTip() {
+    this.infoTooltipVisible = false;
     this.tooltip.style('opacity', 0);
   }
 }

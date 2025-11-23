@@ -83,19 +83,77 @@
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
     pointer-events: none;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
     text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
 }
 
+.legend .legend-item .legend-info-icon {
+    text-anchor: middle;
+    fill: #e0f0ff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.legend .legend-item .legend-info-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 102, 166, 0.8);
+    background: rgba(0, 102, 166, 0.3);
+    color: #e0f0ff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(0, 102, 166, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.legend .legend-item .legend-info-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 8px rgba(0, 170, 204, 0.5);
+    background: rgba(0, 170, 204, 0.4);
+}
+
+.legend .legend-item .legend-info-popover {
+    position: absolute;
+    left: 330px;
+    top: 56px;
+    max-width: 280px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(10, 13, 14, 0.95);
+    color: #e0f0ff;
+    font-size: 12px;
+    line-height: 1.4;
+    z-index: 20;
+    box-shadow: 0 0 10px rgba(0, 102, 166, 0.2);
+    border: 1px solid rgba(0, 102, 166, 0.4);
+}
+
+.legend-info-popover strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #0e8ebe;
+    font-size: 12px;
+}
+
 /* Chart title */
 .chart-title {
-    fill: #0066a6;
-    font-family: 'Courier New', 'Consolas', monospace;
+    fill: #5fa8d3;
+    text-anchor: middle;
+    left: 50%;
+    transform: translateX(0%);
+    font-family: 'Courier New', monospace;
+    font-size: 23px;
     font-weight: bold;
-    font-size: 20px;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba(0, 102, 166, 0.5);
 }
 
 /* Axis titles */
@@ -181,4 +239,158 @@
     .year-label {
         font-size: 9px;
     }
+}
+/* Additional styles from JS file */
+
+/* X-Axis text styles */
+.x-axis-left text,
+.x-axis-right text {
+    fill: #6B9BD1;
+    font-size: 12px;
+}
+
+@media (max-width: 500px) {
+    .x-axis-left text,
+    .x-axis-right text {
+        font-size: 10px;
+    }
+}
+
+/* Divider line styles */
+.divider-line {
+    stroke: #444;
+    stroke-width: 1.5px;
+    stroke-dasharray: 4,4;
+}
+
+/* Axis title styles */
+.axis-title {
+    fill: #999;
+    font-size: 13px;
+}
+
+@media (max-width: 500px) {
+    .axis-title {
+        font-size: 11px;
+    }
+}
+
+/* Bar styles - hover effects managed in JS */
+.gov-bar {
+    fill: #0e8ebe;
+    rx: 2px;
+    opacity: 0.8;
+    transition: opacity 0.2s, fill 0.2s;
+}
+
+.com-bar {
+    fill: #00d4ff;
+    rx: 2px;
+    opacity: 0.8;
+    transition: opacity 0.2s, fill 0.2s;
+}
+
+/* Moving average lines */
+.ma-line-gov,
+.ma-line-com {
+    fill: none;
+    stroke: #8c4effff;
+    stroke-width: 3px;
+    stroke-dasharray: 8,4;
+    opacity: 0.9;
+}
+
+/* Moving average dots */
+.ma-dot-gov,
+.ma-dot-com {
+    fill: #8c4effff;
+    opacity: 0.9;
+    r: 3px;
+}
+
+/* Year label background */
+.year-bg-strip {
+    fill: #0d1129;
+    opacity: 0.95;
+}
+
+.year-bg-rect {
+    fill: #0d1129;
+    opacity: 0.9;
+}
+
+/* Year labels */
+.year-label {
+    fill: #E8E8E8;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+@media (max-width: 500px) {
+    .year-label {
+        font-size: 9px;
+    }
+}
+
+/* Legend items */
+.legend-item rect {
+    rx: 3px;
+    opacity: 0.8;
+}
+
+.legend-item line {
+    opacity: 0.9;
+}
+
+.legend-item text {
+    fill: #e0f0ff;
+    font-size: 13px;
+}
+
+@media (max-width: 500px) {
+    .legend-item text {
+        font-size: 11px;
+    }
+}
+
+/* Chart instruction text */
+.chart-instruction {
+    fill: #e0f0ff;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+@media (max-width: 500px) {
+    .chart-instruction {
+        font-size: 11px;
+    }
+}
+
+/* Chart title responsive */
+@media (max-width: 700px) {
+    .chart-title {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 500px) {
+    .chart-title {
+        font-size: 16px;
+    }
+}
+
+/* Legend rect sizes */
+@media (max-width: 500px) {
+    .legend rect {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* Default legend rect size */
+.legend rect {
+    width: 18px;
+    height: 18px;
 }
