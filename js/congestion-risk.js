@@ -20,6 +20,7 @@ class Congestion {
         const box = this.node.getBoundingClientRect();
         this.width = Math.max(320, Math.floor(box.width || 900));
         this.height = Math.max(320, Math.floor(box.height || 600));
+        this.graphTranslation = 20;
 
         // color scale for orbit classes
         this.colorScale = d3.scaleOrdinal()
@@ -51,7 +52,8 @@ class Congestion {
         // Add instructions
         vis.instructions = vis.host.append('div')
             .attr('class', 'congestion-instructions')
-            .text('Click "Simplify Me" to see orbital density levels. Each satellite orbits Earth in its designated layer.');
+            .text('Click "Simplify Me" to see orbital density levels. Each satellite orbits Earth in its designated layer.')
+            .style('transform', `translate(${vis.width-300}px, ${vis.height/2 - 120 - vis.graphTranslation}px)`);
 
         // Create the main SVG
         vis.svg = vis.host.append('svg')
@@ -64,7 +66,7 @@ class Congestion {
         // Globe Projection
         vis.projection = d3.geoOrthographic()
             .scale(vis.height/6)
-            .translate([vis.width / 2, vis.height / 2 + 40])
+            .translate([vis.width / 2, vis.height / 2 + vis.graphTranslation])
             .clipAngle(90);
 
         vis.path = d3.geoPath(vis.projection);
@@ -73,7 +75,7 @@ class Congestion {
         // Background Sphere
         vis.svg.append("circle")
             .attr("cx", vis.width / 2)
-            .attr("cy", vis.height / 2 + 40)
+            .attr("cy", vis.height / 2 + vis.graphTranslation)
             .attr("r", vis.projection.scale())
             .attr("fill", "#0066a6");
 
@@ -165,32 +167,32 @@ class Congestion {
         // --- info icon right next to the title ---
         const titleWidth = legendTitle.node().getComputedTextLength();
 
-        vis.legend.append("text")
-            .attr("class", "legend-info-icon")
-            .attr("x", titleWidth + 8 + 40)   // ⬅️ close to the text
-            .attr("y", 100)
-            .text("ⓘ")
-            .on("mouseover", (event) => {
-                vis.tooltip
-                    .style("opacity", 1)
-                    .html(`
-                        <strong>Orbit Classes</strong><br/>
-                        <strong>LEO: Low Earth Orbit</strong> - Close to Earth, Starlink and Earth-imaging satellites here. Very crowded<br/>
-                        <strong>MEO: Medium Earth Orbit</strong> – A bit higher up. For navigation satellites like GPS<br/>
-                        <strong>GEO: Geostationary Orbit</strong> – Very high up. Perfect for TV & weather<br/>
-                        <strong>Elliptical</strong> –  Oval shaped path. used for special missions
-                    `)
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top",  (event.pageY - 20) + "px");
-            })
-            .on("mousemove", (event) => {
-                vis.tooltip
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top",  (event.pageY - 20) + "px");
-            })
-            .on("mouseout", () => {
-                vis.tooltip.style("opacity", 0);
-            });
+        // vis.legend.append("text")
+        //     .attr("class", "legend-info-icon")
+        //     .attr("x", titleWidth + 8 + 40)   // ⬅️ close to the text
+        //     .attr("y", 100)
+        //     .text("ⓘ")
+        //     .on("mouseover", (event) => {
+        //         vis.tooltip
+        //             .style("opacity", 1)
+        //             .html(`
+        //                 <strong>Orbit Classes</strong><br/>
+        //                 <strong>LEO: Low Earth Orbit</strong> - Close to Earth, Starlink and Earth-imaging satellites here. Very crowded<br/>
+        //                 <strong>MEO: Medium Earth Orbit</strong> – A bit higher up. For navigation satellites like GPS<br/>
+        //                 <strong>GEO: Geostationary Orbit</strong> – Very high up. Perfect for TV & weather<br/>
+        //                 <strong>Elliptical</strong> –  Oval shaped path. used for special missions
+        //             `)
+        //             .style("left", (event.pageX + 10) + "px")
+        //             .style("top",  (event.pageY - 20) + "px");
+        //     })
+        //     .on("mousemove", (event) => {
+        //         vis.tooltip
+        //             .style("left", (event.pageX + 10) + "px")
+        //             .style("top",  (event.pageY - 20) + "px");
+        //     })
+        //     .on("mouseout", () => {
+        //         vis.tooltip.style("opacity", 0);
+        //     });
 
         // color boxes
         vis.legend.selectAll("rect")
@@ -228,7 +230,7 @@ class Congestion {
         // Add a button to change states
         vis.button = vis.svg.append("g")
                             .attr("class", "svg-button")
-                            .attr("transform", `translate(${vis.width-200}, ${vis.height/2})`)
+                            .attr("transform", `translate(${vis.width-230}, ${vis.height/2 - vis.graphTranslation})`)
                             .style("cursor", "pointer")
                             .on("click",function(){
                                 // Get the text of the button
@@ -238,7 +240,7 @@ class Congestion {
                                 if (txt === "Full View"){
                                     d3.select(this).select(".buttonText").text("Simplify Me");
                                     vis.state = 0;
-                                    vis.annotation.attr("transform", `translate(${vis.width}, ${vis.height - 50})`);
+                                    vis.annotation.attr("transform", `translate(${vis.width}, ${vis.height - 50 + vis.graphTranslation})`);
                                     vis.annotation.transition()
                                                 .duration(500) 
                                                 .delay(500)
@@ -317,7 +319,7 @@ class Congestion {
                             .attr('fill', 'none')
                             .attr('stroke', d => vis.colorScale(d.orbit_class))
                             .attr('stroke-width', d => vis.cScale(d.count))
-                            .attr('transform', 'translate(0,40)')   // 👈 this is the correct one
+                            .attr('transform', `translate(0,${vis.graphTranslation})`)
                             .on("mouseover", (event, d) => {
                                 vis.tooltip
                                     .style("opacity", 1)
@@ -365,7 +367,7 @@ class Congestion {
                     const c = (ap - pe) / 2;
                     return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
                 })
-                .attr('transform', d => `translate(0, 40) rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
+                .attr('transform', d => `translate(0, ${vis.graphTranslation}) rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
                 .attr('stroke', d => vis.colorScale(d.class_of_orbit))
                 .on("mouseover", (event, d) =>{
                     vis.tooltip
@@ -491,7 +493,7 @@ class Congestion {
                 const x = vis.width / 2 + d.rx * Math.cos(d.angle);
                 const y = vis.height / 2 + d.ry * Math.sin(d.angle);
                 // Rotate around the center of the visualization
-                return `translate(0,40) rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`;
+                return `translate(0,${vis.graphTranslation}) rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`;
             })
             .style('opacity', d => d.class_of_orbit === 'Elliptical' ? 1.0 : 0.9)
             .on("mouseover", (event, d) =>{

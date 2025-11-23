@@ -26,7 +26,6 @@ class LaunchDominance {
     
     // State
     this.selectedVehicle = null;
-    this.sidebarOpen = false;
     
     // Continue building
     this._buildSVG();
@@ -53,6 +52,30 @@ class LaunchDominance {
     // Chart container (fixed 80% width via CSS)
     this.chartContainer = this.container.append('div')
       .attr('class', 'chart-container');
+    
+    // Add info button and popover above the chart
+    // const infoWrapper = this.chartContainer.append('div')
+    //   .style('position', 'absolute')
+    //   .style('top', '12px')
+    //   .style('left', '50%')
+    //   .style('transform', 'translateX(-50%)')
+    //   .style('z-index', '10');
+    
+    // this.infoButton = infoWrapper.append('button')
+    //   .attr('class', 'map-info-btn')
+    //   .attr('type', 'button')
+    //   .attr('aria-label', 'Information about this visualization')
+    //   .html('ⓘ');
+    
+    // this.infoPopover = infoWrapper.append('div')
+    //   .attr('class', 'map-info-popover')
+    //   .style('left', '30px')
+    //   .style('top', '0')
+    //   .html(`
+    //     <strong>About This Chart</strong>
+    //     <p>This chart shows the cumulative number of satellites launched by each major rocket over time.</p>
+    //     <p>Click on any line, dot, or legend label to select a rocket and view detailed information in the sidebar.</p>
+    //   `);
     
     // Sidebar (Fixed 20% width via CSS)
     this.sidebarContainer = this.container.append('div')
@@ -114,7 +137,8 @@ class LaunchDominance {
     this.tooltip = d3.select('body')
       .append('div')
       .attr('class', 'launch-dom-tooltip')
-                                                                          }
+      .style('visibility', 'hidden');
+  }
 
   _processData() {
     // Get all unique years
@@ -254,8 +278,12 @@ class LaunchDominance {
     this.xAxisGroup.call(xAxis);
     
     this.xAxisGroup.selectAll('text')
-                      this.xAxisGroup.selectAll('.domain, .tick line')
-                // Y axis
+      .style('fill', '#e0f0ff');
+    
+    this.xAxisGroup.selectAll('.domain, .tick line')
+      .style('stroke', '#778da9');
+    
+    // Y axis
     const yAxis = d3.axisLeft(this.yScale)
       .ticks(8)
       .tickFormat(d => d3.format('.2s')(d));
@@ -263,8 +291,12 @@ class LaunchDominance {
     this.yAxisGroup.call(yAxis);
     
     this.yAxisGroup.selectAll('text')
-                      this.yAxisGroup.selectAll('.domain, .tick line')
-                // Y axis label
+      .style('fill', '#e0f0ff');
+    
+    this.yAxisGroup.selectAll('.domain, .tick line')
+      .style('stroke', '#778da9');
+    
+    // Y axis label
     this.yAxisGroup.selectAll('.y-axis-label').remove();
     this.yAxisGroup.append('text')
       .attr('class', 'y-axis-label')
@@ -272,7 +304,8 @@ class LaunchDominance {
       .attr('x', -this.chartH / 2)
       .attr('y', -55)
       .attr('text-anchor', 'middle')
-                              .text('Cumulative Satellites');
+      .style('fill', '#e0f0ff')
+      .text('Cumulative Satellites');
   }
 
   _drawChart() {
@@ -310,8 +343,9 @@ class LaunchDominance {
       .attr('class', 'line-path')
       .attr('fill', 'none')
       .attr('stroke-width', d => d.vehicle === 'Falcon 9' ? 3 : 2)
-      .attr('stroke-dasharray', d => d.vehicle === 'Falcon 9' ? '0' : '5,5')
-          // Add dots for interaction
+      .attr('stroke-dasharray', d => d.vehicle === 'Falcon 9' ? '0' : '5,5');
+    
+    // Add dots for interaction
     linesEnter.each(function(vehicleObj) {
       const group = d3.select(this);
       
@@ -337,6 +371,7 @@ class LaunchDominance {
     linesUpdate.select('.line-path')
       .attr('d', d => line(d.data))
       .attr('stroke', d => vis.colorMap.get(d.vehicle))
+      .style('cursor', 'pointer')
       .on('click', function(event, d) {
         event.stopPropagation();
         // If clicking the same vehicle, deselect it, otherwise select new one
@@ -373,7 +408,8 @@ class LaunchDominance {
         .attr('class', 'data-point')
         .attr('r', 4)
         .merge(dots)
-        .style('fill', vis.colorMap.get(vehicleObj.vehicle)) 
+        .style('fill', vis.colorMap.get(vehicleObj.vehicle))
+        .style('cursor', 'pointer')
         .attr('cx', d => vis.xScale(d.year))
         .attr('cy', d => vis.yScale(d.accumulated_satellites))
                 .on('click', function(event, d) {
@@ -434,7 +470,8 @@ class LaunchDominance {
     this.legendGroup.append('text')
       .attr('x', 0)
       .attr('y', -5)
-      .text('● Falcon 9 in BRIGHT CYAN (thick line) - All competitors in muted colors (dashed)');
+      .style('fill', '#8fa9b9')
+      .text('Falcon 9 in BRIGHT CYAN (thick line) - All competitors in muted colors (dashed)');
     
     // Legend items
     const itemWidth = 150;
@@ -448,8 +485,11 @@ class LaunchDominance {
       
       const item = this.legendGroup.append('g')
         .attr('class', 'legend-item')
+        .attr('data-vehicle', v.vehicle)
         .attr('transform', `translate(${x}, ${y})`)
-                .on('click', function(event) {
+        .style('cursor', 'pointer')
+        .style('opacity', 1)
+        .on('click', function(event) {
           event.stopPropagation();
           // If clicking the same vehicle, deselect it, otherwise select new one
           if (vis.selectedVehicle === v.vehicle) {
@@ -459,16 +499,21 @@ class LaunchDominance {
           }
         })
         .on('mouseover', function() {
-          d3.select(this).select('text')
-            .style('fill', '#00d4ff');
+          if (!vis.selectedVehicle || vis.selectedVehicle === v.vehicle) {
+            d3.select(this).select('text')
+              .style('filter', 'drop-shadow(0 0 4px ' + vis.colorMap.get(v.vehicle) + ')');
+          }
         })
         .on('mouseout', function() {
-          d3.select(this).select('text')
-            .style('fill', vis.colorMap.get(v.vehicle));
+          if (!vis.selectedVehicle || vis.selectedVehicle === v.vehicle) {
+            d3.select(this).select('text')
+              .style('filter', 'none');
+          }
         });
       
       // Line sample
       item.append('line')
+        .attr('class', 'legend-line')
         .attr('x1', 0)
         .attr('x2', 20)
         .attr('y1', 0)
@@ -477,20 +522,52 @@ class LaunchDominance {
         .attr('stroke-width', v.vehicle === 'Falcon 9' ? 3 : 2)
         .attr('stroke-dasharray', v.vehicle === 'Falcon 9' ? '0' : '5,5');
       
-      // Label
+      // Label - set fill to match line color
       item.append('text')
+        .attr('class', 'legend-text')
         .attr('x', 25)
         .attr('y', 4)
-        .attr('color', vis.colorMap.get(v.vehicle))
+        .style('fill', vis.colorMap.get(v.vehicle))
         .text(v.vehicle);
     });
+    
+    // Update legend based on selection state
+    this._updateLegendSelection();
+  }
+
+  
+  _updateLegendSelection() {
+    const vis = this;
+    
+    if (this.selectedVehicle) {
+      // Fade out non-selected items
+      this.legendGroup.selectAll('.legend-item')
+        .style('opacity', function() {
+          const vehicleName = d3.select(this).attr('data-vehicle');
+          return vehicleName === vis.selectedVehicle ? 1 : 0.3;
+        })
+        .style('filter', function() {
+          const vehicleName = d3.select(this).attr('data-vehicle');
+          if (vehicleName === vis.selectedVehicle) {
+            // Add glow to selected item
+            return 'drop-shadow(0 0 8px ' + vis.colorMap.get(vis.selectedVehicle) + ')';
+          }
+          return 'none';
+        });
+    } else {
+      // Reset all items to full opacity
+      this.legendGroup.selectAll('.legend-item')
+        .style('opacity', 1)
+        .style('filter', 'none');
+    }
   }
 
   _drawSidebar() {
     // Sidebar content
     this.sidebarContent = this.sidebarContainer.append('div')
-      .attr('class', 'sidebar-content')
-                            // Add instruction text - centered in the middle
+      .attr('class', 'sidebar-content');
+    
+    // Add instruction text - centered in the middle
     this.sidebarInstruction = this.sidebarContent.append('div')
       .attr('class', 'sidebar-instruction')
       .html('Select a rocket line<br/>to view details');
@@ -498,15 +575,18 @@ class LaunchDominance {
     // Details container (initially hidden)
     this.sidebarDetails = this.sidebarContent.append('div')
       .attr('class', 'sidebar-details')
-        }
+      .style('display', 'none');
+  }
 
   _selectVehicle(vehicle) {
     this.selectedVehicle = vehicle;
-    this.sidebarOpen = true;
     
     // Don't resize - sidebar is fixed
     // Just update chart visual state and sidebar content
     this._drawChart();
+    
+    // Update legend appearance
+    this._updateLegendSelection();
     
     // Update sidebar
     this._updateSidebar();
@@ -514,26 +594,32 @@ class LaunchDominance {
 
   _deselectVehicle() {
     if (!this.selectedVehicle) return;
-    
+
     this.selectedVehicle = null;
-    this.sidebarOpen = false;
-    
-    // Don't resize - sidebar is fixed
-    // Just update chart visual state
+
     this._drawChart();
     
-    // Hide details, show instruction
-    this.sidebarDetails;
-    this.sidebarInstruction  }
+    // Reset legend appearance
+    this._updateLegendSelection();
+
+    // Reset sidebar
+    this.sidebarDetails
+      .style('display', 'none')
+      .html('');
+
+    this.sidebarInstruction
+      .style('display', 'block');
+  }
 
   _updateSidebar() {
     const vehicleObj = this.vehicleData.find(v => v.vehicle === this.selectedVehicle);
     if (!vehicleObj) return;
     
     // Hide instruction, show details
-    this.sidebarInstruction;
-    this.sidebarDetails    // Clear and populate details
-    this.sidebarDetails.html('');
+    this.sidebarInstruction.style('display', 'none');
+    this.sidebarDetails
+      .style('display', 'block')
+      .html('');
     
     // Title
     this.sidebarDetails.append('h2')

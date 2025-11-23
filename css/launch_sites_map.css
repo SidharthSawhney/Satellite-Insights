@@ -89,7 +89,7 @@
     bottom: 0px;          
     width: 320px;
     max-width: 32%;
-    padding: 12px 14px;
+    padding: 12px 12px;
     border-radius: 10px;
     background: rgba(10, 13, 14, 0.9);
     border: 1px solid rgba(0, 102, 166, 0.5);
@@ -124,8 +124,7 @@
 
 .site-panel-info {
     font-size: 11px;
-    color: #e0f0ff;
-    margin-bottom: 6px;
+    color: #8fa9b9;
 }
 
 .site-panel-chart {
@@ -502,9 +501,16 @@
 }
 /* Additional styles from JS file */
 
-/* Info popover display */
+/* Info popover display - shows on hover */
 .map-info-popover {
     display: none;
+    pointer-events: none;
+}
+
+.map-info-btn:hover + .map-info-popover,
+.map-info-popover:hover {
+    display: block;
+    pointer-events: auto;
 }
 
 /* Site labels */

@@ -68,11 +68,11 @@ class LaunchSitesMap {
             .attr('class', 'map-title-text')
             .text('Satellite Launches by Location');
 
-        this.infoButton = this.title.append('button')
-            .attr('class', 'map-info-btn')
-            .attr('type', 'button')
-            .html('i')
-            .on('click', () => this._toggleInfoPopover());
+        // this.infoButton = this.title.append('button')
+        //     .attr('class', 'map-info-btn')
+        //     .attr('type', 'button')
+        //     .attr('aria-label', 'Information about this visualization')
+        //     .html('ⓘ');
 
         // SVG root
         this.svg = d3.select(this.node)
@@ -87,11 +87,11 @@ class LaunchSitesMap {
         // Info popover that explains what the circles are
         this.infoPopover = d3.select(this.node).append('div')
             .attr('class', 'map-info-popover')
-                        .html(`
-            <strong>What do the circles show?</strong>
-            <p>Each circle represents a <em>launch site</em> – a spaceport or launch complex where rockets carrying satellites lift off.</p>
-            <p>The size of the circle shows the cumulative number of satellite launches from that site. Hover to see totals, and click to explore its launch history.</p>
-        `);
+            .html(`
+                <strong>What do the circles show?</strong>
+                <p>Each circle represents a <em>launch site</em> – a spaceport or launch complex where rockets carrying satellites lift off.</p>
+                <p>The size of the circle shows the cumulative number of satellite launches from that site. Hover to see totals, and click to explore its launch history.</p>
+            `);
 
         // Year display
         this.yearDisplay = d3.select(this.node).append('div')
@@ -119,12 +119,12 @@ class LaunchSitesMap {
 
         this.sitePanelInfo = this.sitePanel.append('div')
             .attr('class', 'site-panel-info')
-            .text('No site selected yet.');
+            .text('No site selected.');
 
         // SVG for stacked horizontal bar chart
         this.sitePanelSvg = this.sitePanel.append('svg')
             .attr('class', 'site-panel-chart')
-            .attr('viewBox', '0 0 320 220')
+            .attr('viewBox', '0 0 320 180')
             .attr('preserveAspectRatio', 'xMidYMid meet');
 
         // Clicking anywhere else in the container hides the info popover
@@ -138,7 +138,16 @@ class LaunchSitesMap {
             }
         });
 
-
+        // Clicking on the map (not on a site circle) resets the side panel to instructions
+        this.svg.on('click.reset-panel', (event) => {
+            // Check if we clicked directly on the SVG or background, not on a site circle
+            const target = event.target;
+            const isCircle = target.classList && target.classList.contains('site-circle');
+            
+            if (!isCircle) {
+                this._resetSitePanel();
+            }
+        });
     }
 
     _layout() {
@@ -171,11 +180,7 @@ class LaunchSitesMap {
 
     /* ---------- Data helpers ---------- */
 
-    _toggleInfoPopover() {
-        if (!this.infoPopover) return;
-        const visible = this.infoPopover.style('display') !== 'none';
-        this.infoPopover.style('display', visible ? 'none' : 'block');
-    }
+    // _toggleInfoPopover method removed - CSS now handles hover automatically
 
     _installSiteDictionary() {
         this.siteDict = [
@@ -612,7 +617,7 @@ class LaunchSitesMap {
             .attr('class', 'site-label')
             .attr('text-anchor', 'middle')
             .attr('dy', '0.35em')
-                                                            .style('opacity', 0)
+            .style('opacity', 0)
             .text(d => this._acronym(d.siteName));
 
         // Update
@@ -699,7 +704,7 @@ class LaunchSitesMap {
         const svg = this.sitePanelSvg;
         svg.selectAll('*').remove();
 
-        const margin = { top: 16, right: 12, bottom: 30, left: 48 };
+        const margin = { top: 16, right: 12, bottom: 20, left: 16};
         const width = 320 - margin.left - margin.right;
         const height = 180 - margin.top - margin.bottom;
 
@@ -754,7 +759,7 @@ class LaunchSitesMap {
             .attr('x', -height / 2)
             .attr('y', -35)
             .attr('text-anchor', 'middle')
-                        .style('font-size', '10px')
+            .style('font-size', '10px')
             .text('Launches per Year');
 
         // Line generator
@@ -784,6 +789,14 @@ class LaunchSitesMap {
             .attr('fill', '#0066a6')
             .attr('stroke', '#0e8ebe')
             .attr('stroke-width', 1.5);
+    }
+
+    _resetSitePanel() {
+        // Reset the side panel back to the default instruction state
+        this.sitePanelTitle.text('Launch Site Details');
+        this.sitePanelSubtitle.text('Click a circle to see yearly launches.');
+        this.sitePanelInfo.text('No site selected yet.');
+        this.sitePanelSvg.selectAll('*').remove();
     }
 
     _inferCountry(name, fallback) {
