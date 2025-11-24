@@ -121,7 +121,7 @@ class LaunchMetrics {
             .attr('text-anchor', 'middle')
             .style('font-family', "'Courier New', monospace") 
             .style('fill', '#5fa8d3') 
-            .text('Average Power (Watts) - Linear Scale');
+            .text('Average Power (Watts)');
 
         // Legend Group
         vis.legend = vis.svg.append('g')
@@ -177,20 +177,13 @@ class LaunchMetrics {
             .style('opacity', '0.7')
             .text('Source: Launch Dominance Data'); // Example text, as user didn't specify content
 
-        // Tooltip
+        // Tooltip: use the same class/style as launch dominance tooltip
         vis.tooltip = d3.select('body').append('div')
-            .attr('class', 'd3-tooltip')
+            .attr('class', 'launch-dom-tooltip')
             .style('position', 'absolute')
-            .style('z-index', '10')
             .style('visibility', 'hidden')
-            .style('background-color', 'rgba(255, 255, 255, 0.95)')
-            .style('border', '1px solid #ccc')
-            .style('border-radius', '8px')
-            .style('padding', '10px')
-            .style('font-family', "'Courier New', monospace") 
-            .style('font-size', '12px')
-            .style('color', '#333')
-            .style('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
+            .style('pointer-events', 'none')
+            .style('z-index', 2000);
 
         vis.wrangleData();
     }
@@ -345,7 +338,7 @@ class LaunchMetrics {
             vis.xAxisLabel.text('Time (Year)');
             vis.toggleButton.text('Switch View');
             
-            vis.annotation.text("Note: Larger radius indicates greater launch mass.");
+            vis.annotation.text("The circle's radius corresponds to the rocket's launch mass.");
         }
 
         // Shared Scales
@@ -410,11 +403,10 @@ class LaunchMetrics {
 
                 vis.tooltip.style('visibility', 'visible')
                     .html(`
-                        <strong>${d.launch_vehicle}</strong><br>
-                        <hr style="border:0; border-top: 1px solid #eee; margin: 4px 0;">
-                        <strong>Year:</strong> ${d.year}<br>
-                        <strong>Power:</strong> ${d3.format(',.0f')(d.avg_power_watts)} Watts<br>
-                        <strong>Mass:</strong> ${d3.format(',.0f')(d.avg_launch_mass_kg)} kg
+                        <div style="margin-bottom: 5px;"><strong style="color: ${vis.colorScale(d.avg_launch_mass_kg)};">${d.launch_vehicle}</strong></div>
+                        <div style="margin-bottom: 3px;"><span style="color: #778da9;">Time:</span> ${d.year}</div>
+                        <div style="margin-bottom: 3px;"><span style="color: #778da9;">Power:</span> ${d3.format(',.0f')(d.avg_power_watts)} Watts</div>
+                        <div><span style="color: #778da9;">Mass:</span> ${d3.format(',.0f')(d.avg_launch_mass_kg)} kg</div>
                     `);
             })
             .on('mousemove', (event) => {
