@@ -1,6 +1,6 @@
 /* =====================================================
    launch-metrics.js
-   Template for Launch Metrics Visualization
+   Scatter plot for Launch Metrics Visualization
    ===================================================== */
 
 class LaunchMetrics {
@@ -9,12 +9,20 @@ class LaunchMetrics {
         this.data = data;
         this.displayData = [];
         
+        // State to track current view: 'mass-power' or 'time-power'
+        this.viewState = 'mass-power'; 
+        
+        // State to track selected legend category (color string)
+        this.selectedFilter = null;
+
         // Configuration and dimensions
         this.config = {
-            margin: { top: 60, right: 80, bottom: 80, left: 80 },
+            margin: { top: 80, right: 150, bottom: 100, left: 80 }, // Increased bottom margin for annotation
             tooltipPadding: 15,
-            minRadius: 3,
-            maxRadius: 50
+            minRadius: 2,
+            maxRadius: 50, 
+            legendRectSize: 18,
+            legendSpacing: 4
         };
         
         this.initVis();
@@ -29,9 +37,30 @@ class LaunchMetrics {
         // Get the container element
         vis.container = d3.select('#' + vis.parentElement);
         
+        // Ensure container is relative for absolute positioning of the title
+        vis.container.style('position', 'relative');
+
+        // --- 1. CREATE CUSTOM HTML TITLE ---
+        vis.htmlTitle = vis.container.append('div')
+            .attr('class', 'custom-chart-title')
+            .style('position', 'absolute')
+            .style('top', '0px')
+            .style('left', '50%')
+            .style('transform', 'translateX(-50%)')
+            .style('color', '#5fa8d3')
+            .style('text-align', 'center') 
+            .style('font-family', "'Courier New', monospace")
+            .style('font-size', '23px')
+            .style('font-weight', 'bold')
+            .style('text-transform', 'uppercase')
+            .style('letter-spacing', '0.05em')
+            .style('text-shadow', '0 0 10px rgba(0, 102, 166, 0.5)')
+            .style('width', '350px')
+            .style('pointer-events', 'none'); 
+
         // Calculate dimensions
         vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
-        vis.height = 600 - vis.config.margin.top - vis.config.margin.bottom;
+        vis.height = 600 - vis.config.margin.top - vis.config.margin.bottom; 
 
         // Create SVG element
         vis.svg = vis.container.append('svg')
@@ -46,134 +75,340 @@ class LaunchMetrics {
         vis.xScale = d3.scaleLinear()
             .range([0, vis.width]);
 
+        // Y-Axis: Linear scale
         vis.yScale = d3.scaleLinear()
             .range([vis.height, 0]);
 
-        // Scale for circle radius (using sqrt scale for area perception)
+        // Radius Scale
         vis.rScale = d3.scaleLinear()
             .range([vis.config.minRadius, vis.config.maxRadius]);
 
+        // Color Scale
+        vis.colorScale = d3.scaleQuantile();
+
         // Initialize axes
         vis.xAxis = d3.axisBottom(vis.xScale)
-            .tickFormat(d3.format("d")); // Format year as integer (no comma)
+            .tickFormat(d3.format("d")); 
             
         vis.yAxis = d3.axisLeft(vis.yScale)
-            .tickFormat(d3.format(".2s")); // Format power with SI prefix (e.g., "10k")
+            .ticks(10, "~s"); 
 
         // Append axis groups
         vis.xAxisG = vis.chart.append('g')
             .attr('class', 'axis x-axis')
-            .attr('transform', `translate(0,${vis.height})`);
+            .attr('transform', `translate(0,${vis.height})`)
+            .style('font-family', "'Courier New', monospace"); 
 
         vis.yAxisG = vis.chart.append('g')
-            .attr('class', 'axis y-axis');
+            .attr('class', 'axis y-axis')
+            .style('font-family', "'Courier New', monospace"); 
 
-        // Add Chart Title
-        vis.chartTitle = vis.svg.append('text')
-            .attr('class', 'chart-title')
-            .attr('x', (vis.width / 2) + vis.config.margin.left)
-            .attr('y', vis.config.margin.top / 2)
-            .text('Satellite Mass vs Power Consumed Over Time');
-
-        // Add X-Axis Label
+        // X-Axis Label
         vis.xAxisLabel = vis.svg.append('text')
             .attr('class', 'axis-label')
-            .attr('x', (vis.width / 2) + vis.config.margin.left)
-            .attr('y', vis.height + vis.config.margin.top + vis.config.margin.bottom / 1.5)
+            .attr('x', (vis.width / 2) + vis.config.margin.left) 
+            .attr('y', vis.height + vis.config.margin.top + 50) 
             .attr('text-anchor', 'middle')
-                        .text('Year');
+            .style('font-family', "'Courier New', monospace") 
+            .style('fill', '#5fa8d3'); 
 
-        // Add Y-Axis Label
+        // Y-Axis Label
         vis.yAxisLabel = vis.svg.append('text')
             .attr('class', 'axis-label')
             .attr('transform', 'rotate(-90)')
             .attr('x', -(vis.height / 2) - vis.config.margin.top)
             .attr('y', vis.config.margin.left / 3)
             .attr('text-anchor', 'middle')
-                        .text('Average Power (Watts)');
+            .style('font-family', "'Courier New', monospace") 
+            .style('fill', '#5fa8d3') 
+            .text('Average Power (Watts) - Linear Scale');
 
-        // Initialize Tooltip
+        // Legend Group
+        vis.legend = vis.svg.append('g')
+            .attr('class', 'legend')
+            .attr('transform', `translate(${vis.width + 20}, 20)`)
+            .style('font-family', "'Courier New', monospace");
+
+        // --- 2. REPOSITION TOGGLE BUTTON (BELOW LEGEND) ---
+        // We position this absolutely relative to the container.
+        // Since the legend is on the right, we'll position the button on the right too.
+        // An approximate 'top' value creates space below the legend.
+        vis.buttonContainer = vis.container.append('div')
+            .style('position', 'absolute')
+            .style('top', '180px') // Adjusted to be below the legend
+            .style('right', '40px') // Aligned to the right side
+            .style('z-index', '10');
+
+        vis.toggleButton = vis.buttonContainer.append('button')
+            .attr('id', 'view-toggle-btn')
+            .text('Switch View') 
+            .style('fill', 'rgba(10, 13, 14, 0.8)') 
+            .style('background-color', 'rgba(10, 13, 14, 0.8)') 
+            .style('color', '#fff') 
+            .style('border', '2px solid #0066a6') 
+            .style('filter', 'drop-shadow(0 0 5px rgba(0, 102, 166, 0.4))')
+            .style('transition', 'all 0.3s ease')
+            .style('font-family', "'Courier New', monospace") 
+            .style('padding', '8px 16px')
+            .style('cursor', 'pointer')
+            .style('border-radius', '4px')
+            .on('mouseover', function() {
+                d3.select(this).style('background-color', 'rgba(20, 26, 28, 0.9)');
+            })
+            .on('mouseout', function() {
+                d3.select(this).style('background-color', 'rgba(10, 13, 14, 0.8)');
+            })
+            .on('click', () => {
+                vis.toggleView();
+            });
+
+        // --- 3. ADD ANNOTATION LINE BELOW X-AXIS LABEL ---
+        // Using SVG text for precise positioning relative to the chart
+        vis.annotation = vis.svg.append('text')
+            .attr('class', 'chart-annotation')
+            .attr('x', (vis.width / 2) + vis.config.margin.left)
+            .attr('y', vis.height + vis.config.margin.top + 80) // Positioned below x-axis label
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .style('fill', '#e0f0ff')
+            .style('font-family', "'Courier New', monospace")
+            .style('font-size', '16px')
+            .style('font-weight', '500')
+            .style('opacity', '0.7')
+            .text('Source: Launch Dominance Data'); // Example text, as user didn't specify content
+
+        // Tooltip
         vis.tooltip = d3.select('body').append('div')
             .attr('class', 'd3-tooltip')
-                                                                                                                                            // Process data and update visualization
+            .style('position', 'absolute')
+            .style('z-index', '10')
+            .style('visibility', 'hidden')
+            .style('background-color', 'rgba(255, 255, 255, 0.95)')
+            .style('border', '1px solid #ccc')
+            .style('border-radius', '8px')
+            .style('padding', '10px')
+            .style('font-family', "'Courier New', monospace") 
+            .style('font-size', '12px')
+            .style('color', '#333')
+            .style('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
+
         vis.wrangleData();
     }
 
     /**
-     * Process and prepare data for visualization
+     * Process Data
      */
     wrangleData() {
         let vis = this;
-        // Filter data to include only entries with valid numbers for all required fields
-        // We also filter out 0-power entries as they can't be shown meaningfully on a linear scale starting from 0
-        vis.displayData = vis.data.filter(d => 
+
+        // Filter data
+        let filtered = vis.data.filter(d => 
             d.year && isFinite(d.year) &&
             d.avg_power_watts && isFinite(d.avg_power_watts) && d.avg_power_watts > 0 &&
             d.avg_launch_mass_kg && isFinite(d.avg_launch_mass_kg) && d.avg_launch_mass_kg > 0
         );
         
-        // Convert year to number just in case
-        vis.displayData.forEach(d => {
-            d.year = +d.year;
-            d.avg_power_watts = +d.avg_power_watts;
-            d.avg_launch_mass_kg = +d.avg_launch_mass_kg;
-        });
+        // Create deep copy
+        vis.displayData = filtered.map(d => ({
+            ...d,
+            year: +d.year,
+            avg_power_watts: +d.avg_power_watts,
+            avg_launch_mass_kg: +d.avg_launch_mass_kg
+        }));
 
-        // Update the visualization
+        // Sort by Mass DESCENDING
+        vis.displayData.sort((a, b) => b.avg_launch_mass_kg - a.avg_launch_mass_kg);
+
         vis.updateVis();
     }
 
     /**
-     * Update visualization with new data
+     * Switch the view state and update
+     */
+    toggleView() {
+        let vis = this;
+        vis.viewState = vis.viewState === 'mass-power' ? 'time-power' : 'mass-power';
+        vis.updateVis();
+    }
+
+    /**
+     * Update Visualization
      */
     updateVis() {
         let vis = this;
-
-        // Update scale domains
-        const yearPadding = 1;
-        vis.xScale.domain([
-            d3.min(vis.displayData, d => d.year) - yearPadding, 
-            d3.max(vis.displayData, d => d.year) + yearPadding
-        ]);
+        const maxMass = d3.max(vis.displayData, d => d.avg_launch_mass_kg);
+        const maxPower = d3.max(vis.displayData, d => d.avg_power_watts);
         
-        vis.yScale.domain([0, d3.max(vis.displayData, d => d.avg_power_watts) * 1.05]); // Add 5% padding
+        // --- UPDATE COLOR SCALE ---
+        const customColors = [
+            "rgb(130, 230, 255)", 
+            "rgb(119, 173, 255)", 
+            "rgb(113, 116, 255)", 
+            "rgb(157, 105, 255)"
+        ];
         
-        vis.rScale.domain([0, d3.max(vis.displayData, d => d.avg_launch_mass_kg)]);
+        vis.colorScale
+            .domain(vis.displayData.map(d => d.avg_launch_mass_kg))
+            .range(customColors);
 
-        // Data join for circles
+        // --- UPDATE LEGEND ---
+        vis.legend.selectAll('*').remove();
+
+        vis.legend.append('text')
+            .attr('x', 0)
+            .attr('y', -10)
+            .style('font-weight', 'bold')
+            .style('font-size', '12px')
+            .style('font-family', "'Courier New', monospace")
+            .style('fill', '#0066a6') 
+            .text('Mass Category (Click to Filter)');
+
+        const quantiles = vis.colorScale.quantiles();
+        const rangeValues = [0, ...quantiles];
+
+        const legendItems = vis.legend.selectAll('.legend-item')
+            .data(rangeValues)
+            .enter().append('g')
+            .attr('class', 'legend-item')
+            .attr('transform', (d, i) => `translate(0, ${i * (vis.config.legendRectSize + vis.config.legendSpacing)})`)
+            .style('cursor', 'pointer')
+            .on('click', function(event, d, i) {
+                const index = rangeValues.indexOf(d);
+                const clickedColor = customColors[index];
+
+                if (vis.selectedFilter === clickedColor) {
+                    vis.selectedFilter = null;
+                } else {
+                    vis.selectedFilter = clickedColor;
+                }
+                
+                vis.updateVis();
+            });
+
+        legendItems.append('rect')
+            .attr('width', vis.config.legendRectSize)
+            .attr('height', vis.config.legendRectSize)
+            .style('fill', (d, i) => customColors[i])
+            .style('stroke', '#ccc')
+            .style('stroke-width', (d, i) => {
+                return vis.selectedFilter === customColors[i] ? 2 : 1;
+            })
+            .style('stroke', (d, i) => {
+                return vis.selectedFilter === customColors[i] ? '#000' : '#ccc';
+            })
+            .style('opacity', (d, i) => {
+                if (vis.selectedFilter && vis.selectedFilter !== customColors[i]) {
+                    return 0.3;
+                }
+                return 1;
+            });
+
+        legendItems.append('text')
+            .attr('x', vis.config.legendRectSize + 5)
+            .attr('y', vis.config.legendRectSize - 4)
+            .text((d, i) => {
+                let start = d3.format(".2s")(d);
+                let end = (i < quantiles.length) ? d3.format(".2s")(quantiles[i]) : 'Max';
+                return i === rangeValues.length - 1 ? `> ${start}` : `${start} - ${end}`;
+            })
+            .style('font-size', '11px')
+            .style('font-family', "'Courier New', monospace")
+            .style('fill', '#e0f0ff') 
+             .style('opacity', (d, i) => {
+                if (vis.selectedFilter && vis.selectedFilter !== customColors[i]) {
+                    return 0.3;
+                }
+                return 1;
+            });
+
+
+        if (vis.viewState === 'mass-power') {
+            vis.xScale.domain([0, maxMass * 1.1]); 
+            vis.xAxis.tickFormat(d3.format("~s")); 
+            
+            vis.htmlTitle.html('Launch Mass vs. Power');
+            
+            vis.xAxisLabel.text('Launch Mass (kg)');
+            vis.toggleButton.text('Switch View'); 
+            
+            vis.annotation.text("The circle's radius corresponds to the rocket's launch mass.");
+        } else {
+            const yearPadding = 1;
+            vis.xScale.domain([
+                d3.min(vis.displayData, d => d.year) - yearPadding, 
+                d3.max(vis.displayData, d => d.year) + yearPadding
+            ]);
+            vis.xAxis.tickFormat(d3.format("d")); 
+            
+            vis.htmlTitle.html('Power over Time View');
+            
+            vis.xAxisLabel.text('Time (Year)');
+            vis.toggleButton.text('Switch View');
+            
+            vis.annotation.text("Note: Larger radius indicates greater launch mass.");
+        }
+
+        // Shared Scales
+        vis.yScale.domain([0, maxPower * 1.05]); 
+        vis.rScale.domain([0, maxMass]);
+        
+        // --- FILTER DATA FOR DISPLAY ---
+        let dataToRender = vis.displayData;
+        if (vis.selectedFilter) {
+            dataToRender = vis.displayData.filter(d => vis.colorScale(d.avg_launch_mass_kg) === vis.selectedFilter);
+        }
+
+        // 2. DATA JOIN
         const circles = vis.chart.selectAll('circle')
-            .data(vis.displayData, d => d.launch_vehicle + d.year); // Use a key for object constancy
+            .data(dataToRender, d => d.launch_vehicle + d.year);
 
-        // Enter: Append new circles
+        // Enter
         const circlesEnter = circles.enter().append('circle')
             .attr('class', 'data-point')
-            .attr('cx', d => vis.xScale(d.year))
-            .attr('cy', d => vis.yScale(d.avg_power_watts))
-            // .attr('r', 0) // Start with radius 0 for transition
-                        .style('fill-opacity', 0.6) // slightly more opaque so overlaps are visible
-                                            // Exit: Remove old circles
+            .attr('r', 0) 
+            .style('fill-opacity', 0.9)
+            .style('stroke', '#03045e') 
+            .style('stroke-width', 0.6) 
+            .style('cursor', 'pointer');
+
+        // Exit
         circles.exit()
             .transition().duration(500)
             .attr('r', 0)
             .remove();
 
-// MERGE Enter and Update selections
+        // Merge
         const circlesUpdate = circlesEnter.merge(circles);
 
-        // --- Apply event handlers to the MERGED selection ---
-        circlesUpdate
-            // Add tooltip event listeners
-            .on('mouseover', function(event, d) {
-                // Enlarge circle
-                d3.select(this)
-                    .interrupt() // Stop any ongoing transitions
-                    .transition().duration(150)
-                    // .attr('r', vis.rScale(d.avg_launch_mass_kg) * 1.5) // Grow by 50%
-                    .style('stroke', '#000') // Add a highlight stroke
-                    .style('stroke-width', 2);
+        // RE-ORDER: Smallest on top
+        circlesUpdate.order();
 
-                vis.tooltip
-                    .style('visibility', 'visible')
+        // 3. UPDATE POSITIONS & STYLES
+        circlesUpdate
+            .transition().duration(1000)
+            .attr('cx', d => {
+                if (vis.viewState === 'mass-power') {
+                    return vis.xScale(d.avg_launch_mass_kg);
+                } else {
+                    return vis.xScale(d.year);
+                }
+            })
+            .attr('cy', d => vis.yScale(d.avg_power_watts))
+            .attr('r', d => vis.rScale(d.avg_launch_mass_kg))
+            .style('fill', d => vis.colorScale(d.avg_launch_mass_kg));
+
+        // 4. EVENTS (Hover effects)
+        circlesUpdate
+            .on('mouseover', function(event, d) { 
+                d3.select(this).raise(); // Bring to front
+                
+                d3.select(this)
+                    .interrupt()
+                    .transition().duration(150)
+                    .style('stroke', '#000') 
+                    .style('stroke-width', 1.5); 
+
+                vis.tooltip.style('visibility', 'visible')
                     .html(`
                         <strong>${d.launch_vehicle}</strong><br>
                         <hr style="border:0; border-top: 1px solid #eee; margin: 4px 0;">
@@ -184,64 +419,55 @@ class LaunchMetrics {
             })
             .on('mousemove', (event) => {
                 vis.tooltip
-                    .style('top', (event.pageY - vis.config.tooltipPadding - 10) + 'px') // Position above cursor
+                    .style('top', (event.pageY - vis.config.tooltipPadding - 10) + 'px') 
                     .style('left', (event.pageX + vis.config.tooltipPadding) + 'px');
             })
-            .on('mouseleave', function(event, d) { // Use 'function' to get 'this'
-                
-                // Reset circle size and style
+            .on('mouseleave', function(event, d) {
                 d3.select(this)
-                    .interrupt() // Stop any ongoing transitions
+                    .interrupt()
                     .transition().duration(150)
-                    // .attr('r', vis.rScale(d.avg_launch_mass_kg)) // Back to original size
-                    .style('stroke', '#03045e') // Back to original stroke
-                    .style('stroke-width', 1);
+                    .style('stroke', '#03045e') 
+                    .style('stroke-width', 0.6); 
 
                 vis.tooltip.style('visibility', 'hidden');
+
+                // Restore Z-index order
+                vis.chart.selectAll('.data-point')
+                   .sort((a, b) => b.avg_launch_mass_kg - a.avg_launch_mass_kg);
             });
 
-        // Update: Update existing circles (for resizing)
-        circlesUpdate
-            .transition().duration(500)
-            .attr('cx', d => vis.xScale(d.year))
-            .attr('cy', d => vis.yScale(d.avg_power_watts))
-            .attr('r', d => vis.rScale(d.avg_launch_mass_kg));
-
         // Reorder circles in the DOM so that larger circles are drawn first
-        // and smaller circles appear on top. This reduces the chance that
-        // small points get hidden behind big ones when they overlap.
         vis.chart.selectAll('circle')
             .sort((a, b) => vis.rScale(b.avg_launch_mass_kg) - vis.rScale(a.avg_launch_mass_kg));
 
-        // Update axes
+        // 5. RENDER AXES
         vis.renderVis();
     }
 
-    /**
-     * Render static elements (axes, legends, etc.)
-     */
     renderVis() {
         let vis = this;
+        
+        // Update Scale Text Color (#8fa9b9)
+        vis.xAxisG.transition().duration(1000).call(vis.xAxis)
+            .selectAll('text')
+            .style('fill', '#8fa9b9')
+            .style('font-family', "'Courier New', monospace");
 
-        // Update axes (CSS will handle styling)
-        vis.xAxisG.call(vis.xAxis);
-        vis.yAxisG.call(vis.yAxis);
+        vis.yAxisG.transition().duration(1000).call(vis.yAxis)
+            .selectAll('text')
+            .style('fill', '#8fa9b9')
+            .style('font-family', "'Courier New', monospace");
+
+        vis.svg.selectAll('.axis path, .axis line').style('stroke', '#ccc').style('stroke-width', '1px');
     }
 
-    /**
-     * Handle window resize
-     */
-    renderVis() {
+    resize() {
         let vis = this;
-
-        // Update axes (CSS will handle styling)
-        vis.xAxisG.call(vis.xAxis);
-        vis.yAxisG.call(vis.yAxis);
+        vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
+        vis.svg.attr('width', vis.width + vis.config.margin.left + vis.config.margin.right);
+        vis.xScale.range([0, vis.width]);
+        vis.xAxisLabel.attr('x', vis.width / 2);
+        vis.legend.attr('transform', `translate(${vis.width + 20}, 20)`);
+        vis.updateVis();
     }
 }
-
-// TODO: Add helper functions here if needed
-// Example:
-// function formatMetricValue(value) {
-//     return d3.format('.2f')(value);
-// }
