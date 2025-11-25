@@ -15,7 +15,7 @@ class LaunchSitesMap {
             this.host.style('height', '70vh');
         }
 
-        this.w = opts.width  ?? this.node.clientWidth  ?? 1100;
+        this.w = opts.width ?? this.node.clientWidth ?? 1100;
         this.h = opts.height ?? this.node.clientHeight ?? 720;
 
         // Lock aspect ratio so resize is width-driven, not feedback from height
@@ -55,26 +55,65 @@ class LaunchSitesMap {
     /* ---------- DOM / layout ---------- */
 
     _build() {
-        // Title with small round (i) button
+
+
         this.title = d3.select(this.node).append('div')
             .attr('class', 'map-title');
 
-        // Instructions
+        this.titleText = this.title.append('span')
+            .attr('class', 'map-title-text')
+            .text('Satellite Launches by Location');
+
+        // Info button next to the title
+        this.infoButton = this.title.append('button')
+            .attr('class', 'map-info-btn')
+            .attr('type', 'button')
+            .html('ⓘ');
+
+        // Popover attached near the icon
+        this.infoPopover = d3.select(this.node).append('div')
+            .attr('class', 'map-info-popover')
+            .style('display', 'none')
+            .html(`
+        <p>Each circle is a space centre which are launch sites where rockets were launched carrying satellite to deploy in space </p>
+ 
+    `);
+
+        // Show on hover
+        this.infoButton.on('mouseenter', (event) => {
+            const rect = event.target.getBoundingClientRect();
+
+            // Position next to icon
+            this.infoPopover
+                .style('left', `${rect.left + rect.width + 10}px`)
+                .style('top', `${rect.top - 10}px`)
+                .style('display', 'block');
+        });
+
+        // Hide when mouse leaves BOTH icon and popover
+        this.infoButton.on('mouseleave', () => {
+            setTimeout(() => {
+                if (!this.isHoveringPopover) {
+                    this.infoPopover.style('display', 'none');
+                }
+            }, 120);
+        });
+
+        this.infoPopover
+            .on('mouseenter', () => { this.isHoveringPopover = true; })
+            .on('mouseleave', () => {
+                this.isHoveringPopover = false;
+                this.infoPopover.style('display', 'none');
+            });
+
+
         this.prompt = d3.select(this.node).append('div')
             .attr('class', 'map-prompt')
             .text('Hover over and click a circle to learn more about that launch site.');
 
-        this.title.append('span')
-            .attr('class', 'map-title-text')
-            .text('Satellite Launches by Location');
 
-        // this.infoButton = this.title.append('button')
-        //     .attr('class', 'map-info-btn')
-        //     .attr('type', 'button')
-        //     .attr('aria-label', 'Information about this visualization')
-        //     .html('ⓘ');
 
-        // SVG root
+
         this.svg = d3.select(this.node)
             .append('svg')
             .attr('viewBox', `0 0 ${this.w} ${this.h}`)
@@ -82,72 +121,44 @@ class LaunchSitesMap {
 
         this.g = this.svg.append('g');
         this.gLand = this.g.append('g');
-        this.gSites = this.g.append('g'); // circles
+        this.gSites = this.g.append('g');
 
-        // Info popover that explains what the circles are
-        this.infoPopover = d3.select(this.node).append('div')
-            .attr('class', 'map-info-popover')
-            .html(`
-                <strong>What do the circles show?</strong>
-                <p>Each circle represents a <em>launch site</em> – a spaceport or launch complex where rockets carrying satellites lift off.</p>
-                <p>The size of the circle shows the cumulative number of satellite launches from that site. Hover to see totals, and click to explore its launch history.</p>
-            `);
 
-        // Year display
+
         this.yearDisplay = d3.select(this.node).append('div')
             .attr('class', 'map-year-display')
             .text('');
 
-        // Tooltip
+
+
+
         this.tooltip = d3.select(this.node).append('div')
             .attr('class', 'map-tooltip');
 
-        // Right-hand detail panel (copied conceptually from launch dominance box)
-        this.sitePanel = d3.select(this.node).append('div')
-            .attr('class', 'site-detail-panel');
 
-        const header = this.sitePanel.append('div')
-            .attr('class', 'site-panel-header');
 
-        this.sitePanelTitle = header.append('div')
-            .attr('class', 'site-panel-title')
-            .text('Launch Site Details');
 
-        this.sitePanelSubtitle = header.append('div')
-            .attr('class', 'site-panel-subtitle')
-            .text('Click a circle to see yearly launches.');
+        this.detailPanel = d3.select(this.node).append('div')
+            .attr('class', 'map-detail-panel');
 
-        this.sitePanelInfo = this.sitePanel.append('div')
-            .attr('class', 'site-panel-info')
-            .text('No site selected.');
+        this.detailPanel.html(`
+        <div class="detail-title">Launch Site Details</div>
+        <div class="detail-content">Click a circle to see yearly launches.<br>No site selected.</div>
+    `);
 
-        // SVG for stacked horizontal bar chart
-        this.sitePanelSvg = this.sitePanel.append('svg')
-            .attr('class', 'site-panel-chart')
-            .attr('viewBox', '0 0 320 180')
-            .attr('preserveAspectRatio', 'xMidYMid meet');
+        this.detailContent = this.detailPanel.select('.detail-content');
 
-        // Clicking anywhere else in the container hides the info popover
-        d3.select(this.node).on('click.map-info-dismiss', (event) => {
-            if (!this.infoPopover) return;
+
+
+        d3.select('body').on('click', (event) => {
             const target = event.target;
-            const inButton  = target.closest && target.closest('.map-info-btn');
-            const inPopover = target.closest && target.closest('.map-info-popover');
-            if (!inButton && !inPopover) {
+            const insideInfoButton = target.closest('.map-info-btn');
+            const insidePopover = target.closest('.map-info-popover');
+            if (!insideInfoButton && !insidePopover) {
                 this.infoPopover.style('display', 'none');
             }
         });
 
-        // Clicking on the map (not on a site circle) resets the side panel to instructions
-        this.svg.on('click.reset-panel', (event) => {
-            // Check if we clicked directly on the SVG or background, not on a site circle
-            const target = event.target;
-            const isCircle = target.classList && target.classList.contains('site-circle');
-            
-            if (!isCircle) {
-                this._resetSitePanel();
-            }
-        });
     }
 
     _layout() {
@@ -184,25 +195,25 @@ class LaunchSitesMap {
 
     _installSiteDictionary() {
         this.siteDict = [
-            { test:/\b(kourou|guiana)\b/i,                 lon:-52.768, lat: 5.239,   name:'Guiana Space Center' },
-            { test:/\bcape\s*canaveral|kennedy\b/i,        lon:-80.605, lat:28.396,   name:'Cape Canaveral / KSC' },
-            { test:/\bvandenberg\b/i,                      lon:-120.611,lat:34.632,   name:'Vandenberg' },
-            { test:/\bbaikonur\b/i,                        lon: 63.305, lat:45.964,   name:'Baikonur Cosmodrome' },
-            { test:/\bplesetsk\b/i,                        lon: 40.577, lat:62.925,   name:'Plesetsk Cosmodrome' },
-            { test:/\bjiuquan\b/i,                         lon:100.298, lat:40.960,   name:'Jiuquan SLC' },
-            { test:/\bxichang\b/i,                         lon:102.026, lat:28.246,   name:'Xichang SLC' },
-            { test:/\btaiyuan\b/i,                         lon:111.608, lat:38.846,   name:'Taiyuan SLC' },
-            { test:/\bwenchang\b/i,                        lon:110.951, lat:19.614,   name:'Wenchang SLS' },
-            { test:/\btanegashima\b/i,                     lon:130.957, lat:30.375,   name:'Tanegashima' },
-            { test:/\buchinoura|kagoshima\b/i,             lon:131.081, lat:31.251,   name:'Uchinoura' },
-            { test:/\bsvobodny|vostochny\b/i,              lon:128.12,  lat:51.42,    name:'Svobodny/Vostochny' },
-            { test:/\bsatish|sriharikota|shar\b/i,         lon: 80.235, lat:13.733,   name:'Satish Dhawan (Sriharikota)' },
-            { test:/\bnaro\b/i,                            lon:127.535, lat:34.431,   name:'Naro' },
-            { test:/\bwallops\b/i,                         lon:-75.466, lat:37.940,   name:'Wallops' },
-            { test:/\bkodiak|psca\b/i,                     lon:-152.339,lat:57.435,   name:'Kodiak (PSCA)' },
-            { test:/\bmah[ií]a|rocket\s*lab|lc-1\b/i,      lon:177.865, lat:-39.262,  name:'LC-1 Mahia' },
-            { test:/\bdombarov|yasny\b/i,                  lon: 59.533, lat:50.803,   name:'Dombarovsky (Yasny)' },
-            { test:/\bsea\s*launch|odyssey\b/i,            lon:-154.0,  lat: 0.000,   name:'Sea Launch (equator)' }
+            { test: /\b(kourou|guiana)\b/i, lon: -52.768, lat: 5.239, name: 'Guiana Space Center' },
+            { test: /\bcape\s*canaveral|kennedy\b/i, lon: -80.605, lat: 28.396, name: 'Cape Canaveral / KSC' },
+            { test: /\bvandenberg\b/i, lon: -120.611, lat: 34.632, name: 'Vandenberg' },
+            { test: /\bbaikonur\b/i, lon: 63.305, lat: 45.964, name: 'Baikonur Cosmodrome' },
+            { test: /\bplesetsk\b/i, lon: 40.577, lat: 62.925, name: 'Plesetsk Cosmodrome' },
+            { test: /\bjiuquan\b/i, lon: 100.298, lat: 40.960, name: 'Jiuquan SLC' },
+            { test: /\bxichang\b/i, lon: 102.026, lat: 28.246, name: 'Xichang SLC' },
+            { test: /\btaiyuan\b/i, lon: 111.608, lat: 38.846, name: 'Taiyuan SLC' },
+            { test: /\bwenchang\b/i, lon: 110.951, lat: 19.614, name: 'Wenchang SLS' },
+            { test: /\btanegashima\b/i, lon: 130.957, lat: 30.375, name: 'Tanegashima' },
+            { test: /\buchinoura|kagoshima\b/i, lon: 131.081, lat: 31.251, name: 'Uchinoura' },
+            { test: /\bsvobodny|vostochny\b/i, lon: 128.12, lat: 51.42, name: 'Svobodny/Vostochny' },
+            { test: /\bsatish|sriharikota|shar\b/i, lon: 80.235, lat: 13.733, name: 'Satish Dhawan (Sriharikota)' },
+            { test: /\bnaro\b/i, lon: 127.535, lat: 34.431, name: 'Naro' },
+            { test: /\bwallops\b/i, lon: -75.466, lat: 37.940, name: 'Wallops' },
+            { test: /\bkodiak|psca\b/i, lon: -152.339, lat: 57.435, name: 'Kodiak (PSCA)' },
+            { test: /\bmah[ií]a|rocket\s*lab|lc-1\b/i, lon: 177.865, lat: -39.262, name: 'LC-1 Mahia' },
+            { test: /\bdombarov|yasny\b/i, lon: 59.533, lat: 50.803, name: 'Dombarovsky (Yasny)' },
+            { test: /\bsea\s*launch|odyssey\b/i, lon: -154.0, lat: 0.000, name: 'Sea Launch (equator)' }
         ];
     }
 
@@ -216,7 +227,7 @@ class LaunchSitesMap {
         const d = new Date(raw);
         if (!isNaN(+d)) return d;
         const m = String(raw).match(/^(\d{4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/);
-        if (m) return new Date(+m[1], (m[2]? +m[2]-1:0), (m[3]? +m[3]:1));
+        if (m) return new Date(+m[1], (m[2] ? +m[2] - 1 : 0), (m[3] ? +m[3] : 1));
         return null;
     }
 
@@ -308,17 +319,17 @@ class LaunchSitesMap {
         this.siteYearly = new Map();
 
         for (const r of rows) {
-            const rawSiteName = this._pick(r, ['launch_site','Launch Site','Launch_Site','Site']) || '';
-            const dateRaw  = this._pick(r, ['date_of_launch','Date of Launch','Launch_Date','Launch Date','Date']);
+            const rawSiteName = this._pick(r, ['launch_site', 'Launch Site', 'Launch_Site', 'Site']) || '';
+            const dateRaw = this._pick(r, ['date_of_launch', 'Date of Launch', 'Launch_Date', 'Launch Date', 'Date']);
             const dt = this._parseDate(dateRaw);
             if (!dt) continue;
 
             // lat/lon (prefer data; fall back to fuzzy site dictionary)
             let lat = +this._pick(r, [
-                'Launch_Site_Lat','Launch Site Lat','Launch Site Latitude','site_lat','lat','Latitude'
+                'Launch_Site_Lat', 'Launch Site Lat', 'Launch Site Latitude', 'site_lat', 'lat', 'Latitude'
             ]);
             let lon = +this._pick(r, [
-                'Launch_Site_Lon','Launch Site Lon','Launch Site Longitude','site_lon','lon','Longitude'
+                'Launch_Site_Lon', 'Launch Site Lon', 'Launch Site Longitude', 'site_lon', 'lon', 'Longitude'
             ]);
 
             const lookup = this._siteFromName(rawSiteName);
@@ -407,11 +418,11 @@ class LaunchSitesMap {
         }
 
         // Sort by year
-        events.sort((a,b) => a.year - b.year);
+        events.sort((a, b) => a.year - b.year);
 
         // Unique years
         const yearsSet = new Set(events.map(e => e.year));
-        this.years = Array.from(yearsSet).sort((a,b) => a - b);
+        this.years = Array.from(yearsSet).sort((a, b) => a - b);
 
         // Group events by year
         this.eventsByYear = {};
@@ -550,7 +561,7 @@ class LaunchSitesMap {
 
     _startPlayback() {
         if (this.playbackTimer) clearInterval(this.playbackTimer);
-        
+
         this.playbackTimer = setInterval(() => {
             if (this.currentYearIndex < this.years.length - 1) {
                 this.currentYearIndex++;
@@ -657,14 +668,14 @@ class LaunchSitesMap {
         }
 
         const siteName = (d && d.siteName) || 'Unknown site';
-        const country  = (d && d.country)  || 'Unknown';
+        const country = (d && d.country) || 'Unknown';
 
         // Safely fall back if the all-time fields aren’t present
         const total = (d && d.totalAllYears != null)
             ? d.totalAllYears
             : (d && d.count != null ? d.count : 0);
 
-        const gov  = (d && d.govTotal  != null) ? d.govTotal  : 'n/a';
+        const gov = (d && d.govTotal != null) ? d.govTotal : 'n/a';
         const comm = (d && d.commTotal != null) ? d.commTotal : 'n/a';
 
         this.tooltip
@@ -704,7 +715,7 @@ class LaunchSitesMap {
         const svg = this.sitePanelSvg;
         svg.selectAll('*').remove();
 
-        const margin = { top: 16, right: 12, bottom: 20, left: 16};
+        const margin = { top: 16, right: 12, bottom: 20, left: 16 };
         const width = 320 - margin.left - margin.right;
         const height = 180 - margin.top - margin.bottom;
 
@@ -898,11 +909,11 @@ class LaunchSitesMap {
 
         this.tooltip
             .style('left', (x + 12) + 'px')
-            .style('top',  (y - 12) + 'px');
+            .style('top', (y - 12) + 'px');
     }
 
-    _hideTip() { 
-        this.tooltip.style('visibility', 'hidden'); 
+    _hideTip() {
+        this.tooltip.style('visibility', 'hidden');
     }
 
     /* ---------- Resize ---------- */

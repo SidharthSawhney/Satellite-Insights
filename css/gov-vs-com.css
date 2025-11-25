@@ -92,7 +92,10 @@
     fill: #e0f0ff;
     font-size: 14px;
     font-weight: bold;
+
+    pointer-events: all !important;
     cursor: pointer;
+
 }
 
 .legend .legend-item .legend-info-btn {
@@ -117,6 +120,7 @@
     transform: scale(1.08);
     box-shadow: 0 0 8px rgba(0, 170, 204, 0.5);
     background: rgba(0, 170, 204, 0.4);
+    pointer-events: all;
 }
 
 .legend .legend-item .legend-info-popover {
@@ -177,7 +181,7 @@
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
     line-height: 1.6;
-    box-shadow: 
+    box-shadow:
         0 0 30px rgba(0, 102, 166, 0.6),
         0 0 50px rgba(0, 170, 204, 0.3),
         inset 0 0 25px rgba(0, 102, 166, 0.1);
@@ -240,6 +244,7 @@
         font-size: 9px;
     }
 }
+
 /* Additional styles from JS file */
 
 /* X-Axis text styles */
@@ -250,6 +255,7 @@
 }
 
 @media (max-width: 500px) {
+
     .x-axis-left text,
     .x-axis-right text {
         font-size: 10px;
@@ -260,7 +266,7 @@
 .divider-line {
     stroke: #444;
     stroke-width: 1.5px;
-    stroke-dasharray: 4,4;
+    stroke-dasharray: 4, 4;
 }
 
 /* Axis title styles */
@@ -296,7 +302,7 @@
     fill: none;
     stroke: #8c4effff;
     stroke-width: 3px;
-    stroke-dasharray: 8,4;
+    stroke-dasharray: 8, 4;
     opacity: 0.9;
 }
 
