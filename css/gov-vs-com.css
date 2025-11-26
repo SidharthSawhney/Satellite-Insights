@@ -33,7 +33,6 @@
     fill: #8fa9b9;
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 12px;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
@@ -88,17 +87,6 @@
 }
 
 .legend .legend-item .legend-info-icon {
-    text-anchor: middle;
-    fill: #e0f0ff;
-    font-size: 14px;
-    font-weight: bold;
-
-    pointer-events: all !important;
-    cursor: pointer;
-
-}
-
-.legend .legend-item .legend-info-btn {
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -114,35 +102,42 @@
     justify-content: center;
     box-shadow: 0 0 5px rgba(0, 102, 166, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    padding: 0;
+    pointer-events: all !important;
+    cursor: pointer;
 }
 
-.legend .legend-item .legend-info-btn:hover {
+.legend .legend-item .legend-info-icon:hover {
     transform: scale(1.08);
     box-shadow: 0 0 8px rgba(0, 170, 204, 0.5);
     background: rgba(0, 170, 204, 0.4);
-    pointer-events: all;
 }
 
-.legend .legend-item .legend-info-popover {
+
+.tooltip-govcom-tip {
     position: absolute;
-    left: 330px;
-    top: 56px;
-    max-width: 280px;
+    pointer-events: none;
+    background: rgba(10, 13, 14, 0.95);
     padding: 10px 14px;
     border-radius: 8px;
-    background: rgba(10, 13, 14, 0.95);
-    color: #e0f0ff;
-    font-size: 12px;
-    line-height: 1.4;
-    z-index: 20;
+    z-index: 100;
+    visibility: hidden;
     box-shadow: 0 0 10px rgba(0, 102, 166, 0.2);
-    border: 1px solid rgba(0, 102, 166, 0.4);
+    border: 2px solid rgba(0, 102, 166, 0.3);
 }
 
-.legend-info-popover strong {
+.tooltip-govcom-tip p {
+    color: #e0f0ff;
+    font-size: 10px;
+    margin: 0;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.tooltip-govcom-tip p strong {
+    color: #0066a6;
     display: block;
     margin-bottom: 4px;
-    color: #0e8ebe;
     font-size: 12px;
 }
 
@@ -165,7 +160,6 @@
     fill: #8fa9b9;
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
-    text-transform: uppercase;
     letter-spacing: 0.08em;
 }
 
@@ -286,14 +280,24 @@
     fill: #0e8ebe;
     rx: 2px;
     opacity: 0.8;
-    transition: opacity 0.2s, fill 0.2s;
+    transition: fill-opacity 0.2s, transform 0.2s;
+    filter: drop-shadow(0 0 4px rgba(0, 170, 204, 0.6));
+}
+
+.gov-bar:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 170, 204, 0.8));
 }
 
 .com-bar {
     fill: #00d4ff;
     rx: 2px;
     opacity: 0.8;
-    transition: opacity 0.2s, fill 0.2s;
+    transition: opacity 0.2s, fill 0.2s, filter 0.2s;
+    filter: drop-shadow(0 0 4px rgba(0, 170, 204, 0.4));
+}
+
+.com-bar:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 170, 204, 0.8));
 }
 
 /* Moving average lines */
@@ -364,8 +368,10 @@
     fill: #e0f0ff;
     font-size: 16px;
     letter-spacing: 0.05em;
-    font-weight: 600;
     opacity: 0.7;
+    font-family: 'Courier New', 'Consolas', monospace;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+    text-anchor: middle;
 }
 
 @media (max-width: 500px) {

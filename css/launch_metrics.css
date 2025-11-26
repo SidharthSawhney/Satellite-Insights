@@ -1,220 +1,193 @@
 /* =====================================================
-   launch_metrics.css
-   Styles for Launch Metrics Visualization
-   Follows Dark Blue Techy Theme
+   Launch Metrics Visualization CSS
+   Blue Tech Theme - Consistent with other visualizations
    ===================================================== */
 
-/* ============ LAUNCH METRICS SECTION ============ */
-#launch-metrics-section {
-    position: relative;
-}
-
-#launch-metrics-section .viz-container {
-    background: linear-gradient(135deg, 
-        rgba(0, 102, 166, 0.03) 0%, 
-        rgba(0, 0, 0, 0.5) 100%);
-}
-
-/* ============ LAUNCH METRICS CONTAINER ============ */
 #launch-metrics {
     width: 100%;
-    height: 600px;
+    height: 700px;
     position: relative;
 }
 
-#launch-metrics svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* ============ AXES STYLING ============ */
-#launch-metrics .axis path,
-#launch-metrics .axis line {
-    stroke: #0066a6;
-    opacity: 0.5;
-    stroke-width: 1px;
-    shape-rendering: crispEdges;
-}
-
-#launch-metrics .axis text {
-    fill: #8fa9b9;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-}
-
-#launch-metrics .axis-label {
-    fill: #8fa9b9;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-/* ============ CHART ELEMENTS ============ */
-#launch-metrics .chart-title {
-    fill: #5fa8d3;
-    text-anchor: middle;
-    font-family: 'Courier New', monospace;
+/* Custom HTML Title */
+.custom-chart-title {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #5fa8d3;
+    text-align: center;
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 23px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     text-shadow: 0 0 10px rgba(0, 102, 166, 0.5);
-}
-
-/* Data points (for scatter/line charts) */
-#launch-metrics .data-point {
-    fill: #0066a6;
-    stroke: #0e8ebe;
-    stroke-width: 2px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#launch-metrics .data-point:hover {
-    fill: #0e8ebe;
-    filter: drop-shadow(0 0 10px #0066a6);
-}
-
-/* ============ GRID LINES ============ */
-#launch-metrics .grid line {
-    stroke: rgba(0, 102, 166, 0.1);
-    stroke-dasharray: 2, 2;
-}
-
-#launch-metrics .grid path {
-    stroke-width: 0;
-}
-
-/* ============ LEGEND ============ */
-#launch-metrics .legend {
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-}
-
-#launch-metrics .legend-item {
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-}
-
-#launch-metrics .legend-item:hover {
-    opacity: 0.8;
-}
-
-#launch-metrics .legend-text {
-    fill: #e0f0ff;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-#launch-metrics .legend-rect {
-    stroke: #0e8ebe;
-    stroke-width: 1px;
-}
-
-#launch-metrics .legend-circle {
-    stroke: #0e8ebe;
-    stroke-width: 2px;
-}
-
-/* ============ ANNOTATIONS ============ */
-#launch-metrics .annotation {
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    fill: #8fa9b9;
-}
-
-#launch-metrics .annotation-line {
-    stroke: #8fa9b9;
-    stroke-width: 1px;
-    stroke-dasharray: 4, 4;
-    opacity: 0.5;
-}
-
-#launch-metrics .annotation-label {
-    fill: #e0f0ff;
-    font-size: 12px;
-    text-transform: uppercase;
-}
-
-/* ============ TRANSITIONS & ANIMATIONS ============ */
-#launch-metrics .data-point,
-#launch-metrics .bar,
-#launch-metrics .line {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-/* Pulse animation for emphasis */
-#launch-metrics .pulse {
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 0.8;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-}
-
-/* ============ INTERACTIVE STATES ============ */
-#launch-metrics .highlighted {
-    filter: drop-shadow(0 0 15px #0066a6);
+    width: 350px;
+    pointer-events: none;
     z-index: 10;
 }
 
-#launch-metrics .dimmed {
-    opacity: 0.3;
+/* SVG Axes Styling */
+.axis path,
+.axis line {
+    stroke: #0066a6;
+    stroke-opacity: 0.5;
+    stroke-width: 1px;
 }
 
-/* ============ LOADING STATE ============ */
-#launch-metrics .loading-text {
+.axis text {
     fill: #8fa9b9;
-    font-family: 'Courier New', monospace;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 12px;
+}
+
+/* Axis Labels */
+.axis-label {
+    fill: #8fa9b9;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+/* Data Points (Circles) */
+.data-point {
+    fill-opacity: 0.7;
+    stroke: #6a5acd;
+    stroke-width: 1.5px;
+    cursor: pointer;
+    transition: filter 0.2s;
+    filter: drop-shadow(0 0 4px rgba(147, 112, 219, 0.6));
+}
+
+.data-point:hover {
+    fill-opacity: 1;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 8px rgba(147, 112, 219, 0.9));
+}
+
+/* Legend */
+.legend text {
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 13px;
+    pointer-events: none;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+}
+
+.legend-item rect {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.4));
+    rx: 3px;
+    transition: opacity 0.2s, stroke-width 0.2s;
+}
+
+.legend-item {
+    cursor: pointer;
+}
+
+.legend-item:hover rect {
+    stroke-width: 2px;
+}
+
+.legend-title {
+    font-family: 'Courier New', 'Consolas', monospace;
     font-size: 16px;
-    text-anchor: middle;
-    animation: blink 1.5s ease-in-out infinite;
+    font-weight: 700;
+    fill: #ffffff;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+/* Switch View Button */
+.switch-view-button {
+    padding: 10px 22px;
+    border-radius: 20px;
+    border: 2px solid #0066a6;
+    background: rgba(10, 13, 14, 1);
+    color: #5fa8d3;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 102, 166, 0.4);
+    transition: 0.3s ease;
 }
 
-/* ============ RESPONSIVE ADJUSTMENTS ============ */
+.switch-view-button:hover {
+    background: rgba(0, 102, 166, 1);
+    border-color: #0e8ebe;
+    box-shadow: 0 0 10px rgba(0, 102, 166, 0.6);
+    transform: translateY(-1px);
+}
+
+.switch-view-button:active {
+    transform: translateY(1px) scale(0.97);
+}
+
+/* Chart Annotation */
+.chart-annotation {
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+}
+
+/* Tooltip - matching launch sites map style */
+.launch-metrics-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(10, 13, 14, 0.95);
+    padding: 10px 14px;
+    border-radius: 8px;
+    z-index: 100;
+    visibility: hidden;
+    box-shadow: 0 0 10px rgba(0, 102, 166, 0.2);
+    border: 2px solid rgba(0, 102, 166, 0.3);
+}
+
+.launch-metrics-tooltip p {
+    color: #e0f0ff;
+    font-size: 10px;
+    margin: 0;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.launch-metrics-tooltip p strong {
+    color: #0066a6;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
     #launch-metrics {
         height: 500px;
     }
-    
-    #launch-metrics .axis text {
+
+    .custom-chart-title {
+        font-size: 18px;
+        width: 300px;
+    }
+
+    .axis-label {
+        font-size: 11px;
+    }
+
+    .legend text {
+        font-size: 11px;
+    }
+
+    .axis text {
         font-size: 10px;
     }
-    
-    #launch-metrics .axis-label {
+
+    .chart-annotation {
         font-size: 12px;
-    }
-    
-    #launch-metrics .chart-title {
-        font-size: 16px;
-    }
-    
-    #launch-metrics .tooltip {
-        font-size: 11px;
-        padding: 10px 12px;
     }
 }
 
@@ -222,65 +195,12 @@
     #launch-metrics {
         height: 400px;
     }
-    
-    #launch-metrics .axis text {
-        font-size: 9px;
+
+    .custom-chart-title {
+        font-size: 16px;
     }
-    
-    #launch-metrics .chart-title {
-        font-size: 14px;
+
+    .chart-annotation {
+        font-size: 10px;
     }
-}
-
-/* ============ TECH ACCENTS ============ */
-#launch-metrics .tech-border {
-    stroke: #0066a6;
-    stroke-width: 1px;
-    fill: none;
-    stroke-dasharray: 5, 5;
-    animation: dash 20s linear infinite;
-}
-
-@keyframes dash {
-    to {
-        stroke-dashoffset: -100;
-    }
-}
-
-/* Reuse the Launch Dominance tooltip styling for the Launch Metrics chart
-   so both tooltips look consistent. */
-.launch-dom-tooltip {
-    position: absolute;
-    visibility: hidden;
-    background: rgba(10, 13, 14, 0.95);
-    color: #0066a6;
-    padding: 12px;
-    border-radius: 4px;
-    border: 1px solid #0066a6;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    pointer-events: none;
-    z-index: 2000;
-    box-shadow: 0 0 20px rgba(0, 102, 166, 0.3);
-    line-height: 1.5;
-}
-
-/* Data point colors and styles */
-#launch-metrics .data-point {
-    fill: #0077b6;
-    stroke: #03045e;
-    stroke-width: 1.5px;
-    fill-opacity: 0.6;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-/* Axis labels */
-#launch-metrics .axis-label {
-    fill: #5fa8d3;
-}
-
-/* Chart title color override */
-#launch-metrics .chart-title {
-    fill: #5fa8d3;
 }

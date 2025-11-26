@@ -19,9 +19,9 @@ class governmentVsCommercial {
     this.chart = this.svg.append('g')
       .attr('class', 'chart-group');
 
-    this.tooltip = d3.select('body')
-      .append('div')
-      .attr('class', 'tooltip govcom-tip')
+    this.tooltip = this.host.append('div')
+      .attr('class', 'tooltip-govcom-tip')
+      .style('visibility', 'hidden')
       .style('opacity', 0);
 
     this.infoTooltipVisible = false;
@@ -244,16 +244,17 @@ class governmentVsCommercial {
   }
 
   _showLegendMATip(event) {
-    const html = `
-                  <strong>3-Year Moving Average</strong>
-                  <p>Takes the average of the satellites launched in the current, prior and latter year to smoothen out fluctuations and show trend of satellites launched</p>
-                `;
+    const html = `<p>Takes the average of the satellites launched in the current, prior and latter year to smoothen out fluctuations and show trend of satellites launched</p>`;
+
+    // Get mouse position relative to the container
+    const [x, y] = d3.pointer(event, this.node);
 
     this.tooltip
+      .style('visibility', 'visible')
       .style('opacity', 1)
       .html(html)
-      .style('left', (event.pageX + 10) + 'px')
-      .style('top', (event.pageY - 20) + 'px');
+      .style('left', (x + 10) + 'px')
+      .style('top', (y - 20) + 'px');
 
     // Mark that tooltip is showing for info icon
     this.infoTooltipVisible = true;
@@ -416,17 +417,30 @@ class governmentVsCommercial {
         const labelWidth = label.node().getComputedTextLength();
         const infoX = labelX + labelWidth + 9;   // just to the RIGHT of text
 
-        const infoIcon = item.append("text")
-          .attr("class", "legend-info-icon")
+        // Create a foreignObject to embed HTML button
+        const infoIcon = item.append("foreignObject")
           .attr("x", infoX)
-          .attr("y", baseY + rectSize - 3)
-          .text("ⓘ")
-          .style("cursor", "pointer")
-          .on("mouseenter", (event) => {
+          .attr("y", baseY)
+          .attr("width", 22)
+          .attr("height", 22)
+          .style("overflow", "visible");
+
+        infoIcon.append("xhtml:button")
+          .attr("class", "legend-info-icon")
+          .html("i")
+          .on("mouseenter", function(event) {
+            d3.select(this)
+              .style("transform", "scale(1.08)")
+              .style("box-shadow", "0 0 8px rgba(0, 170, 204, 0.5)")
+              .style("background", "rgba(0, 170, 204, 0.4)");
             vis._showLegendMATip(event);
             vis.infoTooltipVisible = true;
           })
-          .on("mouseleave", () => {
+          .on("mouseleave", function() {
+            d3.select(this)
+              .style("transform", "scale(1)")
+              .style("box-shadow", "0 0 5px rgba(0, 102, 166, 0.3)")
+              .style("background", "rgba(0, 102, 166, 0.3)");
             vis._hideInfoTip();
           });
 
@@ -464,35 +478,43 @@ class governmentVsCommercial {
   _showTip(event, d, side) {
     const val = side === 'Government' ? d.government : d.commercial;
     const ma = side === 'Government' ? d.govMA.toFixed(1) : d.comMA.toFixed(1);
-    const html = `<strong>${side}</strong><br>Year: ${d.year}<br>Satellites: ${val}<br>3-Year Avg: ${ma}`;
+    const html = `<p><strong>${side}</strong>Year: ${d.year}<br>Satellites: ${val}<br>3-Year Avg: ${ma}<p>`;
+
+    // Get mouse position relative to the container
+    const [x, y] = d3.pointer(event, this.node);
 
     this.tooltip
+      .style('visibility', 'visible')
       .style('opacity', 1)
       .html(html)
-      .style('left', (event.pageX + 10) + 'px')
-      .style('top', (event.pageY - 20) + 'px');
+      .style('left', (x + 10) + 'px')
+      .style('top', (y - 20) + 'px');
   }
 
   _showMATooltip(event, d, side) {
     const ma = side === 'Government' ? d.govMA.toFixed(1) : d.comMA.toFixed(1);
-    const html = `<strong>${side} Moving Average</strong><br>Year: ${d.year}<br>3-Year Avg: ${ma}`;
+    const html = `<p><strong>${side}</strong>Year: ${d.year}<br>Satellites: ${val}<br>3-Year Avg: ${ma}<p>`;
+
+    // Get mouse position relative to the container
+    const [x, y] = d3.pointer(event, this.node);
 
     this.tooltip
+      .style('visibility', 'visible')
       .style('opacity', 1)
       .html(html)
-      .style('left', (event.pageX + 10) + 'px')
-      .style('top', (event.pageY - 20) + 'px');
+      .style('left', (x + 10) + 'px')
+      .style('top', (y - 20) + 'px');
   }
 
   _hideTip() {
     // Only hide if it's not the info icon tooltip
     if (!this.infoTooltipVisible) {
-      this.tooltip.style('opacity', 0);
+      this.tooltip.style('visibility', 'hidden').style('opacity', 0);
     }
   }
 
   _hideInfoTip() {
     this.infoTooltipVisible = false;
-    this.tooltip.style('opacity', 0);
+    this.tooltip.style('visibility', 'hidden').style('opacity', 0);
   }
 }

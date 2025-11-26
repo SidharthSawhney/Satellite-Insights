@@ -68,16 +68,14 @@ class LaunchSitesMap {
         this.infoButton = this.title.append('button')
             .attr('class', 'map-info-btn')
             .attr('type', 'button')
-            .html('ⓘ');
+            .html('i');
 
         // Popover attached near the icon
         this.infoPopover = d3.select(this.node).append('div')
             .attr('class', 'map-info-popover')
-            .style('display', 'none')
             .html(`
-        <p>Each circle is a space centre which are launch sites where rockets were launched carrying satellite to deploy in space </p>
- 
-    `);
+                    <p>Each circle is a space centre which are launch sites where rockets were launched carrying satellite to deploy in space.</p>
+                `);
 
         // Show on hover
         this.infoButton.on('mouseenter', (event) => {
@@ -111,9 +109,6 @@ class LaunchSitesMap {
             .attr('class', 'map-prompt')
             .text('Hover over and click a circle to learn more about that launch site.');
 
-
-
-
         this.svg = d3.select(this.node)
             .append('svg')
             .attr('viewBox', `0 0 ${this.w} ${this.h}`)
@@ -139,14 +134,28 @@ class LaunchSitesMap {
 
 
         this.detailPanel = d3.select(this.node).append('div')
-            .attr('class', 'map-detail-panel');
+            .attr('class', 'site-detail-panel');
 
-        this.detailPanel.html(`
-        <div class="detail-title">Launch Site Details</div>
-        <div class="detail-content">Click a circle to see yearly launches.<br>No site selected.</div>
-    `);
+        // Create the header structure
+        const header = this.detailPanel.append('div')
+            .attr('class', 'site-panel-header');
 
-        this.detailContent = this.detailPanel.select('.detail-content');
+        this.sitePanelTitle = header.append('div')
+            .attr('class', 'site-panel-title')
+            .text('Launch Site Details');
+
+        this.sitePanelSubtitle = header.append('div')
+            .attr('class', 'site-panel-subtitle')
+            .text('Click a circle to see yearly launches.');
+
+        this.sitePanelInfo = this.detailPanel.append('div')
+            .attr('class', 'site-panel-info')
+            .text('No site selected.');
+
+        this.sitePanelSvg = this.detailPanel.append('svg')
+            .attr('class', 'site-panel-chart')
+            .attr('width', 320)
+            .attr('height', 220);
 
 
 
@@ -512,7 +521,7 @@ class LaunchSitesMap {
             .attr('class', 'year-label')
             .text(this.years[this.currentYearIndex] || '');
 
-        // Sexy overlay that covers the timeline initially
+        
         this.timelineOverlay = d3.select(this.node).append('div')
             .attr('class', 'map-timeline-overlay');
 
@@ -681,10 +690,10 @@ class LaunchSitesMap {
         this.tooltip
             .style('visibility', 'visible')
             .html(
-                `<strong>${siteName}</strong>` +
-                `<div>Total satellites (all years): ${total}</div>` +
-                `<div>Government: ${gov}</div>` +
-                `<div>Commercial: ${comm}</div>`
+                `<p><strong>${siteName}</strong>` +
+                `Total satellites (all years): ${total}` +
+                `<br>Government: ${gov}` +
+                `<br>Commercial: ${comm}</p>`
             );
 
         this._moveTip(event);
@@ -715,7 +724,7 @@ class LaunchSitesMap {
         const svg = this.sitePanelSvg;
         svg.selectAll('*').remove();
 
-        const margin = { top: 16, right: 12, bottom: 20, left: 16 };
+        const margin = { top: 16, right: 40, bottom: 16, left: 16 };
         const width = 320 - margin.left - margin.right;
         const height = 180 - margin.top - margin.bottom;
 
@@ -768,10 +777,7 @@ class LaunchSitesMap {
             .attr('class', 'site-panel-axis-label')
             .attr('transform', 'rotate(-90)')
             .attr('x', -height / 2)
-            .attr('y', -35)
-            .attr('text-anchor', 'middle')
-            .style('font-size', '10px')
-            .text('Launches per Year');
+            .attr('y', -35);
 
         // Line generator
         const line = d3.line()
@@ -783,9 +789,6 @@ class LaunchSitesMap {
         g.append('path')
             .datum(data)
             .attr('class', 'site-panel-line')
-            .attr('fill', 'none')
-            .attr('stroke', '#0e8ebe')
-            .attr('stroke-width', 2)
             .attr('d', line);
 
         // Draw dots
@@ -796,10 +799,7 @@ class LaunchSitesMap {
             .attr('class', 'site-panel-dot')
             .attr('cx', d => x(d.year))
             .attr('cy', d => y(d.total))
-            .attr('r', 3)
-            .attr('fill', '#0066a6')
-            .attr('stroke', '#0e8ebe')
-            .attr('stroke-width', 1.5);
+            .attr('r', 3);
     }
 
     _resetSitePanel() {

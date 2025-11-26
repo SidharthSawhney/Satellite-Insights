@@ -66,7 +66,7 @@
 }
 
 .buttonBox {
-    fill: rgba(10, 13, 14, 0.8);
+    fill: rgba(10, 13, 14, 1);
     stroke: #0066a6;
     stroke-width: 2px;
     filter: drop-shadow(0 0 5px rgba(0, 102, 166, 0.4));
@@ -74,7 +74,7 @@
 }
 
 .svg-button:hover .buttonBox {
-    fill: rgba(0, 102, 166, 0.2);
+    fill: rgba(0, 102, 166, 1);
     stroke: #0e8ebe;
     filter: drop-shadow(0 0 10px rgba(0, 102, 166, 0.6));
 }

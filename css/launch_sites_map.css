@@ -35,7 +35,7 @@
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 16px;
     pointer-events: none;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
     z-index: 10;
     opacity: 0.7;
@@ -67,27 +67,29 @@
 }
 
 .map-info-popover {
-    position: fixed; /* follows icon on screen */
+    position: absolute;
     padding: 12px 16px;
-    width: 260px;
+    width: 200px;
+    height: 130px;
     background: rgba(10, 13, 14, 0.95);
     border: 1px solid rgba(0, 140, 255, 0.4);
     border-radius: 8px;
-    color: #e0f0ff;
-    font-size: 12px;
-    line-height: 1.45;
     box-shadow: 0 0 12px rgba(0, 140, 255, 0.3);
     z-index: 9999;
     display: none;
 }
 
-
-
-.map-info-popover strong {
-    display: block;
-    margin-bottom: 4px;
-    color: #0e8ebe;
+.map-info-popover p {
+    color: #e0f0ff;
     font-size: 12px;
+    line-height: 1.45;
+    font-weight: 100;
+}
+
+.map-info-btn:hover + .map-info-popover,
+.map-info-popover:hover {
+    display: block;
+    pointer-events: auto;
 }
 
 .site-detail-panel {
@@ -97,7 +99,7 @@
     width: 320px;
     max-width: 32%;
     padding: 12px 12px;
-    border-radius: 10px;
+    border-radius: 20px;
     background: rgba(10, 13, 14, 0.9);
     border: 1px solid rgba(0, 102, 166, 0.5);
     box-shadow: 0 0 10px rgba(0, 102, 166, 0.15);
@@ -189,6 +191,27 @@
     fill: #4ecdc4;
 }
 
+/* Axis label */
+.site-panel-axis-label {
+    font-size: 10px;
+    fill: #e0f0ff;
+    text-anchor: middle;
+}
+
+/* Line style */
+.site-panel-line {
+    fill: none;
+    stroke: #0e8ebe;
+    stroke-width: 2;
+}
+
+/* Dots on the line */
+.site-panel-dot {
+    fill: #0066a6;
+    stroke: #0e8ebe;
+    stroke-width: 1.5;
+}
+
 .map-controls.timeline-hidden {
     opacity: 0;
     pointer-events: none;
@@ -205,23 +228,23 @@
 
 .map-timeline-overlay-btn {
     padding: 10px 22px;
-    border-radius: 999px;
-    border: 1px solid rgba(0, 102, 166, 0.9);
-    background: rgba(0, 102, 166, 0.3);
-    color: #e0f0ff;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    border-radius: 20px;
+    border: 2px solid #0066a6;
+    background: rgba(10, 13, 14, 1);
+    color: #5fa8d3;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 14px;
     text-transform: uppercase;
+    letter-spacing: 0.1em;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(0, 102, 166, 0.2);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    filter: drop-shadow(0 0 5px rgba(0, 102, 166, 0.4));
+    transition: 0.3s ease;
 }
 
 .map-timeline-overlay-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 15px rgba(0, 102, 166, 0.3);
-    background: rgba(0, 170, 204, 0.4);
+    background: rgba(0, 102, 166, 1);
+    border-color: #0e8ebe;
+    box-shadow: 0 0 10px rgba(0, 102, 166, 0.6);
 }
 
 .map-timeline-overlay-btn:active {
@@ -266,7 +289,7 @@
 /* Launch sites - brighter circles for contrast */
 .site-circle {
     fill: #0e8ebe;
-    fill-opacity: 0.85;
+    fill-opacity: 0.7;
     stroke: #0066a6;
     stroke-width: 1.5px;
     cursor: pointer;
@@ -314,8 +337,9 @@
     background: rgba(10, 13, 14, 0.9);
     border-radius: 30px;
     box-shadow: 0 0 10px rgba(0, 102, 166, 0.15);
+    color: #e0f0ff;
     z-index: 10;
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(16px);
     border: 1px solid rgba(0, 102, 166, 0.2);
 }
 
@@ -415,20 +439,27 @@
     position: absolute;
     pointer-events: none;
     background: rgba(10, 13, 14, 0.95);
-    color: #e0f0ff;
     padding: 10px 14px;
     border-radius: 8px;
-    font-size: 13px;
     z-index: 100;
     visibility: hidden;
     box-shadow: 0 0 10px rgba(0, 102, 166, 0.2);
     border: 2px solid rgba(0, 102, 166, 0.3);
 }
 
-.map-tooltip strong {
+.map-tooltip p {
+    color: #e0f0ff;
+    font-size: 10px;
+    font-weight: 100;
+    margin: 0;
+    border-radius: 8px;
+}
+
+.map-tooltip p strong {
     color: #0066a6;
     display: block;
     margin-bottom: 4px;
+    font-size: 12px;
 }
 
 /* Responsive adjustments */
@@ -507,18 +538,6 @@
     }
 }
 /* Additional styles from JS file */
-
-/* Info popover display - shows on hover */
-.map-info-popover {
-    display: none;
-    pointer-events: none;
-}
-
-.map-info-btn:hover + .map-info-popover,
-.map-info-popover:hover {
-    display: block;
-    pointer-events: auto;
-}
 
 /* Site labels */
 .site-label {
