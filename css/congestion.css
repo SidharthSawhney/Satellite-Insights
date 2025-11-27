@@ -58,7 +58,7 @@
     pointer-events: none;
 }
 
-.legend .legend_text {
+#congestion-risk .legend .legend_text {
     fill: #e0f0ff;
     cursor: pointer;
     fill: #e0f0ff;
@@ -115,7 +115,7 @@
     fill: #0e8ebe;
 }
 
-.legend rect {
+#congestion-risk .legend rect {
     opacity: 0.9;
     filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.4));
     rx: 3px;
@@ -162,7 +162,7 @@
     opacity: 1 !important;
 }
 
-.legend-info-icon {
+#congestion-risk .legend-info-icon {
     fill: #0066a6;
     font-family: "Segoe UI", Arial, sans-serif;
     font-size: 14px;
@@ -171,11 +171,11 @@
     pointer-events: all;
 }
 
-.legend-info-icon:hover {
+#congestion-risk .legend-info-icon:hover {
     fill: #0e8ebe;
 }
 
-.legend_title {
+#congestion-risk .legend_title {
     fill: white;
 }
 

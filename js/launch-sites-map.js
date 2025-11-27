@@ -131,9 +131,15 @@ class LaunchSitesMap {
         this.detailPanel = d3.select(this.node).append('div')
             .attr('class', 'site-detail-panel');
 
-        // Create the header structure
+        // Add centered instruction container (shown by default)
+        this.sitePanelInstruction = this.detailPanel.append('div')
+            .attr('class', 'site-panel-instruction')
+            .text('Click on a launch site to view detailed launch statistics and trends.');
+
+        // Create the header structure (hidden by default)
         const header = this.detailPanel.append('div')
-            .attr('class', 'site-panel-header');
+            .attr('class', 'site-panel-header')
+            .style('display', 'none');
 
         this.sitePanelTitle = header.append('div')
             .attr('class', 'site-panel-title')
@@ -145,12 +151,14 @@ class LaunchSitesMap {
 
         this.sitePanelInfo = this.detailPanel.append('div')
             .attr('class', 'site-panel-info')
+            .style('display', 'none')
             .text('No site selected.');
 
         this.sitePanelSvg = this.detailPanel.append('svg')
             .attr('class', 'site-panel-chart')
             .attr('width', 320)
-            .attr('height', 220);
+            .attr('height', 220)
+            .style('display', 'none');
 
 
 
@@ -570,7 +578,7 @@ class LaunchSitesMap {
 
     _stepForward() {
         if (this.currentYearIndex < this.years.length - 1) {
-            this.currentYearIndex++;
+            this.currentYearIndex += 3;
             this.yearSlider.property('value', this.currentYearIndex);
             this._updateVisualization();
         }
@@ -578,7 +586,7 @@ class LaunchSitesMap {
 
     _stepBackward() {
         if (this.currentYearIndex > 0) {
-            this.currentYearIndex--;
+            this.currentYearIndex -= 3;
             this.yearSlider.property('value', this.currentYearIndex);
             this._updateVisualization();
         }
@@ -689,6 +697,12 @@ class LaunchSitesMap {
     _updateSitePanel(d) {
         if (!d || !this.siteYearly) return;
 
+        // Hide instruction, show data elements
+        this.sitePanelInstruction.style('display', 'none');
+        this.detailPanel.select('.site-panel-header').style('display', 'block');
+        this.sitePanelInfo.style('display', 'block');
+        this.sitePanelSvg.style('display', 'block');
+
         const site = this.siteYearly.get(d.key);
         if (!site) {
             this.sitePanelTitle.text(d.siteName || 'Launch site');
@@ -711,7 +725,7 @@ class LaunchSitesMap {
         const svg = this.sitePanelSvg;
         svg.selectAll('*').remove();
 
-        const margin = { top: 16, right: 40, bottom: 16, left: 16 };
+        const margin = { top: 16, right: 45, bottom: 25, left: 38 };
         const width = 320 - margin.left - margin.right;
         const height = 180 - margin.top - margin.bottom;
 
@@ -750,6 +764,14 @@ class LaunchSitesMap {
                     .tickFormat(d3.format('d'))
             );
 
+        // X axis label
+        g.append('text')
+            .attr('class', 'site-panel-axis-label')
+            .attr('x', width / 2)
+            .attr('y', height + 35)
+            .style('text-anchor', 'middle')
+            .text('Year');
+
         // Y axis
         g.append('g')
             .attr('class', 'site-panel-axis')
@@ -764,7 +786,9 @@ class LaunchSitesMap {
             .attr('class', 'site-panel-axis-label')
             .attr('transform', 'rotate(-90)')
             .attr('x', -height / 2)
-            .attr('y', -35);
+            .attr('y', -30)
+            .style('text-anchor', 'middle')
+            .text('Satellites Launched');
 
         // Line generator
         const line = d3.line()
@@ -790,10 +814,11 @@ class LaunchSitesMap {
     }
 
     _resetSitePanel() {
-        // Reset the side panel back to the default instruction state
-        this.sitePanelTitle.text('Launch Site Details');
-        this.sitePanelSubtitle.text('Click a circle to see yearly launches.');
-        this.sitePanelInfo.text('No site selected yet.');
+        // Show instruction, hide data elements
+        this.sitePanelInstruction.style('display', 'flex');
+        this.detailPanel.select('.site-panel-header').style('display', 'none');
+        this.sitePanelInfo.style('display', 'none');
+        this.sitePanelSvg.style('display', 'none');
         this.sitePanelSvg.selectAll('*').remove();
     }
 

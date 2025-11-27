@@ -70,7 +70,7 @@
 }
 
 /* Legend */
-.legend rect {
+#gov-vs-com .legend rect {
     opacity: 0.9;
     stroke: #0066a6;
     stroke-width: 1px;
@@ -78,7 +78,7 @@
     pointer-events: none;
 }
 
-.legend text {
+#gov-vs-com .legend text {
     fill: #e0f0ff;
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 13px;
@@ -217,7 +217,7 @@
         font-size: 11px;
     }
 
-    .legend text {
+    #gov-vs-com .legend text {
         font-size: 11px;
     }
 
@@ -345,22 +345,22 @@
 }
 
 /* Legend items */
-.legend-item rect {
+#gov-vs-com .legend-item rect {
     rx: 3px;
     opacity: 0.8;
 }
 
-.legend-item line {
+#gov-vs-com .legend-item line {
     opacity: 0.9;
 }
 
-.legend-item text {
+#gov-vs-com .legend-item text {
     fill: #e0f0ff;
     font-size: 13px;
 }
 
 @media (max-width: 500px) {
-    .legend-item text {
+    #gov-vs-com .legend-item text {
         font-size: 11px;
     }
 }
@@ -397,14 +397,14 @@
 
 /* Legend rect sizes */
 @media (max-width: 500px) {
-    .legend rect {
+    #gov-vs-com .legend rect {
         width: 16px;
         height: 16px;
     }
 }
 
 /* Default legend rect size */
-.legend rect {
+#gov-vs-com .legend rect {
     width: 18px;
     height: 18px;
 }

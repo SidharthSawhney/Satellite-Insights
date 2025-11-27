@@ -408,11 +408,11 @@ class Congestion {
             // Apply sequential fade-in based on orbit class
             orbitsEnter.each(function(d) {
                 const orbitIndex = fadeInOrder.indexOf(d.orbit_class);
-                const delay = orbitIndex >= 0 ? orbitIndex * 300 : 0;
+                const delay = 200;
                 d3.select(this)
                     .transition()
                     .delay(delay)
-                    .duration(200)
+                    .duration(300)
                     .style('opacity', 1);
             });
 
@@ -423,7 +423,7 @@ class Congestion {
 
         if (vis.state === 0) {
             // Define fade-in order: LEO, MEO, GEO, Elliptical
-            const fadeInOrder = ["LEO", "MEO", "GEO", "Elliptical"];
+            const fadeInOrder = ["LEO", "MEO", "LEO", "Elliptical"];
             
             // DATA JOIN
             const orbits = vis.orbitLayer.selectAll('.orbit')
@@ -472,11 +472,11 @@ class Congestion {
             orbitsEnter.each(function(d) {
                 const orbitClass = d.class_of_orbit;
                 const orbitIndex = fadeInOrder.indexOf(orbitClass);
-                const delay = orbitIndex >= 0 ? orbitIndex * 300 : 0;
+                const delay = 200;
                 d3.select(this)
                     .transition()
                     .delay(delay)
-                    .duration(200)
+                    .duration(300)
                     .attr('stroke-opacity', 0.9);
             });
 
@@ -487,7 +487,7 @@ class Congestion {
         // Start satellite animation if in full view mode
         if (vis.state === 0) {
             // Delay satellite animation to start after orbits finish fading in
-            setTimeout(() => vis.animateSatellites(), 1000);
+            setTimeout(() => vis.animateSatellites(), 300);
         } else {
             vis.stopSatelliteAnimation();
         }

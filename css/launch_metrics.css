@@ -23,7 +23,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     text-shadow: 0 0 10px rgba(0, 102, 166, 0.5);
-    width: 350px;
+    width: 400px;
     pointer-events: none;
     z-index: 10;
 }
@@ -41,7 +41,7 @@
     letter-spacing: 0.05em;
     opacity: 0.7;
     text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
-    width: 800px;
+    width: 950px;
     pointer-events: none;
     z-index: 10;
     text-anchor: middle;
@@ -86,28 +86,41 @@
 }
 
 /* Legend */
-.legend .legend-item rect {
+#launch-metrics .legend-item {
+    cursor: pointer !important;
+    pointer-events: all !important;
+}
+
+#launch-metrics .legend-item:hover {
+    fill-opacity: 1;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.9));
+}
+
+#launch-metrics .legend-item rect {
+    cursor: pointer !important;
+    pointer-events: all !important;
     opacity: 0.9;
     filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.4));
     rx: 3px;
     transition: opacity 0.2s, stroke-width 0.2s;
 }
 
-.legend .legend-item text {
-    cursor: pointer;
+#launch-metrics .legend-item text {
     fill: #e0f0ff;
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 12px;
-    pointer-events: none;
     letter-spacing: 0.08em;
     text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+    pointer-events: all !important;
 }
 
-.legend .legend-item:hover rect {
+#launch-metrics .legend-item rect:hover {
     stroke-width: 2px;
+    opacity: 1;
 }
 
-.legend text .legend-title {
+#launch-metrics .legend-title {
     font-family: 'Courier New', 'Consolas', monospace;
     font-size: 12px;
     letter-spacing: 0.05em;

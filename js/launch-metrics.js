@@ -48,7 +48,7 @@ class LaunchMetrics {
         // Create instruction text
         vis.htmlInstruction = vis.container.append('div')
             .attr('class', 'chart-instruction-text')
-            .text('Click switch view to toggle between power vs mass and mass over time views');
+            .text('Click switch view to toggle between power vs mass and mass over time views. Click legend to filter.');
 
         // Calculate dimensions
         vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
@@ -194,11 +194,12 @@ class LaunchMetrics {
 
         vis.legend.append('text')
             .attr('class', 'legend-title')
-            .text('Mass Category')
+            .text('Mass Category (Click to filter)')
             .style('fill', '#0066a6')
             .style('font-family', "'Courier New', 'Consolas', monospace")
             .style('font-size', '14px')
-            .style('letter-spacing', '0.05em');
+            .style('letter-spacing', '0.05em')
+            .style('pointer-events', 'none');
 
         const quantiles = vis.colorScale.quantiles();
         const rangeValues = [0, ...quantiles];
@@ -209,10 +210,12 @@ class LaunchMetrics {
             .enter().append('g')
             .attr('class', 'legend-item')
             .attr('transform', (d, i) => {
-                const itemWidth = 120; // Approximate width per legend item
+                const itemWidth = 120;
                 return `translate(${i * itemWidth}, 12)`;
             })
+            .style('cursor', 'pointer')
             .on('click', function(event, d) {
+                event.stopPropagation();
                 const index = rangeValues.indexOf(d);
                 const clickedColor = customColors[index];
 
@@ -229,8 +232,18 @@ class LaunchMetrics {
             .attr('width', vis.config.legendRectSize)
             .attr('height', vis.config.legendRectSize)
             .style('fill', (d, i) => customColors[i])
-            .style('stroke-width', 1)
-            .style('stroke', (d, i) => customColors[i]); 
+            .style('stroke-width', (d, i) => {
+                return vis.selectedFilter === customColors[i] ? 3 : 1;
+            })
+            .style('stroke', (d, i) => {
+                return vis.selectedFilter === customColors[i] ? '#5fa8d3' : customColors[i];
+            })
+            .style('opacity', (d, i) => {
+                if (vis.selectedFilter && vis.selectedFilter !== customColors[i]) {
+                    return 0.3;
+                }
+                return 0.9;
+            });
 
         legendItems.append('text')
             .attr('x', vis.config.legendRectSize + 8)
@@ -280,7 +293,7 @@ class LaunchMetrics {
         const circles = vis.chart.selectAll('circle')
             .data(dataToRender, d => d.launch_vehicle + d.year);
 
-        // ENTER — start at r = 0
+        // ENTER – start at r = 0
         const circlesEnter = circles.enter().append('circle')
             .attr('class', 'data-point')
             .attr('cx', d => vis.viewState === 'mass-power'
@@ -291,7 +304,7 @@ class LaunchMetrics {
             .style('fill', d => vis.colorScale(d.avg_launch_mass_kg))
             .style('opacity', 1);
 
-        // EXIT — shrink to 0 radius, then remove
+        // EXIT – shrink to 0 radius, then remove
         circles.exit()
             .transition()
             .duration(500)
@@ -302,7 +315,7 @@ class LaunchMetrics {
         // MERGE
         const circlesUpdate = circlesEnter.merge(circles);
 
-        // UPDATE — transition to full radius
+        // UPDATE – transition to full radius
         circlesUpdate
             .transition()
             .duration(500)
@@ -319,7 +332,6 @@ class LaunchMetrics {
             .on('mouseover', function(event, d) { 
                 d3.select(this).raise();
                 
-                // Get mouse position relative to the container
                 const [x, y] = d3.pointer(event, vis.container.node());
 
                 vis.tooltip

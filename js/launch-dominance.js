@@ -137,7 +137,7 @@ class LaunchDominance {
     
     // Legend group
     this.legendGroup = this.chartGroup.append('g')
-      .attr('class', 'legend')
+      .attr('class', 'launch-dom-legend')
       .attr('transform', `translate(0, ${this.chartH + 68})`)
     
     // Tooltip
@@ -479,13 +479,9 @@ class LaunchDominance {
     
     // Legend title - styled like launch-metrics
     this.legendGroup.append('text')
-      .attr('class', 'legend-title')
+      .attr('class', 'launch-dom-legend-title')
       .attr('x', 0)
       .attr('y', -5)
-      .style('fill', '#0066a6')
-      .style('font-family', "'Courier New', 'Consolas', monospace")
-      .style('font-size', '14px')
-      .style('letter-spacing', '0.05em')
       .text('Top 8 Most Launched Rockets');
     
     // Legend items
@@ -499,11 +495,9 @@ class LaunchDominance {
       const y = row * 20 + 10;
       
       const item = this.legendGroup.append('g')
-        .attr('class', 'legend-item')
+        .attr('class', 'launch-dom-legend-item')
         .attr('data-vehicle', v.vehicle)
         .attr('transform', `translate(${x}, ${y})`)
-        .style('cursor', 'pointer')
-        .style('opacity', 1)
         .on('click', function(event) {
           event.stopPropagation();
           // If clicking the same vehicle, deselect it, otherwise select new one
@@ -512,23 +506,11 @@ class LaunchDominance {
           } else {
             vis._selectVehicle(v.vehicle);
           }
-        })
-        .on('mouseover', function() {
-          if (!vis.selectedVehicle || vis.selectedVehicle === v.vehicle) {
-            d3.select(this).select('text')
-              .style('filter', 'drop-shadow(0 0 4px ' + vis.colorMap.get(v.vehicle) + ')');
-          }
-        })
-        .on('mouseout', function() {
-          if (!vis.selectedVehicle || vis.selectedVehicle === v.vehicle) {
-            d3.select(this).select('text')
-              .style('filter', 'none');
-          }
         });
       
       // Line sample
       item.append('line')
-        .attr('class', 'legend-line')
+        .attr('class', 'launch-dom-legend-line')
         .attr('x1', 0)
         .attr('x2', 20)
         .attr('y1', 0)
@@ -536,10 +518,10 @@ class LaunchDominance {
         .attr('stroke', vis.colorMap.get(v.vehicle))
         .attr('stroke-width', v.vehicle === 'Falcon 9' ? 3 : 2)
         .attr('stroke-dasharray', v.vehicle === 'Falcon 9' ? '0' : '5,5');
-      
+
       // Label - set fill to match line color
       item.append('text')
-        .attr('class', 'legend-text')
+        .attr('class', 'launch-dom-legend-text')
         .attr('x', 25)
         .attr('y', 4)
         .style('fill', vis.colorMap.get(v.vehicle))
@@ -556,7 +538,7 @@ class LaunchDominance {
     
     if (this.selectedVehicle) {
       // Fade out non-selected items
-      this.legendGroup.selectAll('.legend-item')
+      this.legendGroup.selectAll('.launch-dom-legend-item')
         .style('opacity', function() {
           const vehicleName = d3.select(this).attr('data-vehicle');
           return vehicleName === vis.selectedVehicle ? 1 : 0.3;
@@ -571,9 +553,7 @@ class LaunchDominance {
         });
     } else {
       // Reset all items to full opacity
-      this.legendGroup.selectAll('.legend-item')
-        .style('opacity', 1)
-        .style('filter', 'none');
+      this.legendGroup.selectAll('.launch-dom-legend-item');
     }
   }
 
