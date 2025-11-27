@@ -684,7 +684,7 @@ class LaunchSitesMap {
         this.tooltip
             .style('visibility', 'visible')
             .html(
-                `<p><strong>${siteName}</strong><br>` +
+                `<p><strong>${siteName}</strong>` +
                 `Country: ${country}<br>` +
                 `Total satellites: ${total}<br>` +
                 `Government: ${gov}<br>` +
@@ -747,7 +747,7 @@ class LaunchSitesMap {
 
         // X axis
         const years = data.map(d => d.year);
-        const step = Math.max(1, Math.ceil(years.length / 6));
+        const step = Math.max(1, Math.ceil(years.length / 5));
         const [minYear, maxYear] = x.domain();
         const nTicks = 6;
 

@@ -251,23 +251,6 @@ p {
     box-shadow: 0 0 10px var(--accent-green);
 }
 
-/* .launch-widget {
-    width: 100%;
-    min-height: 600px;
-}
-
-.congestion-viz {
-    min-height: 600px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#congestion-risk {
-    width: 100%;
-    height: 600px;
-} */
-
 /* ============ NARRATIVE SECTIONS ============ */
 .narrative-section {
     padding: 4rem 0;
@@ -454,34 +437,10 @@ p {
     }
 }
 
-@keyframes scanline {
-    0% {
-        transform: translateY(-100%);
-    }
-    100% {
-        transform: translateY(100vh);
-    }
-}
-
 .viz-section,
 .narrative-section,
 .insight-section {
     animation: fadeInUp 0.8s ease-out;
-}
-
-/* Scanline effect */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(transparent, var(--accent-green), transparent);
-    pointer-events: none;
-    z-index: 9999;
-    animation: scanline 8s linear infinite;
-    opacity: 0.1;
 }
 
 /* ============ RESPONSIVE ============ */

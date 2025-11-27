@@ -48,7 +48,7 @@ class LaunchMetrics {
         // Create instruction text
         vis.htmlInstruction = vis.container.append('div')
             .attr('class', 'chart-instruction-text')
-            .text('Click switch view to toggle between power vs mass and mass over time views. Click legend to filter. Click again or anywhere to deselect.');
+            .text('Click switch view to toggle between power vs mass and mass over time views. Click legend to filter.');
 
         // Calculate dimensions
         vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
