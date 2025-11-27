@@ -65,7 +65,7 @@ class LaunchMetrics {
         // Create instruction text
         vis.htmlInstruction = vis.container.append('div')
             .attr('class', 'chart-instruction-text')
-            .text('Click switch view to toggle between power vs mass and mass over time views. Click legend to filter.');
+            .text('Click switch view to toggle between views. Click legend to filter. Radius represents mass of each rocket.');
 
         // Calculate dimensions
         vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;

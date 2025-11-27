@@ -53,30 +53,6 @@ class LaunchDominance {
     this.chartContainer = this.container.append('div')
       .attr('class', 'chart-container');
     
-    // Add info button and popover above the chart
-    // const infoWrapper = this.chartContainer.append('div')
-    //   .style('position', 'absolute')
-    //   .style('top', '12px')
-    //   .style('left', '50%')
-    //   .style('transform', 'translateX(-50%)')
-    //   .style('z-index', '10');
-    
-    // this.infoButton = infoWrapper.append('button')
-    //   .attr('class', 'map-info-btn')
-    //   .attr('type', 'button')
-    //   .attr('aria-label', 'Information about this visualization')
-    //   .html('ⓘ');
-    
-    // this.infoPopover = infoWrapper.append('div')
-    //   .attr('class', 'map-info-popover')
-    //   .style('left', '30px')
-    //   .style('top', '0')
-    //   .html(`
-    //     <strong>About This Chart</strong>
-    //     <p>This chart shows the cumulative number of satellites launched by each major rocket over time.</p>
-    //     <p>Click on any line, dot, or legend label to select a rocket and view detailed information in the sidebar.</p>
-    //   `);
-    
     // Sidebar (Fixed 20% width via CSS)
     this.sidebarContainer = this.container.append('div')
       .attr('class', 'launch-dom-sidebar');
@@ -256,7 +232,7 @@ class LaunchDominance {
         this.colorMap.set(v.vehicle, '#00d4ff'); // Bright cyan for Falcon 9
       } else {
         // Muted colors for others - Blue/Purple Palette
-        const mutedColors = ['#5fa8d3', '#7b2cbf', '#778da9', '#415a77', '#9d4edd', '#4a90e2', '#6a4c93'];
+        const mutedColors = ['#5290b7ff', '#6c2cbfff', '#8491c0ff', '#739dceff', '#8b49c2ff', '#4a5ce2ff', '#724c93ff'];
         this.colorMap.set(v.vehicle, mutedColors[i % mutedColors.length]);
       }
     });
@@ -388,6 +364,8 @@ class LaunchDominance {
     linesUpdate.select('.line-path')
       .attr('d', d => line(d.data))
       .attr('stroke', d => vis.colorMap.get(d.vehicle))
+      .attr('stroke-width', d => d.vehicle === 'Falcon 9' ? 3 : 2)
+      .style('filter', d => d.vehicle === this.selectedVehicle ? 'drop-shadow(0 0 4px ' + vis.colorMap.get(d.vehicle) + ')' : 'none')
       .style('cursor', 'pointer')
       .on('click', function(event, d) {
         event.stopPropagation();
@@ -554,7 +532,7 @@ class LaunchDominance {
     } else {
       // Reset all items to full opacity and remove filters
       this.legendGroup.selectAll('.launch-dom-legend-item')
-        .style('opacity', 0.7)
+        .style('opacity', 1)
         .style('filter', 'none');
     }
   }
