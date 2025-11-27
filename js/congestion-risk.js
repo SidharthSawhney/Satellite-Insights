@@ -15,29 +15,46 @@ class Congestion {
         this.node = this.host.node();
         this.data = data || [];
         this.dataCondensed = condensed;
+
         // dimensions
         const box = this.node.getBoundingClientRect();
         this.width = Math.max(320, Math.floor(box.width || 900));
         this.height = Math.max(320, Math.floor(box.height || 600));
+        this.graphTranslation = 20;
 
         // color scale for orbit classes
         this.colorScale = d3.scaleOrdinal()
             .domain(["LEO", "MEO", "GEO", "Elliptical"])
-            .range(['#00d4ff', '#5fa8d3', '#7b2cbf', '#ff006e']);
+            .range(['#82e6ffff', '#77adffff', '#7174ffff', '#9d69ffff']);
 
         //sets current state to 0
         this.state = 0;
 
-        // responsive
-        if (window.ResizeObserver) {
-            this._ro = new ResizeObserver(() => this.resize());
-            this._ro.observe(this.node);
-        }
-        window.addEventListener('resize', () => this.resize());
+        // // responsive
+        // if (window.ResizeObserver) {
+        //     this._ro = new ResizeObserver(() => this.resize());
+        //     this._ro.observe(this.node);
+        // }
+        // window.addEventListener('resize', () => this.resize());
     }
 
     initVis() {
         const vis = this;
+
+        // Add title
+        vis.title = vis.host.append('div')
+            .attr('class', 'congestion-title');
+
+        vis.title.append('span')
+            .attr('class', 'congestion-title-text')
+            .text('Orbital Congestion Risk');
+
+        // Add instructions
+        vis.instructions = vis.host.append('div')
+            .attr('class', 'congestion-instructions')
+            .text('Click "Simplify" to see orbital density levels. Each satellite orbits Earth in its designated layer.')
+            .style('right', `${10}px`)
+            .style('top', `${vis.height / 2 - vis.graphTranslation - 110}px`);
 
         // Create the main SVG
         vis.svg = vis.host.append('svg')
@@ -49,19 +66,24 @@ class Congestion {
 
         // Globe Projection
         vis.projection = d3.geoOrthographic()
-            .scale(vis.height/5)
-            .translate([vis.width / 2, vis.height / 2])
+            .scale(vis.height / 6)
+            .translate([vis.width / 2, vis.height / 2 + vis.graphTranslation])
             .clipAngle(90);
 
         vis.path = d3.geoPath(vis.projection);
+        
+        // Create tooltip
+        vis.tooltip = vis.host.append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
 
 
         // Background Sphere
         vis.svg.append("circle")
             .attr("cx", vis.width / 2)
-            .attr("cy", vis.height / 2)
+            .attr("cy", vis.height / 2 + vis.graphTranslation)
             .attr("r", vis.projection.scale())
-            .attr("fill", "#1b4965");
+            .attr("fill", "#0066a6");
 
         // Load World Map 
         d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(worldData => {
@@ -70,15 +92,15 @@ class Congestion {
             vis.land = vis.svg.append("g").selectAll("path")
                 .data(countries.features)
                 .enter().append("path")
-                .attr("fill", "#2a9d8f")
-                .attr("stroke", "#264653")
-                .attr("stroke-width", 0.3);
+                .attr("fill", "#0e8ebe")
+                .attr("stroke", "#0e8ebe")
+                .attr("stroke-width", 1);
 
             //  Rotation Animation 
             vis.rotation = [0, -10]; // initial [lambda, phi]
             vis.velocity = 0.35; // degrees per frame
 
-            d3.timer(function() {
+            d3.timer(function () {
                 vis.rotation[0] += vis.velocity;
                 vis.projection.rotate(vis.rotation);
                 vis.land.attr("d", vis.path);
@@ -94,7 +116,7 @@ class Congestion {
 
         // Add defs for satellite image
         vis.defs = vis.svg.append("defs");
-        
+
         vis.defs.append("pattern")
             .attr("id", "satellite-icon")
             .attr("width", 1)
@@ -117,255 +139,365 @@ class Congestion {
         vis.scale = d3.scaleLinear()
             .domain([0, maxApogee])
             .range([0, maxRadius]);
-        
-        
+
+
         // Create scales for condensed view - where stroke width indicates satellite value
         vis.cScale = d3.scaleLinear()
-                        .domain(d3.extent(vis.dataCondensed, d => d.count))
-                        .range([4,10]);
-        
+            .domain(d3.extent(vis.dataCondensed, d => d.count))
+            .range([4, 10]);
+
         const earthRadius = vis.projection.scale();
         vis.orbitScale = d3.scaleOrdinal()
-                            .domain(["LEO", "MEO", "GEO", "Elliptical"])
-                            .range([earthRadius*1.2,earthRadius*1.4,earthRadius*1.6,earthRadius*1.8]);
-        
+            .domain(["LEO", "MEO", "GEO", "Elliptical"])
+            .range([earthRadius * 1.2, earthRadius * 1.4, earthRadius * 1.6, earthRadius * 1.8]);
+
         // Sort the data
         vis.dataCondensed = vis.dataCondensed.sort((a, b) => {
-                // Sort by orbitScale value, descending (largest radius first)
-                return vis.orbitScale(b.orbit_class) - vis.orbitScale(a.orbit_class);
-            });
+            // Sort by orbitScale value, descending (largest radius first)
+            return vis.orbitScale(b.orbit_class) - vis.orbitScale(a.orbit_class);
+        });
 
-        
-        // Show the color legend
+
+        // Legend for orbit classes
         vis.legend = vis.svg.append("g")
-                        .attr("class", "legend");
+            .attr("class", "legend");
+
+        // Title text
+        const legendTitle = vis.legend.append("text")
+            .attr("x", 40)
+            .attr("y", 100)
+            .attr("class", "legend_title")
+            .text("Orbit Class")
+            .style('fill', '#0066a6')
+            .style('font-family', "'Courier New', 'Consolas', monospace")
+            .style('font-size', '14px')
+            .style('letter-spacing', '0.05em');
+
+
+        // --- info icon right next to the title ---
+        const titleWidth = legendTitle.node().getComputedTextLength();
 
         vis.legend.append("text")
-                    .attr("x", 0)
-                    .attr("y", 10)
-                    .attr("class", "legend_title")
-                    .text("Orbit Class")
-                    .style("fill", "white");
-        
+            .attr("class", "legend-info-icon")
+            .attr("x", titleWidth + 8 + 40)
+            .attr("y", 100)
+            .text("")
+            .on("mouseover", (event) => {
+                vis.tooltip
+                    .style("opacity", 1)
+                    .html(`
+                        <strong>Orbit Classes</strong><br/>
+                        <strong>LEO: Low Earth Orbit</strong> - Close to Earth, Starlink and Earth-imaging satellites here. Very crowded<br/>
+                        <strong>MEO: Medium Earth Orbit</strong> – A bit higher up. For navigation satellites like GPS<br/>
+                        <strong>GEO: Geostationary Orbit</strong> – Very high up. Perfect for TV & weather<br/>
+                        <strong>Elliptical</strong> –  Oval shaped path. used for special missions
+                    `)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+            })
+            .on("mousemove", (event) => {
+                vis.tooltip
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+            })
+            .on("mouseout", () => {
+                vis.tooltip.style("opacity", 0);
+            });
+
+        // color boxes
         vis.legend.selectAll("rect")
-                    .data(vis.colorScale.domain())
-                    .enter()
-                    .append("rect")
-                    .attr("x",0)
-                    .attr("y", (d,i)=> i*25 + 30)
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .style("fill", d=> this.colorScale(d));
+            .data(vis.colorScale.domain())
+            .enter()
+            .append("rect")
+            .attr("x", 40)
+            .attr("y", (d, i) => i * 25 + 110)
+            .attr("width", 20)
+            .attr("height", 20)
+            .style("fill", d => vis.colorScale(d))
+            .style("stroke", d => vis.colorScale(d));
 
+        // labels
         vis.legend.selectAll("legend_text")
-                    .data(vis.colorScale.domain())
-                    .enter()
-                    .append("text")
-                    .attr("class", "legend_text")
-                    .attr("x", 30)
-                    .attr("y", (d,i) => i*25 + 45)
-                    .text(d=>d);
+            .data(vis.colorScale.domain())
+            .enter()
+            .append("text")
+            .attr("class", "legend_text")
+            .attr("x", 70)
+            .attr("y", (d, i) => i * 25 + 125)
+            .text(d => {if (d === "GEO") {
+                            return "GEO (High)";
+                        } else if (d === "MEO") {
+                            return "MEO (Middle)";
+                        } else if (d === "LEO") {
+                            return "LEO (Low)";
+                        } else {
+                            return d;
+                        }
+                        });
 
-        // Add tooltips
-        vis.tooltip = d3.select("body").append("div")
-                            .style("opacity", 0)
-                            .attr("class", "tooltip");        
+
+
         // Add annotation
         vis.annotation = vis.svg.append("g")
-                                .attr("class", "annotation")
-                                .attr("transform", `translate(${150}, 0)`);
-        
-        vis.annotation.append("rect")
-                        .attr("class", "label_box")
-                        .attr("x",0)
-                        .attr("y",0)
-                        .attr("width", 950) 
-                        .attr("height",40);
-        
-        vis.annotation.append("text")
-                        .attr("class", "annotation")
-                        .text("Each orbital layer's thickness indicates the density of satellites within that orbital region.")
-                        .style("fill", "white")
-                        .attr("x", 30)
-                        .attr("y", 25);
-        
-        vis.annotation.style("opacity", 0);
-        
+            .attr("class", "annotation")
+            .style("opacity", 0);
 
-        
+        vis.annotation.append("text")
+            .attr("class", "annotation")
+            .text("Each orbital layer's thickness indicates the density of satellites within that orbital region.");
+
         // Add a button to change states
         vis.button = vis.svg.append("g")
-                            .attr("class", "svg-button")
-                            .attr("transform", `translate(${vis.width-200}, ${vis.height/2-80})`)
-                            .style("cursor", "pointer")
-                             .on("click",function(){
-                                // Get the text of the button
-                                let txt = d3.select(this).select(".buttonText").text();
-                                
-                                // Depending on current text, change state
-                                if (txt === "Full View"){
-                                    d3.select(this).select(".buttonText").text("Simplify");
-                                    vis.state = 0;
-                                    vis.annotation.transition()
-                                                .duration(500) 
-                                                .delay(500)
-                                                .style("opacity", 0);
-                                }
-                                else{
-                                     d3.select(this).select(".buttonText").text("Full View");
-                                    vis.annotation.transition()
-                                                .duration(500) 
-                                                .delay(500)
-                                                .style("opacity", 1);
+            .attr("class", "svg-button")
+            .attr("transform", `translate(${vis.width - 230}, ${vis.height / 2 - vis.graphTranslation})`)
+            .style("cursor", "pointer")
+            .on("click", function () {
+                // Get the text of the button
+                let txt = d3.select(this).select(".buttonText").text();
 
-                                     vis.state = 1;
-                                }
+                // Depending on current text, change state
+                if (txt === "Full View") {
+                    d3.select(this).select(".buttonText").text("Simplify");
+                    vis.state = 0;
+                    // Fade out instruction immediately when switching to full view
+                    vis.annotation.transition()
+                        .duration(200)
+                        .style("opacity", 0);
+                }
+                else {
+                    d3.select(this).select(".buttonText").text("Full View");
+                    // Fade in instruction after orbits are drawn
+                    vis.annotation
+                        .attr("transform", `translate(${vis.width / 2}, ${vis.height - 50 + vis.graphTranslation})`)
+                        .transition()
+                        .duration(200)
+                        .delay(1000)
+                        .style("opacity", 1);
 
-                                vis.removeOrbits();
-                            
+                    vis.state = 1;
+                }
 
-                             });
+                vis.removeOrbits();
+            });
         vis.button.append("rect")
-                .attr("class", "buttonBox")
-                .attr("width", 140)
-                .attr("height", 40)
-                ;
+            .attr("class", "buttonBox")
+            .attr("width", 150)
+            .attr("height", 45)
+            .attr("rx", 22.5)
+            .attr("ry", 22.5);
 
         vis.button.append("text")
-                .attr("class", "buttonText")
-                .attr("x", 20)
-                .attr("y", 25)
-                .text("Simplify Me");
+            .attr("class", "buttonText")
+            .attr("x", 75)
+            .attr("y", 28)
+            .attr("text-anchor", "middle")
+            .text("Simplify");
 
-        
+
 
         // Call updateVis to draw orbits
         vis.updateVis();
     }
-
-    // Transition out the orbits
-    removeOrbits(){
-         const vis = this
-           const orbits = vis.svg.selectAll(".orbit");
-           let remaining = orbits.size();
-
-           if (remaining ===0){
+    removeOrbits() {
+        const vis = this;
+        const orbits = vis.svg.selectAll(".orbit");
+        const satellites = vis.svg.selectAll(".satellite");
+        
+        if (orbits.size() === 0) {
             vis.updateVis();
             return;
-           }
+        }
 
-           orbits.transition()
-           .duration(500)
-           .style("opacity", 0)
-           .on("end", ()=>{
-                remaining--;
-                if (remaining ===0 ) {
-                    vis.updateVis();}
-            })
-            .remove();
-
+        // Define fade order based on current state
+        const fadeOrder = vis.state === 1 
+            ? ["Elliptical", "GEO", "MEO", "LEO"]  // Going to simplified: outer to inner
+            : ["Elliptical", "GEO", "MEO", "LEO"]; // Going to full: outer to inner
         
+        // Group orbits by class
+        const orbitsByClass = {};
+        fadeOrder.forEach(className => {
+            orbitsByClass[className] = [];
+        });
+        
+        orbits.each(function(d) {
+            const orbitClass = d.class_of_orbit || d.orbit_class;
+            if (orbitsByClass[orbitClass]) {
+                orbitsByClass[orbitClass].push(this);
+            }
+        });
+        
+        // Animation timing
+        let delay = 0;
+        const fadeDuration = 200;
+        const delayBetweenClasses = 100;
+        
+        // Fade satellites FIRST when going to simplified
+        if (vis.state === 1 && satellites.size() > 0) {
+            satellites
+                .transition()
+                .duration(fadeDuration)
+                .style("opacity", 0)
+                .on("end", function() {
+                    d3.select(this).remove();
+                });
+            // Add delay so orbits start fading after satellites
+            delay = delayBetweenClasses;
+        }
+        
+        fadeOrder.forEach((className, index) => {
+            const classOrbits = orbitsByClass[className];
+            if (classOrbits && classOrbits.length > 0) {
+                d3.selectAll(classOrbits)
+                    .transition()
+                    .delay(delay)
+                    .duration(fadeDuration)
+                    .style("opacity", 0)
+                    .on("end", function() {
+                        d3.select(this).remove();
+                        if (index === fadeOrder.length - 1) {
+                            setTimeout(() => vis.updateVis(), 50);
+                        }
+                    });
+                delay += delayBetweenClasses;
+            }
+        });
 
+        // Fade satellites FIRST when going to simplified
+        if (vis.state === 1 && satellites.size() > 0) {
+            satellites
+                .transition()
+                .duration(fadeDuration)
+                .style("opacity", 0)
+                .on("end", function() {
+                    d3.select(this).remove();
+                });
+            // Add delay so orbits start fading after satellites
+            delay = delayBetweenClasses;
+        };
     }
+
+
 
     updateVis() {
         const vis = this;
-        if(vis.state === 1){
+        if (vis.state === 1) {
             const orbits = vis.orbitLayer.selectAll('.orbit')
-                            .data(vis.dataCondensed, d=> d.orbit_class);
-            
-            // Enter and merge
-            orbits.enter().append('circle')
-                            .merge(orbits)
-                            .attr('cx', (d)=>{
-                                console.log(vis.width)
-                                return vis.width/2;
-                            })
-                            .attr('cy', (d) =>{
-                                console.log(vis.height)
-                                return vis.height/2;
+                .data(vis.dataCondensed, d => d.orbit_class);
 
-                            })
-                            .attr('r',(d,i)=>{
-                                return vis.orbitScale(d.orbit_class);
-                            })
-                            .attr('class', 'orbit')
-                            .attr('fill', 'none')
-                            .attr('stroke', d => vis.colorScale(d.orbit_class))
-                            .attr('stroke-width', d=>{
-                                return vis.cScale(d.count);
-                            })
-                            .on("mouseover", (event, d) =>{
-                                    vis.tooltip
-                                                .style("opacity", 1)
-                                                .text(`Satellites in Orbit Layer ${d.orbit_class}: ${d.count}`)
-                                                .style("left", (event.pageX ) + "px")
-                                                .style("top", (event.pageY) + "px");
-                            })
-                            .on("mouseleave", ()=>{
-                                vis.tooltip.style("opacity",0)
-                                    .text("")
-                            }) 
-                            ;
+            // Define fade-in order: LEO, MEO, GEO, Elliptical
+            const fadeInOrder = ["LEO", "MEO", "GEO", "Elliptical"];
             
+            // Enter new circles
+            const orbitsEnter = orbits.enter().append('circle')
+                .attr('cx', d => vis.width / 2)
+                .attr('cy', d => vis.height / 2)
+                .attr('r', d => vis.orbitScale(d.orbit_class))
+                .attr('class', 'orbit')
+                .attr('fill', 'none')
+                .attr('stroke', d => vis.colorScale(d.orbit_class))
+                .attr('stroke-width', d => vis.cScale(d.count))
+                .attr('transform', `translate(0,${vis.graphTranslation})`)
+                .style('opacity', 0)
+                .on("mouseover", (event, d) => {
+                    vis.tooltip
+                        .style("opacity", 1)
+                        .html(`<p><strong>${d.orbit_class === "GEO" ? "GEO (High)" : d.orbit_class === "MEO" ? "MEO (Middle)" : d.orbit_class === "LEO" ? "LEO (Low)" : d.orbit_class}</strong>Satellites: ${d.count}</p>`)
+                        .style("left", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (x + 10) + "px";
+                        })())
+                        .style("top", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (y - 10) + "px";
+                        })());
+                })
+                .on("mouseleave", () => {
+                    vis.tooltip.style("opacity", 0).html("");
+                });
+
+            // Apply sequential fade-in based on orbit class
+            orbitsEnter.each(function(d) {
+                const orbitIndex = fadeInOrder.indexOf(d.orbit_class);
+                const delay = 200;
+                d3.select(this)
+                    .transition()
+                    .delay(delay)
+                    .duration(300)
+                    .style('opacity', 1);
+            });
+
             orbits.order();
-             //Remove unused orbits   
-             orbits.exit().remove();
-
+            orbits.exit().remove();
 
         }
 
-        if (vis.state === 0){
-        // DATA JOIN
-        const orbits = vis.orbitLayer.selectAll('.orbit')
-            .data(vis.data, d => d.norad_number || d['current_official_name_of_satellite'] || Math.random());
+        if (vis.state === 0) {
+            // Define fade-in order: LEO, MEO, GEO, Elliptical
+            const fadeInOrder = ["LEO", "MEO", "GEO", "Elliptical"];
+            
+            // DATA JOIN
+            const orbits = vis.orbitLayer.selectAll('.orbit')
+                .data(vis.data, d => d.norad_number || d['current_official_name_of_satellite'] || Math.random());
 
-        // ENTER
-        const orbitsEnter = orbits.enter().append('ellipse')
-            .attr('class', 'orbit')
-            .attr('fill', 'none')
-            .attr('stroke-width', 0.5)
-            .attr('stroke-opacity', 0.9);
+            // ENTER
+            const orbitsEnter = orbits.enter().append('ellipse')
+                .attr('class', 'orbit')
+                .attr('fill', 'none')
+                .attr('stroke-width', 0.5)
+                .attr('stroke-opacity', 0)
+                .attr('cx', vis.width / 2)
+                .attr('cy', vis.height / 2)
+                .attr('rx', d => {
+                    const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
+                    const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
+                    return (ap + pe) / 2 + vis.projection.scale();
+                })
+                .attr('ry', d => {
+                    const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
+                    const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
+                    const a = (ap + pe) / 2;
+                    const c = (ap - pe) / 2;
+                    return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale();
+                })
+                .attr('transform', d => `translate(0, ${vis.graphTranslation}) rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
+                .attr('stroke', d => vis.colorScale(d.class_of_orbit))
+                .on("mouseover", (event, d) => {
+                    vis.tooltip
+                        .style("opacity", 1)
+                        .html(`<p><strong>${d.current_official_name_of_satellite}</strong>Orbit: ${d.class_of_orbit === "GEO" ? "GEO (High)" : d.class_of_orbit === "MEO" ? "MEO (Middle)" : d.class_of_orbit === "LEO" ? "LEO (Low)" : d.class_of_orbit}</p>`)
+                        .style("left", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (x + 10) + "px";
+                        })())
+                        .style("top", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (y - 10) + "px";
+                        })());
+                })
+                .on("mouseleave", () => {
+                    vis.tooltip.style("opacity", 0).html("");
+                });
 
-        // ENTER + UPDATE
-        orbitsEnter.merge(orbits)
-            .attr('cx', vis.width / 2)
-            .attr('cy', vis.height / 2)
-            .attr('rx', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
-                const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
-                return (ap + pe) / 2 + vis.projection.scale(); // semi-major axis
-            })
-            .attr('ry', d => {
-                const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
-                const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
-                const a = (ap + pe) / 2;
-                const c = (ap - pe) / 2;
-                return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
-            })
-            .attr('transform', d => `rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
-            .attr('stroke', d => vis.colorScale(d.class_of_orbit))
-            .on("mouseover", (event, d) =>{
-                vis.tooltip
-                            .style("opacity", 1)
-                            .text(`${d.current_official_name_of_satellite}`)
-                            .style("left", (event.pageX ) + "px")
-                            .style("top", (event.pageY) + "px");
-            })
-            .on("mouseleave", ()=>{
-                vis.tooltip.style("opacity",0)
-                    .text("")
-            }) 
-            ;
+            // Apply sequential fade-in based on orbit class
+            orbitsEnter.each(function(d) {
+                const orbitClass = d.class_of_orbit;
+                const orbitIndex = fadeInOrder.indexOf(orbitClass);
+                const delay = 200;
+                d3.select(this)
+                    .transition()
+                    .delay(delay)
+                    .duration(300)
+                    .attr('stroke-opacity', 0.9);
+            });
 
-        // EXIT
-        orbits.exit().remove();
-
+            // EXIT
+            orbits.exit().remove();
         }
 
         // Start satellite animation if in full view mode
         if (vis.state === 0) {
-            vis.animateSatellites();
+            // Delay satellite animation to start after orbits finish fading in
+            setTimeout(() => vis.animateSatellites(), 300);
         } else {
             vis.stopSatelliteAnimation();
         }
@@ -374,121 +506,127 @@ class Congestion {
 
     animateSatellites() {
         const vis = this;
-        
+
         // Stop existing animation if any
         if (vis.satelliteAnimationTimer) {
             vis.satelliteAnimationTimer.stop();
         }
 
         // Sample satellites from the data (limit to ~100 for performance, prioritize elliptical)
-        const sampleSize = Math.min(60, vis.data.length);
+        const sampleSize = Math.min(80, vis.data.length);
         const sampledData = [];
-        
+
         // First, get all elliptical orbit satellites
         const ellipticalSats = vis.data.filter(d => d.class_of_orbit === "Elliptical");
         const otherSats = vis.data.filter(d => d.class_of_orbit !== "Elliptical");
-        
+
         // Take more elliptical satellites to make them visible
         const ellipticalSampleSize = Math.min(ellipticalSats.length);
         const otherSampleSize = sampleSize - ellipticalSampleSize;
-        
+
         const ellipticalStep = Math.max(1, Math.floor(ellipticalSats.length / ellipticalSampleSize));
         const otherStep = Math.max(1, Math.floor(otherSats.length / otherSampleSize));
-        
+
         // Add elliptical satellites
         for (let i = 0; i < ellipticalSats.length && sampledData.length < ellipticalSampleSize; i += ellipticalStep) {
-                const sat = ellipticalSats[i];
-                // Calculate ellipse parameters
-                const ap = vis.scale(+sat['apogee_(km)'] || 0) + 15;
-                const pe = vis.scale(+sat['perigee_(km)'] || 0) + 15;
-                const a = (ap + pe) / 2; // semi-major axis
-                const c = (ap - pe) / 2; // distance from center to focus
-                const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
-                
-                // Speed based on power - normalize to reasonable rotation speed
-                const power = +sat['power_(watts)'] || 100;
-                const speed = (power / 1000) * 0.01; // Adjust multiplier for visible movement
-                
-                sampledData.push({
-                    ...sat,
-                    rx: a + vis.projection.scale(), // semi-major axis with earth radius
-                    ry: b + vis.projection.scale(), // semi-minor axis with earth radius
-                    angle: Math.random() * Math.PI * 2, // Random starting position
-                    speed: speed,
-                    inclination: +sat['inclination_(degrees)'] || 0
-                });
+            const sat = ellipticalSats[i];
+            // Calculate ellipse parameters
+            const ap = vis.scale(+sat['apogee_(km)'] || 0) + 15;
+            const pe = vis.scale(+sat['perigee_(km)'] || 0) + 15;
+            const a = (ap + pe) / 2; // semi-major axis
+            const c = (ap - pe) / 2; // distance from center to focus
+            const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
+
+            // Speed based on apogee and perigee
+            const baseSpeed = 0.02;
+            const exponent = 0.5;
+
+            // farther orbit -> smaller speed
+            const speed = baseSpeed / Math.pow(a, exponent);
+
+            sampledData.push({
+                ...sat,
+                rx: a + vis.projection.scale(), // semi-major axis with earth radius
+                ry: b + vis.projection.scale(), // semi-minor axis with earth radius
+                angle: Math.random() * Math.PI * 2, // Random starting position
+                speed: speed,
+                inclination: +sat['inclination_(degrees)'] || 0
+            });
         }
-        
+
         // Add other satellites
         for (let i = 0; i < otherSats.length && sampledData.length < sampleSize; i += otherStep) {
-                const sat = otherSats[i];
-                // Calculate ellipse parameters
-                const ap = vis.scale(+sat['apogee_(km)'] || 0) + 15;
-                const pe = vis.scale(+sat['perigee_(km)'] || 0) + 15;
-                const a = (ap + pe) / 2; // semi-major axis
-                const c = (ap - pe) / 2; // distance from center to focus
-                const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
-                
-                // Speed based on power - normalize to reasonable rotation speed
-                const power = +sat['power_(watts)'] || 100;
-                const speed = (power / 1000) * 0.01; // Adjust multiplier for visible movement
-                
-                sampledData.push({
-                    ...sat,
-                    rx: a + vis.projection.scale(), // semi-major axis with earth radius
-                    ry: b + vis.projection.scale(), // semi-minor axis with earth radius
-                    angle: Math.random() * Math.PI * 2, // Random starting position
-                    speed: speed,
-                    inclination: +sat['inclination_(degrees)'] || 0
-                });
+            const sat = otherSats[i];
+            // Calculate ellipse parameters
+            const ap = vis.scale(+sat['apogee_(km)'] || 0) + 15;
+            const pe = vis.scale(+sat['perigee_(km)'] || 0) + 15;
+            const a = (ap + pe) / 2; // semi-major axis
+            const c = (ap - pe) / 2; // distance from center to focus
+            const b = Math.sqrt(Math.max(1, a * a - c * c)); // semi-minor axis
+
+            // Speed based on apogee and perigee
+            const baseSpeed = 0.02;
+            const exponent = 0.4;
+
+            // farther orbit -> smaller speed
+            const speed = baseSpeed / Math.pow(a, exponent);
+
+            sampledData.push({
+                ...sat,
+                rx: a + vis.projection.scale(), // semi-major axis with earth radius
+                ry: b + vis.projection.scale(), // semi-minor axis with earth radius
+                angle: Math.random() * Math.PI * 2, // Random starting position
+                speed: speed,
+                inclination: +sat['inclination_(degrees)'] || 0
+            });
         }
-        
+
         vis.satelliteData = sampledData;
-        
+
         console.log(`Creating ${sampledData.length} satellites in animation`);
-        
+
         // Create satellite elements - using images
         const satellites = vis.satelliteLayer.selectAll('.satellite')
             .data(vis.satelliteData);
-        
+
         satellites.enter()
             .append('image')
             .attr('class', 'satellite')
-            .attr('xlink:href', 'images/satellite.png')
+            // prefer 'href' for modern SVG; fallback to 'xlink:href' if needed
+            .attr('href', 'images/satellite.png')
             .attr('width', d => d.class_of_orbit === 'Elliptical' ? 16 : 12)
             .attr('height', d => d.class_of_orbit === 'Elliptical' ? 16 : 12)
+            .style('pointer-events', 'auto') // ensure image receives mouse events
             .merge(satellites)
             .attr('x', d => vis.width / 2 + d.rx * Math.cos(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
             .attr('y', d => vis.height / 2 + d.ry * Math.sin(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
-            .attr('transform', d => {
-                // Calculate current position
-                const x = vis.width / 2 + d.rx * Math.cos(d.angle);
-                const y = vis.height / 2 + d.ry * Math.sin(d.angle);
-                // Rotate around the center of the visualization
-                return `rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`;
-            })
+            .attr('transform', d => `translate(0,${vis.graphTranslation}) rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`)
             .style('opacity', d => d.class_of_orbit === 'Elliptical' ? 1.0 : 0.9)
-            .on("mouseover", (event, d) =>{
+            .on("mouseover", (event, d) => {
+                const [x, y] = d3.pointer(event, vis.host.node()); // relative coords
                 vis.tooltip
+                    .style("left", (x + 10) + "px")
+                    .style("top", (y - 10) + "px")
                     .style("opacity", 1)
-                    .html(`<strong>${d.current_official_name_of_satellite}</strong><br/>Power: ${d['power_(watts)']}W<br/>Orbit: ${d.class_of_orbit}`)
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top", (event.pageY - 10) + "px");
+                    .html(`<p><strong>${d.current_official_name_of_satellite}</strong>Orbit: ${d.class_of_orbit}</p>`);
             })
-            .on("mouseleave", ()=>{
-                vis.tooltip.style("opacity",0)
-                    .html("")
+            .on("mousemove", (event) => { // update position while moving
+                const [x, y] = d3.pointer(event, vis.host.node());
+                vis.tooltip.style("left", (x + 10) + "px").style("top", (y - 10) + "px");
+            })
+            .on("mouseleave", () => {
+                vis.tooltip.style("opacity", 0).html("");
             });
-        
+
         satellites.exit().remove();
-        
+
         // Animate satellites
         vis.satelliteAnimationTimer = d3.timer(() => {
             vis.satelliteData.forEach(d => {
                 d.angle += d.speed;
                 if (d.angle > Math.PI * 2) d.angle -= Math.PI * 2;
             });
-            
+
             vis.satelliteLayer.selectAll('.satellite')
                 .attr('x', d => vis.width / 2 + d.rx * Math.cos(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
                 .attr('y', d => vis.height / 2 + d.ry * Math.sin(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6));
@@ -521,14 +659,14 @@ class Congestion {
         // Reposition the globe
         vis.projection
             .translate([vis.width / 2, vis.height / 2])
-            .scale(vis.height/5);
-        
+            .scale(vis.height / 6);
+
         // Reposition the background Earth
         vis.svg.selectAll("circle")
             .attr("cx", vis.width / 2)
             .attr("cy", vis.height / 2)
             .attr("r", vis.projection.scale());
-        
+
         // Make annotation box responsive
         vis.annotation.attr("transform", `translate(${vis.width * 0.15}, ${vis.height * 0.05})`);
         vis.annotation.select("rect")
@@ -540,27 +678,23 @@ class Congestion {
             .attr("y", 25)
             .style("font-size", `${Math.max(7, vis.width / 80)}px`);
 
-        // Move and resize the button dynamically
-        const buttonWidth = vis.width * 0.15;   // 15% of width
-        const buttonHeight = Math.max(30, vis.height * 0.06); // scale with height
-        const buttonX = vis.width - buttonWidth - 40; // 40px padding from right
-        const buttonY = vis.height / 2 - buttonHeight / 2;
+        // Move and resize the button dynamically - position at bottom right
+        const buttonWidth = 150;
+        const buttonHeight = 45;
+        const buttonX = vis.width - buttonWidth - 20; // 20px padding from right
+        const buttonY = vis.height - buttonHeight - 20; // 20px padding from bottom
 
         vis.button.select("rect.buttonBox")
-                    .attr("width", buttonWidth)
-                    .attr("height", buttonHeight);
+            .attr("width", buttonWidth)
+            .attr("height", buttonHeight);
 
         vis.button.select("text.buttonText")
-                    .attr("x", buttonWidth / 2)
-                    .attr("y", buttonHeight / 2 + 5)
-                    .attr("text-anchor", "middle")
-                    .style("font-size", `${Math.max(7, vis.width / 55)}px`)
+            .attr("x", buttonWidth / 2)
+            .attr("y", buttonHeight / 2 + 5)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
 
         vis.button.attr("transform", `translate(${buttonX}, ${buttonY})`);
         vis.updateVis();
-
-
-
-    
     }
 }
