@@ -352,7 +352,8 @@ class LaunchSitesMap {
                 'Launch Site Country',
                 'Country of Launch',
                 'Launch Country',
-                'Country'
+                'Country',
+                'country_of_operator/owner'
             ]) || 'Unknown';
 
             const ownerClass = this._classifyOwnership(r);
@@ -671,7 +672,8 @@ class LaunchSitesMap {
         }
 
         const siteName = (d && d.siteName) || 'Unknown site';
-        const country = (d && d.country) || 'Unknown';
+        const rawCountry = (d && d.country) || 'Unknown';
+        const country = this._inferCountry(siteName, rawCountry);
 
         // Safely fall back if the all-time fields aren't present
         const total = (d && d.totalAllYears != null)
@@ -685,7 +687,7 @@ class LaunchSitesMap {
             .style('visibility', 'visible')
             .html(
                 `<p><strong>${siteName}</strong>` +
-                `Country: ${country}<br>` +
+                `Ownership: ${country}<br>` +
                 `Total satellites: ${total}<br>` +
                 `Government: ${gov}<br>` +
                 `Commercial: ${comm}</p>`
@@ -714,7 +716,7 @@ class LaunchSitesMap {
 
         // Header text
         this.sitePanelTitle.text(site.siteName);
-        this.sitePanelSubtitle.text(this._inferCountry(site.siteName, site.country));
+        this.sitePanelSubtitle.text('Country of Ownership: ' + this._inferCountry(site.siteName, site.country));
 
         const desc = this._getSiteDescription(site.siteName, site.country);
         this.sitePanelInfo.text(desc);
