@@ -77,32 +77,22 @@ class LaunchSitesMap {
                     <p>Each circle is a space centre which are launch sites where rockets were launched carrying satellite to deploy in space.</p>
                 `);
 
-        // Show on hover
+        // Show on hover with cursor tracking
         this.infoButton.on('mouseenter', (event) => {
-            const rect = event.target.getBoundingClientRect();
+            this.infoPopover.classed('visible', true);
+        });
 
-            // Position next to icon
+        this.infoButton.on('mousemove', (event) => {
+            const [x, y] = d3.pointer(event, this.node);
             this.infoPopover
-                .style('left', `${rect.left + rect.width + 10}px`)
-                .style('top', `${rect.top - 10}px`)
-                .style('display', 'block');
+                .style('left', (x + 12) + 'px')
+                .style('top', (y - 12) + 'px');
         });
 
-        // Hide when mouse leaves BOTH icon and popover
+        // Hide when mouse leaves icon
         this.infoButton.on('mouseleave', () => {
-            setTimeout(() => {
-                if (!this.isHoveringPopover) {
-                    this.infoPopover.style('display', 'none');
-                }
-            }, 120);
+            this.infoPopover.classed('visible', false);
         });
-
-        this.infoPopover
-            .on('mouseenter', () => { this.isHoveringPopover = true; })
-            .on('mouseleave', () => {
-                this.isHoveringPopover = false;
-                this.infoPopover.style('display', 'none');
-            });
 
 
         this.prompt = d3.select(this.node).append('div')
@@ -112,7 +102,12 @@ class LaunchSitesMap {
         this.svg = d3.select(this.node)
             .append('svg')
             .attr('viewBox', `0 0 ${this.w} ${this.h}`)
-            .attr('preserveAspectRatio', 'xMidYMid meet');
+            .attr('preserveAspectRatio', 'xMidYMid meet')
+            .on('click', (event) => {
+                if (event.target === event.currentTarget || event.target.tagName === 'path') {
+                    this._resetSitePanel();
+                }
+            });
 
         this.g = this.svg.append('g');
         this.gLand = this.g.append('g');
@@ -158,15 +153,6 @@ class LaunchSitesMap {
             .attr('height', 220);
 
 
-
-        d3.select('body').on('click', (event) => {
-            const target = event.target;
-            const insideInfoButton = target.closest('.map-info-btn');
-            const insidePopover = target.closest('.map-info-popover');
-            if (!insideInfoButton && !insidePopover) {
-                this.infoPopover.style('display', 'none');
-            }
-        });
 
     }
 
@@ -679,7 +665,7 @@ class LaunchSitesMap {
         const siteName = (d && d.siteName) || 'Unknown site';
         const country = (d && d.country) || 'Unknown';
 
-        // Safely fall back if the all-time fields aren’t present
+        // Safely fall back if the all-time fields aren't present
         const total = (d && d.totalAllYears != null)
             ? d.totalAllYears
             : (d && d.count != null ? d.count : 0);
@@ -690,10 +676,11 @@ class LaunchSitesMap {
         this.tooltip
             .style('visibility', 'visible')
             .html(
-                `<p><strong>${siteName}</strong>` +
-                `Total satellites (all years): ${total}` +
-                `<br>Government: ${gov}` +
-                `<br>Commercial: ${comm}</p>`
+                `<p><strong>${siteName}</strong><br>` +
+                `Country: ${country}<br>` +
+                `Total satellites: ${total}<br>` +
+                `Government: ${gov}<br>` +
+                `Commercial: ${comm}</p>`
             );
 
         this._moveTip(event);

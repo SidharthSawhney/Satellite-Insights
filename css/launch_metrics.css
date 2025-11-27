@@ -28,6 +28,25 @@
     z-index: 10;
 }
 
+/* Chart Instruction Text */
+.chart-instruction-text {
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #e0f0ff;
+    text-align: center;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+    width: 800px;
+    pointer-events: none;
+    z-index: 10;
+    text-anchor: middle;
+}
+
 /* SVG Axes Styling */
 .axis path,
 .axis line {
@@ -67,35 +86,33 @@
 }
 
 /* Legend */
-.legend text {
-    fill: #e0f0ff;
-    font-family: 'Courier New', 'Consolas', monospace;
-    font-size: 13px;
-    pointer-events: none;
-    letter-spacing: 0.08em;
-    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
-}
-
-.legend-item rect {
+.legend .legend-item rect {
     opacity: 0.9;
     filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.4));
     rx: 3px;
     transition: opacity 0.2s, stroke-width 0.2s;
 }
 
-.legend-item {
+.legend .legend-item text {
     cursor: pointer;
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 12px;
+    pointer-events: none;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
 }
 
-.legend-item:hover rect {
+.legend .legend-item:hover rect {
     stroke-width: 2px;
 }
 
-.legend-title {
+.legend text .legend-title {
     font-family: 'Courier New', 'Consolas', monospace;
-    font-size: 16px;
+    font-size: 12px;
+    letter-spacing: 0.05em;
     font-weight: 700;
-    fill: #ffffff;
+    fill: #0066a6;
 }
 
 /* Switch View Button */

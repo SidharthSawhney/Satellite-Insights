@@ -52,8 +52,9 @@ class Congestion {
         // Add instructions
         vis.instructions = vis.host.append('div')
             .attr('class', 'congestion-instructions')
-            .text('Click "Simplify Me" to see orbital density levels. Each satellite orbits Earth in its designated layer.')
-            .style('transform', `translate(${vis.width - 300}px, ${vis.height / 2 - 120 - vis.graphTranslation}px)`);
+            .text('Click "Simplify" to see orbital density levels. Each satellite orbits Earth in its designated layer.')
+            .style('right', `${10}px`)
+            .style('top', `${vis.height / 2 - vis.graphTranslation - 110}px`);
 
         // Create the main SVG
         vis.svg = vis.host.append('svg')
@@ -70,10 +71,11 @@ class Congestion {
             .clipAngle(90);
 
         vis.path = d3.geoPath(vis.projection);
-        //     vis.tooltip = d3.select("body")
-        // .append("div")
-        // .attr("class", "tooltip")
-        // .style("opacity", 0);
+        
+        // Create tooltip
+        vis.tooltip = vis.host.append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
 
 
         // Background Sphere
@@ -166,6 +168,10 @@ class Congestion {
             .attr("y", 100)
             .attr("class", "legend_title")
             .text("Orbit Class")
+            .style('fill', '#0066a6')
+            .style('font-family', "'Courier New', 'Consolas', monospace")
+            .style('font-size', '14px')
+            .style('letter-spacing', '0.05em');
 
 
         // --- info icon right next to the title ---
@@ -207,7 +213,8 @@ class Congestion {
             .attr("y", (d, i) => i * 25 + 110)
             .attr("width", 20)
             .attr("height", 20)
-            .style("fill", d => vis.colorScale(d));
+            .style("fill", d => vis.colorScale(d))
+            .style("stroke", d => vis.colorScale(d));
 
         // labels
         vis.legend.selectAll("legend_text")
@@ -222,7 +229,8 @@ class Congestion {
 
         // Add annotation
         vis.annotation = vis.svg.append("g")
-            .attr("class", "annotation");
+            .attr("class", "annotation")
+            .style("opacity", 0);
 
         vis.annotation.append("text")
             .attr("class", "annotation")
@@ -239,19 +247,21 @@ class Congestion {
 
                 // Depending on current text, change state
                 if (txt === "Full View") {
-                    d3.select(this).select(".buttonText").text("Simplify Me");
+                    d3.select(this).select(".buttonText").text("Simplify");
                     vis.state = 0;
-                    vis.annotation.attr("transform", `translate(${vis.width}, ${vis.height - 50 + vis.graphTranslation})`);
+                    // Fade out instruction immediately when switching to full view
                     vis.annotation.transition()
-                        .duration(500)
-                        .delay(500)
+                        .duration(200)
                         .style("opacity", 0);
                 }
                 else {
                     d3.select(this).select(".buttonText").text("Full View");
-                    vis.annotation.transition()
-                        .duration(500)
-                        .delay(500)
+                    // Fade in instruction after orbits are drawn
+                    vis.annotation
+                        .attr("transform", `translate(${vis.width / 2}, ${vis.height - 50 + vis.graphTranslation})`)
+                        .transition()
+                        .duration(200)
+                        .delay(1000)
                         .style("opacity", 1);
 
                     vis.state = 1;
@@ -271,39 +281,92 @@ class Congestion {
             .attr("x", 75)
             .attr("y", 28)
             .attr("text-anchor", "middle")
-            .text("Simplify Me");
+            .text("Simplify");
 
 
 
         // Call updateVis to draw orbits
         vis.updateVis();
     }
-
-    // Transition out the orbits
     removeOrbits() {
-        const vis = this
+        const vis = this;
         const orbits = vis.svg.selectAll(".orbit");
-        let remaining = orbits.size();
-
-        if (remaining === 0) {
+        const satellites = vis.svg.selectAll(".satellite");
+        
+        if (orbits.size() === 0) {
             vis.updateVis();
             return;
         }
 
-        orbits.transition()
-            .duration(500)
-            .style("opacity", 0)
-            .on("end", () => {
-                remaining--;
-                if (remaining === 0) {
-                    vis.updateVis();
-                }
-            })
-            .remove();
+        // Define fade order based on current state
+        const fadeOrder = vis.state === 1 
+            ? ["Elliptical", "GEO", "MEO", "LEO"]  // Going to simplified: outer to inner
+            : ["Elliptical", "GEO", "MEO", "LEO"]; // Going to full: outer to inner
+        
+        // Group orbits by class
+        const orbitsByClass = {};
+        fadeOrder.forEach(className => {
+            orbitsByClass[className] = [];
+        });
+        
+        orbits.each(function(d) {
+            const orbitClass = d.class_of_orbit || d.orbit_class;
+            if (orbitsByClass[orbitClass]) {
+                orbitsByClass[orbitClass].push(this);
+            }
+        });
+        
+        // Animation timing
+        let delay = 0;
+        const fadeDuration = 200;
+        const delayBetweenClasses = 100;
+        
+        // Fade satellites FIRST when going to simplified
+        if (vis.state === 1 && satellites.size() > 0) {
+            satellites
+                .transition()
+                .duration(fadeDuration)
+                .style("opacity", 0)
+                .on("end", function() {
+                    d3.select(this).remove();
+                });
+            // Add delay so orbits start fading after satellites
+            delay = delayBetweenClasses;
+        }
+        
+        fadeOrder.forEach((className, index) => {
+            const classOrbits = orbitsByClass[className];
+            if (classOrbits && classOrbits.length > 0) {
+                d3.selectAll(classOrbits)
+                    .transition()
+                    .delay(delay)
+                    .duration(fadeDuration)
+                    .style("opacity", 0)
+                    .on("end", function() {
+                        d3.select(this).remove();
+                        if (index === fadeOrder.length - 1) {
+                            setTimeout(() => vis.updateVis(), 50);
+                        }
+                    });
+                delay += delayBetweenClasses;
+            }
+        });
 
-
-
+        // Fade satellites FIRST when going to simplified
+        if (vis.state === 1 && satellites.size() > 0) {
+            satellites
+                .transition()
+                .duration(fadeDuration)
+                .style("opacity", 0)
+                .on("end", function() {
+                    d3.select(this).remove();
+                });
+            // Add delay so orbits start fading after satellites
+            delay = delayBetweenClasses;
+        };
     }
+
+
 
     updateVis() {
         const vis = this;
@@ -311,9 +374,11 @@ class Congestion {
             const orbits = vis.orbitLayer.selectAll('.orbit')
                 .data(vis.dataCondensed, d => d.orbit_class);
 
-            // Enter and merge
-            orbits.enter().append('circle')
-                .merge(orbits)
+            // Define fade-in order: LEO, MEO, GEO, Elliptical
+            const fadeInOrder = ["LEO", "MEO", "GEO", "Elliptical"];
+            
+            // Enter new circles
+            const orbitsEnter = orbits.enter().append('circle')
                 .attr('cx', d => vis.width / 2)
                 .attr('cy', d => vis.height / 2)
                 .attr('r', d => vis.orbitScale(d.orbit_class))
@@ -322,26 +387,44 @@ class Congestion {
                 .attr('stroke', d => vis.colorScale(d.orbit_class))
                 .attr('stroke-width', d => vis.cScale(d.count))
                 .attr('transform', `translate(0,${vis.graphTranslation})`)
+                .style('opacity', 0)
                 .on("mouseover", (event, d) => {
                     vis.tooltip
                         .style("opacity", 1)
-                        .text(`Satellites in Orbit Layer ${d.orbit_class}: ${d.count}`)
-                        .style("left", (event.pageX) + "px")
-                        .style("top", (event.pageY) + "px");
+                        .html(`<p><strong>${d.orbit_class === "GEO" ? "GEO (Low)" : d.orbit_class === "MEO" ? "MEO (Middle)" : d.orbit_class === "LEO" ? "LEO (High)" : d.orbit_class}</strong>Satellites: ${d.count}</p>`)
+                        .style("left", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (x + 10) + "px";
+                        })())
+                        .style("top", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (y - 10) + "px";
+                        })());
                 })
                 .on("mouseleave", () => {
-                    vis.tooltip.style("opacity", 0).text("");
+                    vis.tooltip.style("opacity", 0).html("");
                 });
 
+            // Apply sequential fade-in based on orbit class
+            orbitsEnter.each(function(d) {
+                const orbitIndex = fadeInOrder.indexOf(d.orbit_class);
+                const delay = orbitIndex >= 0 ? orbitIndex * 300 : 0;
+                d3.select(this)
+                    .transition()
+                    .delay(delay)
+                    .duration(200)
+                    .style('opacity', 1);
+            });
 
             orbits.order();
-            //Remove unused orbits   
             orbits.exit().remove();
-
 
         }
 
         if (vis.state === 0) {
+            // Define fade-in order: LEO, MEO, GEO, Elliptical
+            const fadeInOrder = ["LEO", "MEO", "GEO", "Elliptical"];
+            
             // DATA JOIN
             const orbits = vis.orbitLayer.selectAll('.orbit')
                 .data(vis.data, d => d.norad_number || d['current_official_name_of_satellite'] || Math.random());
@@ -351,37 +434,51 @@ class Congestion {
                 .attr('class', 'orbit')
                 .attr('fill', 'none')
                 .attr('stroke-width', 0.5)
-                .attr('stroke-opacity', 0.9);
-
-            // ENTER + UPDATE
-            orbitsEnter.merge(orbits)
+                .attr('stroke-opacity', 0)
                 .attr('cx', vis.width / 2)
                 .attr('cy', vis.height / 2)
                 .attr('rx', d => {
                     const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
                     const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
-                    return (ap + pe) / 2 + vis.projection.scale(); // semi-major axis
+                    return (ap + pe) / 2 + vis.projection.scale();
                 })
                 .attr('ry', d => {
                     const ap = vis.scale(+d['apogee_(km)'] || 0) + 15;
                     const pe = vis.scale(+d['perigee_(km)'] || 0) + 15;
                     const a = (ap + pe) / 2;
                     const c = (ap - pe) / 2;
-                    return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale(); // semi-minor axis
+                    return Math.sqrt(Math.max(1, a * a - c * c)) + vis.projection.scale();
                 })
                 .attr('transform', d => `translate(0, ${vis.graphTranslation}) rotate(${+d['inclination_(degrees)'] || 0}, ${vis.width / 2}, ${vis.height / 2})`)
                 .attr('stroke', d => vis.colorScale(d.class_of_orbit))
                 .on("mouseover", (event, d) => {
                     vis.tooltip
                         .style("opacity", 1)
-                        .text(`${d.current_official_name_of_satellite}`)
-                        .style("left", (event.pageX) + "px")
-                        .style("top", (event.pageY) + "px");
+                        .html(`<p><strong>${d.current_official_name_of_satellite}</strong>Orbit: ${d.class_of_orbit === "GEO" ? "GEO (Low)" : d.class_of_orbit === "MEO" ? "MEO (Middle)" : d.class_of_orbit === "LEO" ? "LEO (High)" : d.class_of_orbit}</p>`)
+                        .style("left", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (x + 10) + "px";
+                        })())
+                        .style("top", (() => {
+                            const [x, y] = d3.pointer(event, vis.host.node());
+                            return (y - 10) + "px";
+                        })());
                 })
                 .on("mouseleave", () => {
-                    vis.tooltip.style("opacity", 0)
-                        .text("")
+                    vis.tooltip.style("opacity", 0).html("");
                 });
+
+            // Apply sequential fade-in based on orbit class
+            orbitsEnter.each(function(d) {
+                const orbitClass = d.class_of_orbit;
+                const orbitIndex = fadeInOrder.indexOf(orbitClass);
+                const delay = orbitIndex >= 0 ? orbitIndex * 300 : 0;
+                d3.select(this)
+                    .transition()
+                    .delay(delay)
+                    .duration(200)
+                    .attr('stroke-opacity', 0.9);
+            });
 
             // EXIT
             orbits.exit().remove();
@@ -389,7 +486,8 @@ class Congestion {
 
         // Start satellite animation if in full view mode
         if (vis.state === 0) {
-            vis.animateSatellites();
+            // Delay satellite animation to start after orbits finish fading in
+            setTimeout(() => vis.animateSatellites(), 1000);
         } else {
             vis.stopSatelliteAnimation();
         }
@@ -484,30 +582,30 @@ class Congestion {
         satellites.enter()
             .append('image')
             .attr('class', 'satellite')
-            .attr('xlink:href', 'images/satellite.png')
+            // prefer 'href' for modern SVG; fallback to 'xlink:href' if needed
+            .attr('href', 'images/satellite.png')
             .attr('width', d => d.class_of_orbit === 'Elliptical' ? 16 : 12)
             .attr('height', d => d.class_of_orbit === 'Elliptical' ? 16 : 12)
+            .style('pointer-events', 'auto') // ensure image receives mouse events
             .merge(satellites)
             .attr('x', d => vis.width / 2 + d.rx * Math.cos(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
             .attr('y', d => vis.height / 2 + d.ry * Math.sin(d.angle) - (d.class_of_orbit === 'Elliptical' ? 8 : 6))
-            .attr('transform', d => {
-                // Calculate current position
-                const x = vis.width / 2 + d.rx * Math.cos(d.angle);
-                const y = vis.height / 2 + d.ry * Math.sin(d.angle);
-                // Rotate around the center of the visualization
-                return `translate(0,${vis.graphTranslation}) rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`;
-            })
+            .attr('transform', d => `translate(0,${vis.graphTranslation}) rotate(${d.inclination}, ${vis.width / 2}, ${vis.height / 2})`)
             .style('opacity', d => d.class_of_orbit === 'Elliptical' ? 1.0 : 0.9)
             .on("mouseover", (event, d) => {
+                const [x, y] = d3.pointer(event, vis.host.node()); // relative coords
                 vis.tooltip
+                    .style("left", (x + 10) + "px")
+                    .style("top", (y - 10) + "px")
                     .style("opacity", 1)
-                    .html(`<strong>Name: ${d.current_official_name_of_satellite}</strong><br/>Orbit: ${d.class_of_orbit}`)
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top", (event.pageY - 10) + "px");
+                    .html(`<p><strong>${d.current_official_name_of_satellite}</strong>Orbit: ${d.class_of_orbit}</p>`);
+            })
+            .on("mousemove", (event) => { // update position while moving
+                const [x, y] = d3.pointer(event, vis.host.node());
+                vis.tooltip.style("left", (x + 10) + "px").style("top", (y - 10) + "px");
             })
             .on("mouseleave", () => {
-                vis.tooltip.style("opacity", 0)
-                    .html("")
+                vis.tooltip.style("opacity", 0).html("");
             });
 
         satellites.exit().remove();

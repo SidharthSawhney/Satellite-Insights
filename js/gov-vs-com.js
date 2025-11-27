@@ -20,9 +20,7 @@ class governmentVsCommercial {
       .attr('class', 'chart-group');
 
     this.tooltip = this.host.append('div')
-      .attr('class', 'tooltip-govcom-tip')
-      .style('visibility', 'hidden')
-      .style('opacity', 0);
+      .attr('class', 'tooltip-govcom-tip');
 
     this.infoTooltipVisible = false;
 

@@ -20,7 +20,7 @@ class LaunchDominance {
     // Visualization parameters
     this.w = opts.width ?? Math.floor(chartBbox.width) ?? 960;
     this.h = opts.height ?? Math.floor(chartBbox.height) ?? 700;
-    this.margin = { top: 80, right: 40, bottom: 100, left: 80 };
+    this.margin = { top: 80, right: 40, bottom: 120, left: 80 };
     this.chartW = this.w - this.margin.left - this.margin.right;
     this.chartH = this.h - this.margin.top - this.margin.bottom;
     
@@ -116,6 +116,13 @@ class LaunchDominance {
       .attr('text-anchor', 'middle')
       .text('Cumulative Satellites launched per Major Rocket');
     
+    // Instruction text - below title
+    this.titleGroup.append('text')
+      .attr('class', 'chart-instruction')
+      .attr('x', this.chartW / 2)
+      .attr('y', -25)
+      .text('Falcon 9 in BRIGHT CYAN (thick line) - All competitors in muted colors (dashed)');
+    
     // Axes groups
     this.xAxisGroup = this.chartGroup.append('g')
       .attr('class', 'x-axis')
@@ -131,7 +138,7 @@ class LaunchDominance {
     // Legend group
     this.legendGroup = this.chartGroup.append('g')
       .attr('class', 'legend')
-      .attr('transform', `translate(0, ${this.chartH + 50})`);
+      .attr('transform', `translate(0, ${this.chartH + 68})`)
     
     // Tooltip
     this.tooltip = d3.select('body')
@@ -277,11 +284,11 @@ class LaunchDominance {
     
     this.xAxisGroup.call(xAxis);
     
-    this.xAxisGroup.selectAll('text')
-      .style('fill', '#e0f0ff');
+    this.xAxisGroup.selectAll('text');
     
-    this.xAxisGroup.selectAll('.domain, .tick line')
-      .style('stroke', '#778da9');
+    this.xAxisGroup.selectAll('.domain');
+    
+    this.xAxisGroup.selectAll('.tick line');
     
     // Y axis
     const yAxis = d3.axisLeft(this.yScale)
@@ -290,12 +297,13 @@ class LaunchDominance {
     
     this.yAxisGroup.call(yAxis);
     
-    this.yAxisGroup.selectAll('text')
-      .style('fill', '#e0f0ff');
+    this.yAxisGroup.selectAll('text');
     
-    this.yAxisGroup.selectAll('.domain, .tick line')
-      .style('stroke', '#778da9');
+    this.yAxisGroup.selectAll('.domain');
     
+    this.yAxisGroup.selectAll('.tick line');
+    
+    // Y axis label
     // Y axis label
     this.yAxisGroup.selectAll('.y-axis-label').remove();
     this.yAxisGroup.append('text')
@@ -303,9 +311,15 @@ class LaunchDominance {
       .attr('transform', 'rotate(-90)')
       .attr('x', -this.chartH / 2)
       .attr('y', -55)
-      .attr('text-anchor', 'middle')
-      .style('fill', '#e0f0ff')
       .text('Cumulative Satellites');
+    
+    // X axis label
+    this.xAxisGroup.selectAll('.x-axis-label').remove();
+    this.xAxisGroup.append('text')
+      .attr('class', 'x-axis-label')
+      .attr('x', this.chartW / 2)
+      .attr('y', 40)
+      .text('Year');
   }
 
   _drawChart() {
@@ -357,7 +371,10 @@ class LaunchDominance {
         .attr('cx', d => vis.xScale(d.year))
         .attr('cy', d => vis.yScale(d.accumulated_satellites))
         .attr('r', 4)
-        .style('opacity', d => d.accumulated_satellites > 0 ? 1 : 0);
+        .style('opacity', d => d.accumulated_satellites > 0 ? 1 : 0)
+        .style('fill', vis.colorMap.get(vehicleObj.vehicle))
+        .style('stroke', vis.colorMap.get(vehicleObj.vehicle))
+        .style('stroke-width', 1)
     });
     
     // Update
@@ -410,6 +427,8 @@ class LaunchDominance {
         .merge(dots)
         .style('fill', vis.colorMap.get(vehicleObj.vehicle))
         .style('cursor', 'pointer')
+        .style('stroke', vis.colorMap.get(vehicleObj.vehicle))
+        .style('stroke-width', 1)
         .attr('cx', d => vis.xScale(d.year))
         .attr('cy', d => vis.yScale(d.accumulated_satellites))
                 .on('click', function(event, d) {
@@ -429,20 +448,12 @@ class LaunchDominance {
             
             vis.tooltip
               .style('visibility', 'visible')
-              .html(`
-                <div style="margin-bottom: 5px;">
-                  <strong style="color: ${vis.colorMap.get(vehicleObj.vehicle)};">${vehicleObj.vehicle}</strong>
-                </div>
-                <div style="margin-bottom: 3px;">
-                  <span style="color: #778da9;">Year:</span> ${d.year}
-                </div>
-                <div style="margin-bottom: 3px;">
-                  <span style="color: #778da9;">Accumulated satellites:</span> ${d.accumulated_satellites.toLocaleString()}
-                </div>
-                <div>
-                  <span style="color: #778da9;">Launches this year:</span> ${d.launches}
-                </div>
-              `);
+              .html(`<p>
+                <strong>${vehicleObj.vehicle}</strong>
+                Year: ${d.year}<br>
+                Accumulated satellites: ${d.accumulated_satellites.toLocaleString()}<br>
+                Launches this year: ${d.launches}</p>
+                `);
           }
         })
         .on('mousemove', function(event) {
@@ -466,12 +477,16 @@ class LaunchDominance {
     
     this.legendGroup.selectAll('*').remove();
     
-    // Legend title
+    // Legend title - styled like launch-metrics
     this.legendGroup.append('text')
+      .attr('class', 'legend-title')
       .attr('x', 0)
       .attr('y', -5)
-      .style('fill', '#8fa9b9')
-      .text('Falcon 9 in BRIGHT CYAN (thick line) - All competitors in muted colors (dashed)');
+      .style('fill', '#0066a6')
+      .style('font-family', "'Courier New', 'Consolas', monospace")
+      .style('font-size', '14px')
+      .style('letter-spacing', '0.05em')
+      .text('Top 8 Most Launched Rockets');
     
     // Legend items
     const itemWidth = 150;
@@ -608,7 +623,7 @@ class LaunchDominance {
       .html('');
 
     this.sidebarInstruction
-      .style('display', 'block');
+      .style('display', 'flex');
   }
 
   _updateSidebar() {
@@ -621,9 +636,9 @@ class LaunchDominance {
       .style('display', 'block')
       .html('');
     
-    // Title
+    // Title with bottom border
     this.sidebarDetails.append('h2')
-        .text(vehicleObj.vehicle);
+      .text(vehicleObj.vehicle);
     
     // Stats
     const statsDiv = this.sidebarDetails.append('div')
@@ -635,32 +650,52 @@ class LaunchDominance {
     // Efficiency Rating based on mass and power
     const rating = this._calculateRating(vehicleObj);
     const ratingDiv = this.sidebarDetails.append('div')
-    ratingDiv.append('div')
-              .text('EFFICIENCY RATING');
+      .style('margin-bottom', '20px');
     
-    const starsDiv = ratingDiv.append('div')
-      for (let i = 1; i <= 5; i++) {
-        starsDiv.append('span')
-          .style('color', i <= Math.round(rating) ? '#0066a6' : 'rgba(0, 102, 166, 0.2)')
-          .text('★');
-      }
+    ratingDiv.append('h5')
+              .text('Rating');
+    
+    const starsDiv = ratingDiv.append('div');
+    
+    for (let i = 1; i <= 5; i++) {
+      starsDiv.append('span')
+        .style('color', i <= Math.round(rating) ? '#0066a6' : 'rgba(0, 102, 166, 0.2)')
+        .style('font-size', '20px')
+        .text('★');
+    }
     
     // Add explanation
     ratingDiv.append('div')
-              .html('Based on satellite efficiency:<br/><strong style="color: #0066a6;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
+      .style('font-size', '11px')
+      .style('color', '#8fa9b9')
+      .style('line-height', '1.5')
+      .html('Based on satellite efficiency:<br/><strong style="color: #0066a6;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
     
     // Description
-    this.sidebarDetails.append('div')
-                        .html(`<strong style="color: #0066a6;">ABOUT:</strong><br/>${this._getVehicleInfo(vehicleObj.vehicle)}`);
+    const aboutDiv = this.sidebarDetails.append('div');
+    
+    aboutDiv.append('h5')
+      .text('ABOUT');
+    aboutDiv.append('div')
+      .style('font-size', '13px')
+      .style('color', '#e0f0ff')
+      .style('line-height', '1.6')
+      .html(this._getVehicleInfo(vehicleObj.vehicle));
   }
+
 
   _addStatItem(container, label, value) {
     const item = container.append('div')
-    item.append('div')
-          .text(label);
+      .style('margin-bottom', '15px');
+    
+    item.append('h5')
+      .text(label);
     
     item.append('div')
-         .text(value.toLocaleString());
+      .style('font-size', '20px')
+      .style('font-weight', '700')
+      .style('color', '#e0f0ff')
+      .text(value.toLocaleString());
   }
 
   _calculateRating(vehicleObj) {
@@ -731,7 +766,7 @@ class LaunchDominance {
       .attr('transform', `translate(0,${this.chartH})`);
     
     this.legendGroup
-      .attr('transform', `translate(0, ${this.chartH + 50})`);
+      .attr('transform', `translate(0, ${this.chartH + 68})`);
     
     this._initScales();
     this._drawAxes();

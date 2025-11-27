@@ -18,7 +18,7 @@ class LaunchMetrics {
 
         // Configuration and dimensions
         this.config = {
-            margin: { top: 60, right: 40, bottom: 120, left: 80 },
+            margin: { top: 80, right: 40, bottom: 120, left: 80 },
             tooltipPadding: 15,
             minRadius: 2,
             maxRadius: 50, 
@@ -44,6 +44,11 @@ class LaunchMetrics {
         // Create custom HTML title
         vis.htmlTitle = vis.container.append('div')
             .attr('class', 'custom-chart-title');
+
+        // Create instruction text
+        vis.htmlInstruction = vis.container.append('div')
+            .attr('class', 'chart-instruction-text')
+            .text('Click switch view to toggle between power vs mass and mass over time views');
 
         // Calculate dimensions
         vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
@@ -104,14 +109,14 @@ class LaunchMetrics {
         // Legend Group - positioned at bottom horizontally
         vis.legend = vis.svg.append('g')
             .attr('class', 'legend')
-            .attr('transform', `translate(${vis.config.margin.left}, ${vis.height + vis.config.margin.top + 60})`);
+            .attr('transform', `translate(${vis.config.margin.left}, ${vis.height + vis.config.margin.top + 50})`);
 
         // Toggle button container - positioned at bottom right
         vis.buttonContainer = vis.container.append('div')
             .style('position', 'absolute')
-            .style('bottom', '30px')
+            .style('bottom', '25px')
             .style('right', `${vis.config.margin.right}px`)
-            .style('z-index', '10');
+            .style('z-index', '15');
 
         vis.toggleButton = vis.buttonContainer.append('button')
             .attr('class', 'switch-view-button')
@@ -189,9 +194,11 @@ class LaunchMetrics {
 
         vis.legend.append('text')
             .attr('class', 'legend-title')
-            .attr('x', 0)
-            .attr('y', -10)
-            .text('Mass Category');
+            .text('Mass Category')
+            .style('fill', '#0066a6')
+            .style('font-family', "'Courier New', 'Consolas', monospace")
+            .style('font-size', '14px')
+            .style('letter-spacing', '0.05em');
 
         const quantiles = vis.colorScale.quantiles();
         const rangeValues = [0, ...quantiles];
@@ -203,7 +210,7 @@ class LaunchMetrics {
             .attr('class', 'legend-item')
             .attr('transform', (d, i) => {
                 const itemWidth = 120; // Approximate width per legend item
-                return `translate(${i * itemWidth}, 10)`;
+                return `translate(${i * itemWidth}, 12)`;
             })
             .on('click', function(event, d) {
                 const index = rangeValues.indexOf(d);
@@ -226,14 +233,13 @@ class LaunchMetrics {
             .style('stroke', (d, i) => customColors[i]); 
 
         legendItems.append('text')
-            .attr('x', vis.config.legendRectSize + 5)
+            .attr('x', vis.config.legendRectSize + 8)
             .attr('y', vis.config.legendRectSize - 4)
             .text((d, i) => {
                 let start = d3.format(".2s")(d);
                 let end = (i < quantiles.length) ? d3.format(".2s")(quantiles[i]) : 'Max';
                 return i === rangeValues.length - 1 ? `> ${start}` : `${start} - ${end}`;
             })
-            .style('font-size', '11px')
             .style('opacity', (d, i) => {
                 if (vis.selectedFilter && vis.selectedFilter !== customColors[i]) {
                     return 0.3;
