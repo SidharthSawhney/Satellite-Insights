@@ -48,7 +48,7 @@ class LaunchMetrics {
         // Create instruction text
         vis.htmlInstruction = vis.container.append('div')
             .attr('class', 'chart-instruction-text')
-            .text('Click switch view to toggle between power vs mass and mass over time views. Click legend to filter.');
+            .text('Click switch view to toggle between power vs mass and mass over time views. Click legend to filter. Click again or anywhere to deselect.');
 
         // Calculate dimensions
         vis.width = vis.container.node().getBoundingClientRect().width - vis.config.margin.left - vis.config.margin.right;
@@ -62,6 +62,22 @@ class LaunchMetrics {
         // Create chart group
         vis.chart = vis.svg.append('g')
             .attr('transform', `translate(${vis.config.margin.left},${vis.config.margin.top})`);
+
+        // Add background rect for click detection to deselect filter
+        vis.chart.append('rect')
+            .attr('class', 'chart-background')
+            .attr('width', vis.width)
+            .attr('height', vis.height)
+            .attr('fill', 'transparent')
+            .attr('pointer-events', 'all')
+            .style('cursor', 'default')
+            .on('click', function(event) {
+                // Only deselect if there's an active filter
+                if (vis.selectedFilter) {
+                    vis.selectedFilter = null;
+                    vis.updateVis();
+                }
+            });
 
         // Initialize scales
         vis.xScale = d3.scaleLinear()
@@ -377,6 +393,11 @@ class LaunchMetrics {
         vis.xScale.range([0, vis.width]);
         vis.xAxisLabel.attr('x', (vis.width / 2) + vis.config.margin.left);
         vis.legend.attr('transform', `translate(${vis.config.margin.left}, ${vis.height + vis.config.margin.top + 60})`);
+        
+        // Update background rect size
+        vis.chart.select('.chart-background')
+            .attr('width', vis.width);
+        
         vis.updateVis();
     }
 }

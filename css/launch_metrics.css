@@ -61,6 +61,13 @@
     font-size: 12px;
 }
 
+/* Chart background for click detection */
+.chart-background {
+    fill: transparent;
+    cursor: default;
+    pointer-events: all;
+}
+
 /* Axis Labels */
 .axis-label {
     fill: #8fa9b9;
