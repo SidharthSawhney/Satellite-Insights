@@ -360,9 +360,7 @@ class LaunchMetrics {
                 // Stop propagation so container click doesn't deselect
                 event.stopPropagation();
             })
-            .on('mouseover', function(event, d) { 
-                d3.select(this).raise();
-                
+            .on('mouseover', function(event, d) {                 
                 const [x, y] = d3.pointer(event, vis.container.node());
 
                 vis.tooltip
