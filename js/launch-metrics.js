@@ -40,6 +40,23 @@ class LaunchMetrics {
         
         // Ensure container is relative for absolute positioning
         vis.container.style('position', 'relative');
+        
+        // Add click handler to container for deselecting filter
+        vis.container.on('click', function(event) {
+            // Check if click was on an interactive element
+            const clickedElement = event.target;
+            const isInteractive = 
+                clickedElement.tagName === 'circle' || // data points
+                clickedElement.tagName === 'BUTTON' || // switch view button
+                clickedElement.closest('.legend-item') || // legend items
+                clickedElement.closest('.switch-view-button'); // button container
+            
+            // Only deselect if clicked on non-interactive area and there's an active filter
+            if (!isInteractive && vis.selectedFilter) {
+                vis.selectedFilter = null;
+                vis.updateVis();
+            }
+        });
 
         // Create custom HTML title
         vis.htmlTitle = vis.container.append('div')
@@ -63,21 +80,14 @@ class LaunchMetrics {
         vis.chart = vis.svg.append('g')
             .attr('transform', `translate(${vis.config.margin.left},${vis.config.margin.top})`);
 
-        // Add background rect for click detection to deselect filter
+        // Add background rect for visual consistency
         vis.chart.append('rect')
             .attr('class', 'chart-background')
             .attr('width', vis.width)
             .attr('height', vis.height)
             .attr('fill', 'transparent')
-            .attr('pointer-events', 'all')
-            .style('cursor', 'default')
-            .on('click', function(event) {
-                // Only deselect if there's an active filter
-                if (vis.selectedFilter) {
-                    vis.selectedFilter = null;
-                    vis.updateVis();
-                }
-            });
+            .attr('pointer-events', 'none')
+            .style('cursor', 'default');
 
         // Initialize scales
         vis.xScale = d3.scaleLinear()
@@ -137,7 +147,8 @@ class LaunchMetrics {
         vis.toggleButton = vis.buttonContainer.append('button')
             .attr('class', 'switch-view-button')
             .text('Switch View')
-            .on('click', () => {
+            .on('click', (event) => {
+                event.stopPropagation();
                 vis.toggleView();
             });
 
@@ -345,6 +356,10 @@ class LaunchMetrics {
 
         // Hover events
         circlesUpdate
+            .on('click', function(event) {
+                // Stop propagation so container click doesn't deselect
+                event.stopPropagation();
+            })
             .on('mouseover', function(event, d) { 
                 d3.select(this).raise();
                 

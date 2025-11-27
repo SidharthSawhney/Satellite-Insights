@@ -552,8 +552,10 @@ class LaunchDominance {
           return 'none';
         });
     } else {
-      // Reset all items to full opacity
-      this.legendGroup.selectAll('.launch-dom-legend-item');
+      // Reset all items to full opacity and remove filters
+      this.legendGroup.selectAll('.launch-dom-legend-item')
+        .style('opacity', 0.7)
+        .style('filter', 'none');
     }
   }
 
