@@ -224,7 +224,17 @@ class Congestion {
             .attr("class", "legend_text")
             .attr("x", 70)
             .attr("y", (d, i) => i * 25 + 125)
-            .text(d => d);
+            .text(d => {if (d === "GEO") {
+                            return "GEO (High)";
+                        } else if (d === "MEO") {
+                            return "MEO (Middle)";
+                        } else if (d === "LEO") {
+                            return "LEO (Low)";
+                        } else {
+                            return d;
+                        }
+                        });
+
 
 
         // Add annotation
@@ -391,7 +401,7 @@ class Congestion {
                 .on("mouseover", (event, d) => {
                     vis.tooltip
                         .style("opacity", 1)
-                        .html(`<p><strong>${d.orbit_class === "GEO" ? "GEO (Low)" : d.orbit_class === "MEO" ? "MEO (Middle)" : d.orbit_class === "LEO" ? "LEO (High)" : d.orbit_class}</strong>Satellites: ${d.count}</p>`)
+                        .html(`<p><strong>${d.orbit_class === "GEO" ? "GEO (High)" : d.orbit_class === "MEO" ? "MEO (Middle)" : d.orbit_class === "LEO" ? "LEO (Low)" : d.orbit_class}</strong>Satellites: ${d.count}</p>`)
                         .style("left", (() => {
                             const [x, y] = d3.pointer(event, vis.host.node());
                             return (x + 10) + "px";
@@ -423,7 +433,7 @@ class Congestion {
 
         if (vis.state === 0) {
             // Define fade-in order: LEO, MEO, GEO, Elliptical
-            const fadeInOrder = ["LEO", "MEO", "LEO", "Elliptical"];
+            const fadeInOrder = ["LEO", "MEO", "GEO", "Elliptical"];
             
             // DATA JOIN
             const orbits = vis.orbitLayer.selectAll('.orbit')
@@ -454,7 +464,7 @@ class Congestion {
                 .on("mouseover", (event, d) => {
                     vis.tooltip
                         .style("opacity", 1)
-                        .html(`<p><strong>${d.current_official_name_of_satellite}</strong>Orbit: ${d.class_of_orbit === "GEO" ? "GEO (Low)" : d.class_of_orbit === "MEO" ? "MEO (Middle)" : d.class_of_orbit === "LEO" ? "LEO (High)" : d.class_of_orbit}</p>`)
+                        .html(`<p><strong>${d.current_official_name_of_satellite}</strong>Orbit: ${d.class_of_orbit === "GEO" ? "GEO (High)" : d.class_of_orbit === "MEO" ? "MEO (Middle)" : d.class_of_orbit === "LEO" ? "LEO (Low)" : d.class_of_orbit}</p>`)
                         .style("left", (() => {
                             const [x, y] = d3.pointer(event, vis.host.node());
                             return (x + 10) + "px";
