@@ -15,7 +15,6 @@ class Congestion {
         this.node = this.host.node();
         this.data = data || [];
         this.dataCondensed = condensed;
-
         // dimensions
         const box = this.node.getBoundingClientRect();
         this.width = Math.max(320, Math.floor(box.width || 900));
