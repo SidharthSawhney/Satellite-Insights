@@ -20,13 +20,12 @@ class LaunchDominance {
     // Visualization parameters
     this.w = opts.width ?? Math.floor(chartBbox.width) ?? 960;
     this.h = opts.height ?? Math.floor(chartBbox.height) ?? 700;
-    this.margin = { top: 80, right: 40, bottom: 100, left: 80 };
+    this.margin = { top: 80, right: 40, bottom: 120, left: 80 };
     this.chartW = this.w - this.margin.left - this.margin.right;
     this.chartH = this.h - this.margin.top - this.margin.bottom;
     
     // State
     this.selectedVehicle = null;
-    this.sidebarOpen = false;
     
     // Continue building
     this._buildSVG();
@@ -65,8 +64,7 @@ class LaunchDominance {
       .attr('class', 'launch-dom-svg')
       .attr('width', this.w)
       .attr('height', this.h)
-      .style('background', 'transparent')
-      .on('click', (event) => {
+            .on('click', (event) => {
         // Click on background to deselect
         if (event.target === event.currentTarget) {
           this._deselectVehicle();
@@ -78,8 +76,7 @@ class LaunchDominance {
       .attr('class', 'chart-background')
       .attr('width', this.w)
       .attr('height', this.h)
-      .style('fill', 'transparent')
-      .on('click', () => this._deselectVehicle());
+            .on('click', () => this._deselectVehicle());
     
     this.chartGroup = this.svg.append('g')
       .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
@@ -93,21 +90,14 @@ class LaunchDominance {
       .attr('x', this.chartW / 2)
       .attr('y', -50)
       .attr('text-anchor', 'middle')
-      .style('font-size', '24px')
-      .style('font-weight', 'bold')
-      .style('fill', '#5fa8d3')
-      .style('text-transform', 'uppercase')
       .text('Cumulative Satellites launched per Major Rocket');
     
+    // Instruction text - below title
     this.titleGroup.append('text')
-      .attr('class', 'chart-subtitle')
+      .attr('class', 'chart-instruction')
       .attr('x', this.chartW / 2)
-      .attr('y', -30)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '14px')
-      .style('fill', '#778da9')
-      .style('font-family', 'Courier New, monospace')
-      .text('Click on a line to view vehicle details');
+      .attr('y', -25)
+      .text('Falcon 9 in BRIGHT CYAN (thick line) - All competitors in muted colors (dashed)');
     
     // Axes groups
     this.xAxisGroup = this.chartGroup.append('g')
@@ -123,25 +113,14 @@ class LaunchDominance {
     
     // Legend group
     this.legendGroup = this.chartGroup.append('g')
-      .attr('class', 'legend')
-      .attr('transform', `translate(0, ${this.chartH + 50})`);
+      .attr('class', 'launch-dom-legend')
+      .attr('transform', `translate(0, ${this.chartH + 68})`)
     
     // Tooltip
     this.tooltip = d3.select('body')
       .append('div')
       .attr('class', 'launch-dom-tooltip')
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(0, 0, 0, 0.95)')
-      .style('color', '#5fa8d3')
-      .style('padding', '12px')
-      .style('border-radius', '4px')
-      .style('border', '1px solid #5fa8d3')
-      .style('font-family', 'Courier New, monospace')
-      .style('font-size', '12px')
-      .style('pointer-events', 'none')
-      .style('z-index', '2000')
-      .style('box-shadow', '0 0 20px rgba(0, 255, 136, 0.3)');
+      .style('visibility', 'hidden');
   }
 
   _processData() {
@@ -253,7 +232,7 @@ class LaunchDominance {
         this.colorMap.set(v.vehicle, '#00d4ff'); // Bright cyan for Falcon 9
       } else {
         // Muted colors for others - Blue/Purple Palette
-        const mutedColors = ['#5fa8d3', '#7b2cbf', '#778da9', '#415a77', '#9d4edd', '#4a90e2', '#6a4c93'];
+        const mutedColors = ['#5290b7ff', '#6c2cbfff', '#8491c0ff', '#739dceff', '#8b49c2ff', '#4a5ce2ff', '#724c93ff'];
         this.colorMap.set(v.vehicle, mutedColors[i % mutedColors.length]);
       }
     });
@@ -281,14 +260,11 @@ class LaunchDominance {
     
     this.xAxisGroup.call(xAxis);
     
-    this.xAxisGroup.selectAll('text')
-      .style('fill', '#778da9')
-      .style('font-family', 'Courier New, monospace')
-      .style('font-size', '11px');
+    this.xAxisGroup.selectAll('text');
     
-    this.xAxisGroup.selectAll('.domain, .tick line')
-      .style('stroke', '#5fa8d3')
-      .style('stroke-opacity', 0.2);
+    this.xAxisGroup.selectAll('.domain');
+    
+    this.xAxisGroup.selectAll('.tick line');
     
     // Y axis
     const yAxis = d3.axisLeft(this.yScale)
@@ -297,15 +273,13 @@ class LaunchDominance {
     
     this.yAxisGroup.call(yAxis);
     
-    this.yAxisGroup.selectAll('text')
-      .style('fill', '#778da9')
-      .style('font-family', 'Courier New, monospace')
-      .style('font-size', '11px');
+    this.yAxisGroup.selectAll('text');
     
-    this.yAxisGroup.selectAll('.domain, .tick line')
-      .style('stroke', '#5fa8d3')
-      .style('stroke-opacity', 0.2);
+    this.yAxisGroup.selectAll('.domain');
     
+    this.yAxisGroup.selectAll('.tick line');
+    
+    // Y axis label
     // Y axis label
     this.yAxisGroup.selectAll('.y-axis-label').remove();
     this.yAxisGroup.append('text')
@@ -313,12 +287,15 @@ class LaunchDominance {
       .attr('transform', 'rotate(-90)')
       .attr('x', -this.chartH / 2)
       .attr('y', -55)
-      .attr('text-anchor', 'middle')
-      .style('fill', '#5fa8d3')
-      .style('font-family', 'Courier New, monospace')
-      .style('font-size', '13px')
-      .style('text-transform', 'uppercase')
       .text('Cumulative Satellites');
+    
+    // X axis label
+    this.xAxisGroup.selectAll('.x-axis-label').remove();
+    this.xAxisGroup.append('text')
+      .attr('class', 'x-axis-label')
+      .attr('x', this.chartW / 2)
+      .attr('y', 40)
+      .text('Year');
   }
 
   _drawChart() {
@@ -356,8 +333,7 @@ class LaunchDominance {
       .attr('class', 'line-path')
       .attr('fill', 'none')
       .attr('stroke-width', d => d.vehicle === 'Falcon 9' ? 3 : 2)
-      .attr('stroke-dasharray', d => d.vehicle === 'Falcon 9' ? '0' : '5,5')
-      .style('cursor', 'pointer');
+      .attr('stroke-dasharray', d => d.vehicle === 'Falcon 9' ? '0' : '5,5');
     
     // Add dots for interaction
     linesEnter.each(function(vehicleObj) {
@@ -371,11 +347,10 @@ class LaunchDominance {
         .attr('cx', d => vis.xScale(d.year))
         .attr('cy', d => vis.yScale(d.accumulated_satellites))
         .attr('r', 4)
+        .style('opacity', d => d.accumulated_satellites > 0 ? 1 : 0)
         .style('fill', vis.colorMap.get(vehicleObj.vehicle))
-        .style('stroke', '#000')
+        .style('stroke', vis.colorMap.get(vehicleObj.vehicle))
         .style('stroke-width', 1)
-        .style('cursor', 'pointer')
-        .style('opacity', d => d.accumulated_satellites > 0 ? 1 : 0);
     });
     
     // Update
@@ -389,9 +364,17 @@ class LaunchDominance {
     linesUpdate.select('.line-path')
       .attr('d', d => line(d.data))
       .attr('stroke', d => vis.colorMap.get(d.vehicle))
+      .attr('stroke-width', d => d.vehicle === 'Falcon 9' ? 3 : 2)
+      .style('filter', d => d.vehicle === this.selectedVehicle ? 'drop-shadow(0 0 4px ' + vis.colorMap.get(d.vehicle) + ')' : 'none')
+      .style('cursor', 'pointer')
       .on('click', function(event, d) {
         event.stopPropagation();
-        vis._selectVehicle(d.vehicle);
+        // If clicking the same vehicle, deselect it, otherwise select new one
+        if (vis.selectedVehicle === d.vehicle) {
+          vis._deselectVehicle();
+        } else {
+          vis._selectVehicle(d.vehicle);
+        }
       })
       .on('mouseover', function(event, d) {
         if (!vis.selectedVehicle) {
@@ -419,17 +402,21 @@ class LaunchDominance {
         .append('circle')
         .attr('class', 'data-point')
         .attr('r', 4)
-        .style('fill', vis.colorMap.get(vehicleObj.vehicle))
-        .style('stroke', '#000')
-        .style('stroke-width', 1)
-        .style('cursor', 'pointer')
         .merge(dots)
+        .style('fill', vis.colorMap.get(vehicleObj.vehicle))
+        .style('cursor', 'pointer')
+        .style('stroke', vis.colorMap.get(vehicleObj.vehicle))
+        .style('stroke-width', 1)
         .attr('cx', d => vis.xScale(d.year))
         .attr('cy', d => vis.yScale(d.accumulated_satellites))
-        .style('opacity', d => d.accumulated_satellites > 0 ? 1 : 0)
-        .on('click', function(event, d) {
+                .on('click', function(event, d) {
           event.stopPropagation();
-          vis._selectVehicle(vehicleObj.vehicle);
+          // If clicking the same vehicle, deselect it, otherwise select new one
+          if (vis.selectedVehicle === vehicleObj.vehicle) {
+            vis._deselectVehicle();
+          } else {
+            vis._selectVehicle(vehicleObj.vehicle);
+          }
         })
         .on('mouseover', function(event, d) {
           if (d.accumulated_satellites > 0) {
@@ -439,20 +426,12 @@ class LaunchDominance {
             
             vis.tooltip
               .style('visibility', 'visible')
-              .html(`
-                <div style="margin-bottom: 5px;">
-                  <strong style="color: ${vis.colorMap.get(vehicleObj.vehicle)};">${vehicleObj.vehicle}</strong>
-                </div>
-                <div style="margin-bottom: 3px;">
-                  <span style="color: #778da9;">Year:</span> ${d.year}
-                </div>
-                <div style="margin-bottom: 3px;">
-                  <span style="color: #778da9;">Accumulated satellites:</span> ${d.accumulated_satellites.toLocaleString()}
-                </div>
-                <div>
-                  <span style="color: #778da9;">Launches this year:</span> ${d.launches}
-                </div>
-              `);
+              .html(`<p>
+                <strong>${vehicleObj.vehicle}</strong>
+                Year: ${d.year}<br>
+                Accumulated satellites: ${d.accumulated_satellites.toLocaleString()}<br>
+                Launches this year: ${d.launches}</p>
+                `);
           }
         })
         .on('mousemove', function(event) {
@@ -476,15 +455,12 @@ class LaunchDominance {
     
     this.legendGroup.selectAll('*').remove();
     
-    // Legend title
+    // Legend title - styled like launch-metrics
     this.legendGroup.append('text')
+      .attr('class', 'launch-dom-legend-title')
       .attr('x', 0)
       .attr('y', -5)
-      .style('fill', '#5fa8d3')
-      .style('font-family', 'Courier New, monospace')
-      .style('font-size', '12px')
-      .style('font-weight', 'bold')
-      .text('● Falcon 9 in BRIGHT CYAN (thick line) - All competitors in muted colors (dashed)');
+      .text('Top 8 Most Launched Rockets');
     
     // Legend items
     const itemWidth = 150;
@@ -497,23 +473,22 @@ class LaunchDominance {
       const y = row * 20 + 10;
       
       const item = this.legendGroup.append('g')
-        .attr('class', 'legend-item')
+        .attr('class', 'launch-dom-legend-item')
+        .attr('data-vehicle', v.vehicle)
         .attr('transform', `translate(${x}, ${y})`)
-        .style('cursor', 'pointer')
-        .on('click', function() {
-          vis._selectVehicle(v.vehicle);
-        })
-        .on('mouseover', function() {
-          d3.select(this).select('text')
-            .style('fill', '#00d4ff');
-        })
-        .on('mouseout', function() {
-          d3.select(this).select('text')
-            .style('fill', vis.colorMap.get(v.vehicle));
+        .on('click', function(event) {
+          event.stopPropagation();
+          // If clicking the same vehicle, deselect it, otherwise select new one
+          if (vis.selectedVehicle === v.vehicle) {
+            vis._deselectVehicle();
+          } else {
+            vis._selectVehicle(v.vehicle);
+          }
         });
       
       // Line sample
       item.append('line')
+        .attr('class', 'launch-dom-legend-line')
         .attr('x1', 0)
         .attr('x2', 20)
         .attr('y1', 0)
@@ -521,53 +496,56 @@ class LaunchDominance {
         .attr('stroke', vis.colorMap.get(v.vehicle))
         .attr('stroke-width', v.vehicle === 'Falcon 9' ? 3 : 2)
         .attr('stroke-dasharray', v.vehicle === 'Falcon 9' ? '0' : '5,5');
-      
-      // Label
+
+      // Label - set fill to match line color
       item.append('text')
+        .attr('class', 'launch-dom-legend-text')
         .attr('x', 25)
         .attr('y', 4)
         .style('fill', vis.colorMap.get(v.vehicle))
-        .style('font-family', 'Courier New, monospace')
-        .style('font-size', '11px')
         .text(v.vehicle);
     });
+    
+    // Update legend based on selection state
+    this._updateLegendSelection();
+  }
+
+  
+  _updateLegendSelection() {
+    const vis = this;
+    
+    if (this.selectedVehicle) {
+      // Fade out non-selected items
+      this.legendGroup.selectAll('.launch-dom-legend-item')
+        .style('opacity', function() {
+          const vehicleName = d3.select(this).attr('data-vehicle');
+          return vehicleName === vis.selectedVehicle ? 1 : 0.3;
+        })
+        .style('filter', function() {
+          const vehicleName = d3.select(this).attr('data-vehicle');
+          if (vehicleName === vis.selectedVehicle) {
+            // Add glow to selected item
+            return 'drop-shadow(0 0 8px ' + vis.colorMap.get(vis.selectedVehicle) + ')';
+          }
+          return 'none';
+        });
+    } else {
+      // Reset all items to full opacity and remove filters
+      this.legendGroup.selectAll('.launch-dom-legend-item')
+        .style('opacity', 1)
+        .style('filter', 'none');
+    }
   }
 
   _drawSidebar() {
     // Sidebar content
     this.sidebarContent = this.sidebarContainer.append('div')
-      .attr('class', 'sidebar-content')
-      .style('position', 'relative')
-      .style('padding', '20px')
-      .style('color', '#e0e1dd')
-      .style('height', '100%');
-    
-    // Add title - small and faded in top right
-    this.sidebarContent.append('h2')
-      .attr('class', 'sidebar-title')
-      .style('font-size', '11px')
-      .style('color', '#4a6a4a')
-      .style('text-transform', 'uppercase')
-      .style('font-family', 'Courier New, monospace')
-      .style('text-align', 'right')
-      .style('margin', '0 0 10px 0')
-      .style('opacity', '0.6')
-      .style('font-weight', 'normal')
-      .text('LAUNCH VEHICLE INFO');
+      .attr('class', 'sidebar-content');
     
     // Add instruction text - centered in the middle
     this.sidebarInstruction = this.sidebarContent.append('div')
       .attr('class', 'sidebar-instruction')
-      .style('position', 'absolute')
-      .style('top', '50%')
-      .style('left', '50%')
-      .style('transform', 'translate(-50%, -50%)')
-      .style('width', '80%')
-      .style('font-size', '14px')
-      .style('color', '#778da9')
-      .style('text-align', 'center')
-      .style('line-height', '1.8')
-      .html('Click on a line<br/>to view vehicle details');
+      .html('Select a rocket line<br/>to view details');
     
     // Details container (initially hidden)
     this.sidebarDetails = this.sidebarContent.append('div')
@@ -577,11 +555,13 @@ class LaunchDominance {
 
   _selectVehicle(vehicle) {
     this.selectedVehicle = vehicle;
-    this.sidebarOpen = true;
     
     // Don't resize - sidebar is fixed
     // Just update chart visual state and sidebar content
     this._drawChart();
+    
+    // Update legend appearance
+    this._updateLegendSelection();
     
     // Update sidebar
     this._updateSidebar();
@@ -589,17 +569,21 @@ class LaunchDominance {
 
   _deselectVehicle() {
     if (!this.selectedVehicle) return;
-    
+
     this.selectedVehicle = null;
-    this.sidebarOpen = false;
-    
-    // Don't resize - sidebar is fixed
-    // Just update chart visual state
+
     this._drawChart();
     
-    // Hide details, show instruction
-    this.sidebarDetails.style('display', 'none');
-    this.sidebarInstruction.style('display', 'block');
+    // Reset legend appearance
+    this._updateLegendSelection();
+
+    // Reset sidebar
+    this.sidebarDetails
+      .style('display', 'none')
+      .html('');
+
+    this.sidebarInstruction
+      .style('display', 'flex');
   }
 
   _updateSidebar() {
@@ -608,20 +592,12 @@ class LaunchDominance {
     
     // Hide instruction, show details
     this.sidebarInstruction.style('display', 'none');
-    this.sidebarDetails.style('display', 'block');
+    this.sidebarDetails
+      .style('display', 'block')
+      .html('');
     
-    // Clear and populate details
-    this.sidebarDetails.html('');
-    
-    // Title
+    // Title with bottom border
     this.sidebarDetails.append('h2')
-      .style('font-size', '18px')
-      .style('margin-bottom', '20px')
-      .style('color', '#5fa8d3')
-      .style('border-bottom', '2px solid #5fa8d3')
-      .style('padding-bottom', '10px')
-      .style('text-transform', 'uppercase')
-      .style('font-family', 'Courier New, monospace')
       .text(vehicleObj.vehicle);
     
     // Stats
@@ -634,70 +610,51 @@ class LaunchDominance {
     // Efficiency Rating based on mass and power
     const rating = this._calculateRating(vehicleObj);
     const ratingDiv = this.sidebarDetails.append('div')
-      .style('margin-bottom', '20px')
-      .style('padding', '15px')
-      .style('background', 'rgba(0, 255, 136, 0.1)')
-      .style('border-left', '3px solid #5fa8d3')
-      .style('border-radius', '4px');
+      .style('margin-bottom', '20px');
     
-    ratingDiv.append('div')
-      .style('font-size', '12px')
-      .style('color', '#778da9')
-      .style('margin-bottom', '8px')
-      .style('font-family', 'Courier New, monospace')
-      .text('EFFICIENCY RATING');
+    ratingDiv.append('h5')
+              .text('Rating');
     
-    const starsDiv = ratingDiv.append('div')
-      .style('font-size', '20px')
-      .style('margin-bottom', '5px');
+    const starsDiv = ratingDiv.append('div');
     
     for (let i = 1; i <= 5; i++) {
       starsDiv.append('span')
-        .style('color', i <= Math.round(rating) ? '#5fa8d3' : '#2a3a2a')
+        .style('color', i <= Math.round(rating) ? '#0066a6' : 'rgba(0, 102, 166, 0.2)')
+        .style('font-size', '20px')
         .text('★');
     }
     
     // Add explanation
     ratingDiv.append('div')
-      .style('font-size', '10px')
-      .style('color', '#778da9')
-      .style('margin-top', '8px')
-      .style('line-height', '1.4')
-      .style('font-family', 'Courier New, monospace')
-      .html('Based on satellite efficiency:<br/><strong style="color: #5fa8d3;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
+      .style('font-size', '11px')
+      .style('color', '#8fa9b9')
+      .style('line-height', '1.5')
+      .html('Based on satellite efficiency:<br/><strong style="color: #0066a6;">Lower launch mass + Lower power = Higher rating</strong><br/>Weighted: 60% mass, 40% power');
     
     // Description
-    this.sidebarDetails.append('div')
-      .style('margin-top', '20px')
-      .style('padding', '15px')
-      .style('background', 'rgba(0, 255, 136, 0.05)')
-      .style('border-radius', '4px')
-      .style('font-size', '12px')
+    const aboutDiv = this.sidebarDetails.append('div');
+    
+    aboutDiv.append('h5')
+      .text('ABOUT');
+    aboutDiv.append('div')
+      .style('font-size', '13px')
+      .style('color', '#e0f0ff')
       .style('line-height', '1.6')
-      .style('font-family', 'Courier New, monospace')
-      .style('color', '#778da9')
-      .html(`<strong style="color: #5fa8d3;">ABOUT:</strong><br/>${this._getVehicleInfo(vehicleObj.vehicle)}`);
+      .html(this._getVehicleInfo(vehicleObj.vehicle));
   }
+
 
   _addStatItem(container, label, value) {
     const item = container.append('div')
-      .style('margin-bottom', '15px')
-      .style('padding-bottom', '15px')
-      .style('border-bottom', '1px solid #2a3a2a');
+      .style('margin-bottom', '15px');
     
-    item.append('div')
-      .style('font-size', '11px')
-      .style('color', '#778da9')
-      .style('margin-bottom', '5px')
-      .style('font-family', 'Courier New, monospace')
-      .style('text-transform', 'uppercase')
+    item.append('h5')
       .text(label);
     
     item.append('div')
-      .style('font-size', '24px')
-      .style('font-weight', 'bold')
-      .style('color', '#5fa8d3')
-      .style('font-family', 'Courier New, monospace')
+      .style('font-size', '20px')
+      .style('font-weight', '700')
+      .style('color', '#e0f0ff')
       .text(value.toLocaleString());
   }
 
@@ -769,7 +726,7 @@ class LaunchDominance {
       .attr('transform', `translate(0,${this.chartH})`);
     
     this.legendGroup
-      .attr('transform', `translate(0, ${this.chartH + 50})`);
+      .attr('transform', `translate(0, ${this.chartH + 68})`);
     
     this._initScales();
     this._drawAxes();

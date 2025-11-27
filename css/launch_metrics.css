@@ -1,304 +1,230 @@
 /* =====================================================
-   launch_metrics.css
-   Styles for Launch Metrics Visualization
-   Deep Space Theme
+   Launch Metrics Visualization CSS
+   Blue Tech Theme - Consistent with other visualizations
    ===================================================== */
 
-/* ============ LAUNCH METRICS SECTION ============ */
-#launch-metrics-section {
-    position: relative;
-}
-
-#launch-metrics-section .viz-container {
-    background: linear-gradient(135deg, 
-        rgba(74, 144, 226, 0.05) 0%, 
-        rgba(13, 17, 40, 0.8) 100%);
-}
-
-/* ============ LAUNCH METRICS CONTAINER ============ */
 #launch-metrics {
     width: 100%;
-    height: 600px;
+    height: 700px;
     position: relative;
 }
 
-#launch-metrics svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* ============ AXES STYLING ============ */
-#launch-metrics .axis path,
-#launch-metrics .axis line {
-    stroke: #4a90e2;
-    stroke-width: 1px;
-    shape-rendering: crispEdges;
-}
-
-#launch-metrics .axis text {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 12px;
-}
-
-#launch-metrics .axis-label {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-/* ============ CHART ELEMENTS ============ */
-#launch-metrics .chart-title {
-    fill: #4a90e2;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 18px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
-}
-
-/* Lines (for line charts) */
-#launch-metrics .line {
-    fill: none;
-    stroke: #4a90e2;
-    stroke-width: 2px;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-}
-
-#launch-metrics .line-glow {
-    stroke: #4a90e2;
-    stroke-width: 4px;
-    opacity: 0.3;
-    filter: blur(3px);
-}
-
-/* Data points (for scatter/line charts) */
-#launch-metrics .data-point {
-    fill: #4a90e2;
-    stroke: #00d4ff;
-    stroke-width: 2px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#launch-metrics .data-point:hover {
-    fill: #00d4ff;
-    filter: drop-shadow(0 0 12px #4a90e2);
-}
-
-/* Bars (for bar charts) */
-#launch-metrics .bar {
-    fill: #4a90e2;
-    stroke: #00d4ff;
-    stroke-width: 1px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#launch-metrics .bar:hover {
-    fill: #00d4ff;
-    filter: drop-shadow(0 0 12px #4a90e2);
-}
-
-/* Areas (for area charts) */
-#launch-metrics .area {
-    fill: #4a90e2;
-    opacity: 0.3;
-}
-
-#launch-metrics .area-stroke {
-    fill: none;
-    stroke: #4a90e2;
-    stroke-width: 2px;
-}
-
-/* ============ GRID LINES ============ */
-#launch-metrics .grid line {
-    stroke: rgba(74, 144, 226, 0.1);
-    stroke-dasharray: 2, 2;
-}
-
-#launch-metrics .grid path {
-    stroke-width: 0;
-}
-
-/* ============ LEGEND ============ */
-#launch-metrics .legend {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 12px;
-}
-
-#launch-metrics .legend-item {
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-}
-
-#launch-metrics .legend-item:hover {
-    opacity: 0.8;
-}
-
-#launch-metrics .legend-text {
-    fill: #e0e6f0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-#launch-metrics .legend-rect {
-    stroke: #00d4ff;
-    stroke-width: 1px;
-}
-
-#launch-metrics .legend-circle {
-    stroke: #00d4ff;
-    stroke-width: 2px;
-}
-
-/* ============ TOOLTIP ============ */
-#launch-metrics .tooltip {
+/* Custom HTML Title */
+.custom-chart-title {
     position: absolute;
-    background-color: rgba(13, 17, 40, 0.95);
-    border: 2px solid #4a90e2;
-    border-radius: 6px;
-    padding: 12px 15px;
-    pointer-events: none;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 13px;
-    line-height: 1.6;
-    color: #e0e6f0;
-    box-shadow: 
-        0 0 25px rgba(74, 144, 226, 0.5),
-        inset 0 0 20px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    min-width: 150px;
-}
-
-#launch-metrics .tooltip::before {
-    content: '> DATA';
-    display: block;
-    color: #4a90e2;
-    font-size: 10px;
-    margin-bottom: 8px;
-    letter-spacing: 0.2em;
-    border-bottom: 1px solid #4a90e2;
-    padding-bottom: 4px;
-}
-
-#launch-metrics .tooltip-label {
-    color: #8b9dc3;
-    text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-}
-
-#launch-metrics .tooltip-value {
-    color: #4a90e2;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #5fa8d3;
+    text-align: center;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 23px;
     font-weight: bold;
-    font-size: 14px;
-    text-shadow: 0 0 8px rgba(74, 144, 226, 0.6);
-}
-
-/* ============ ANNOTATIONS ============ */
-#launch-metrics .annotation {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 11px;
-    fill: #8b9dc3;
-}
-
-#launch-metrics .annotation-line {
-    stroke: #8b9dc3;
-    stroke-width: 1px;
-    stroke-dasharray: 4, 4;
-    opacity: 0.5;
-}
-
-#launch-metrics .annotation-label {
-    fill: #e0e6f0;
-    font-size: 12px;
     text-transform: uppercase;
-}
-
-/* ============ TRANSITIONS & ANIMATIONS ============ */
-#launch-metrics .data-point,
-#launch-metrics .bar,
-#launch-metrics .line {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-/* Pulse animation for emphasis */
-#launch-metrics .pulse {
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 0.8;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-}
-
-/* ============ INTERACTIVE STATES ============ */
-#launch-metrics .highlighted {
-    filter: drop-shadow(0 0 20px #4a90e2);
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px rgba(0, 102, 166, 0.5);
+    width: 400px;
+    pointer-events: none;
     z-index: 10;
 }
 
-#launch-metrics .dimmed {
-    opacity: 0.3;
-}
-
-/* ============ LOADING STATE ============ */
-#launch-metrics .loading-text {
-    fill: #8b9dc3;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 16px;
+/* Chart Instruction Text */
+.chart-instruction-text {
+    position: absolute;
+    top: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #e0f0ff;
+    text-align: center;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+    width: 1000px;
+    pointer-events: none;
+    z-index: 10;
     text-anchor: middle;
-    animation: blink 1.5s ease-in-out infinite;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+/* SVG Axes Styling */
+.axis path,
+.axis line {
+    stroke: #0066a6;
+    stroke-opacity: 0.5;
+    stroke-width: 1px;
 }
 
-/* ============ RESPONSIVE ADJUSTMENTS ============ */
+.axis text {
+    fill: #8fa9b9;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 12px;
+}
+
+/* Chart background for click detection */
+.chart-background {
+    fill: transparent;
+    cursor: default;
+    pointer-events: all;
+}
+
+/* Axis Labels */
+.axis-label {
+    fill: #8fa9b9;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+/* Data Points (Circles) */
+.data-point {
+    fill-opacity: 0.7;
+    stroke: #6a5acd;
+    stroke-width: 1.5px;
+    cursor: pointer;
+    transition: filter 0.2s;
+    filter: drop-shadow(0 0 4px rgba(147, 112, 219, 0.6));
+}
+
+.data-point:hover {
+    fill-opacity: 1;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 8px rgba(147, 112, 219, 0.9));
+}
+
+/* Legend */
+#launch-metrics .legend-item {
+    cursor: pointer !important;
+    pointer-events: all !important;
+}
+
+#launch-metrics .legend-item:hover {
+    fill-opacity: 1;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.9));
+}
+
+#launch-metrics .legend-item rect {
+    cursor: pointer !important;
+    pointer-events: all !important;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px rgba(147, 112, 219, 0.4));
+    rx: 3px;
+    transition: opacity 0.2s, stroke-width 0.2s;
+}
+
+#launch-metrics .legend-item text {
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+    pointer-events: all !important;
+}
+
+#launch-metrics .legend-item rect:hover {
+    stroke-width: 2px;
+    opacity: 1;
+}
+
+#launch-metrics .legend-title {
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    fill: #0066a6;
+}
+
+/* Switch View Button */
+.switch-view-button {
+    padding: 10px 22px;
+    border-radius: 20px;
+    border: 2px solid #0066a6;
+    background: rgba(10, 13, 14, 1);
+    color: #5fa8d3;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 102, 166, 0.4);
+    transition: 0.3s ease;
+}
+
+.switch-view-button:hover {
+    background: rgba(0, 102, 166, 1);
+    border-color: #0e8ebe;
+    box-shadow: 0 0 10px rgba(0, 102, 166, 0.6);
+    transform: translateY(-1px);
+}
+
+.switch-view-button:active {
+    transform: translateY(1px) scale(0.97);
+}
+
+/* Chart Annotation */
+.chart-annotation {
+    fill: #e0f0ff;
+    font-family: 'Courier New', 'Consolas', monospace;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    text-shadow: 0 0 8px rgba(0, 102, 166, 0.3);
+}
+
+/* Tooltip - matching launch sites map style */
+.launch-metrics-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(10, 13, 14, 0.95);
+    padding: 10px 14px;
+    border-radius: 8px;
+    z-index: 100;
+    visibility: hidden;
+    box-shadow: 0 0 10px rgba(0, 102, 166, 0.2);
+    border: 2px solid rgba(0, 102, 166, 0.3);
+}
+
+.launch-metrics-tooltip p {
+    color: #e0f0ff;
+    font-size: 10px;
+    margin: 0;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.launch-metrics-tooltip p strong {
+    color: #0066a6;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
     #launch-metrics {
         height: 500px;
     }
-    
-    #launch-metrics .axis text {
+
+    .custom-chart-title {
+        font-size: 18px;
+        width: 300px;
+    }
+
+    .axis-label {
+        font-size: 11px;
+    }
+
+    .legend text {
+        font-size: 11px;
+    }
+
+    .axis text {
         font-size: 10px;
     }
-    
-    #launch-metrics .axis-label {
+
+    .chart-annotation {
         font-size: 12px;
-    }
-    
-    #launch-metrics .chart-title {
-        font-size: 16px;
-    }
-    
-    #launch-metrics .tooltip {
-        font-size: 11px;
-        padding: 10px 12px;
     }
 }
 
@@ -306,52 +232,12 @@
     #launch-metrics {
         height: 400px;
     }
-    
-    #launch-metrics .axis text {
-        font-size: 9px;
+
+    .custom-chart-title {
+        font-size: 16px;
     }
-    
-    #launch-metrics .chart-title {
-        font-size: 14px;
+
+    .chart-annotation {
+        font-size: 10px;
     }
-}
-
-/* ============ TECH ACCENTS ============ */
-#launch-metrics .tech-border {
-    stroke: #4a90e2;
-    stroke-width: 1px;
-    fill: none;
-    stroke-dasharray: 5, 5;
-    animation: dash 20s linear infinite;
-}
-
-@keyframes dash {
-    to {
-        stroke-dashoffset: -100;
-    }
-}
-
-/* Corner brackets for tech aesthetic */
-#launch-metrics-section::before,
-#launch-metrics-section::after {
-    content: '';
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border: 2px solid #4a90e2;
-    opacity: 0.3;
-}
-
-#launch-metrics-section::before {
-    top: 20px;
-    left: 20px;
-    border-right: none;
-    border-bottom: none;
-}
-
-#launch-metrics-section::after {
-    bottom: 20px;
-    right: 20px;
-    border-left: none;
-    border-top: none;
 }
