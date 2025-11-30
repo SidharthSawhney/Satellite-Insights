@@ -25,7 +25,7 @@ class Congestion {
         // color scale for orbit classes
         this.colorScale = d3.scaleOrdinal()
             .domain(["LEO", "MEO", "GEO", "Elliptical"])
-            .range(['#82e6ffff', '#77adffff', '#7174ffff', '#9d69ffff']);
+            .range(['#82e6ffff', '#6ea5f8ff', '#8b71ffff', '#b84dffff']);
 
         //sets current state to 0
         this.state = 0;

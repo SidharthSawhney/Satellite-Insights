@@ -55,8 +55,6 @@ class LaunchSitesMap {
     /* ---------- DOM / layout ---------- */
 
     _build() {
-
-
         this.title = d3.select(this.node).append('div')
             .attr('class', 'map-title');
 
@@ -73,9 +71,7 @@ class LaunchSitesMap {
         // Popover attached near the icon
         this.infoPopover = d3.select(this.node).append('div')
             .attr('class', 'map-info-popover')
-            .html(`
-                    <p>Each circle is a space centre which are launch sites where rockets were launched carrying satellite to deploy in space.</p>
-                `);
+            .html(`<p>Each circle is a space centre which are launch sites where rockets were launched carrying satellite to deploy in space.</p>`);
 
         // Show on hover with cursor tracking
         this.infoButton.on('mouseenter', (event) => {
@@ -113,21 +109,13 @@ class LaunchSitesMap {
         this.gLand = this.g.append('g');
         this.gSites = this.g.append('g');
 
-
-
         this.yearDisplay = d3.select(this.node).append('div')
             .attr('class', 'map-year-display')
             .text('');
-
-
-
-
+        
         this.tooltip = d3.select(this.node).append('div')
             .attr('class', 'map-tooltip');
-
-
-
-
+        
         this.detailPanel = d3.select(this.node).append('div')
             .attr('class', 'site-detail-panel');
 
@@ -159,9 +147,6 @@ class LaunchSitesMap {
             .attr('width', 320)
             .attr('height', 220)
             .style('display', 'none');
-
-
-
     }
 
     _layout() {

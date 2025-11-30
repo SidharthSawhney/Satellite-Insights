@@ -310,10 +310,9 @@ p {
 
 .insight-box {
     background-color: var(--bg-card);
-    border-left: 4px solid var(--accent-green);
-    border-right: 1px solid var(--accent-green);
+    border: 1px solid var(--accent-green);
     padding: 3rem;
-    border-radius: 4px;
+    border-radius: 18px;
     max-width: 1000px;
     margin: 0 auto;
     box-shadow: 
